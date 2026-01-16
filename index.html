@@ -85,7 +85,7 @@
         <p><strong>Story:</strong> Rufki Vila</p>
         <p><strong>Interactive Novel Engine:</strong> Custom Web VN</p>
         <p><strong>World:</strong> WORLD END(S)</p>
-        <p class="smallText">More credits can go here later (music, art, voice, etc.).</p>
+        <p class="smallText">Add music/art/voice credits later.</p>
       </div>
       <div class="modalActions">
         <button id="credClose" class="menuBtn">Close</button>
@@ -111,13 +111,10 @@
 
     <main id="screen" class="stage" aria-label="Story screen">
       <!-- ART/SCENE AREA -->
-      <section id="artLayer" class="artArea" aria-label="Artwork area">
-        <!-- Later: put scene art here or set as background with CSS/JS -->
-      </section>
+      <section id="artLayer" class="artArea" aria-label="Artwork area"></section>
 
       <!-- TEXT BOX -->
       <section class="textBox" aria-label="Text box">
-        <div id="speaker" class="speaker hidden"></div>
         <div id="text" class="text"></div>
 
         <div id="choices" class="choices hidden"></div>
@@ -135,8 +132,7 @@
   </div>
 
   <!-- =========================
-       MINI UI SCRIPT (MENU FLOW)
-       This does NOT replace your engine.
+       MENU FLOW SCRIPT
   ========================== -->
   <script>
     const $ = (id) => document.getElementById(id);
@@ -150,24 +146,19 @@
       $("gameUI").classList.remove("hidden");
     }
 
-    // Buttons
     $("mmNew").onclick = () => {
-      // clear any saved progress for a fresh run
-      try { localStorage.removeItem("WORLD_ENDS_SAVE"); } catch(e){}
+      try { localStorage.removeItem("worlds_ends_save"); } catch(e){}
       showGame();
-      // Engine should start when visible (your engine.js handles start)
-      // If your engine needs a start call, tell me what function name it uses.
     };
 
     $("mmContinue").onclick = () => {
       showGame();
-      // Engine should load last autosave/save if your engine supports it
-      // If it needs a function call, tell me what your save key is and I’ll wire it.
+      // If you saved before, press Load:
+      setTimeout(() => $("btnLoad")?.click(), 50);
     };
 
     $("mmLoad").onclick = () => {
       showGame();
-      // triggers your engine’s Load UI (btnLoad)
       setTimeout(() => $("btnLoad")?.click(), 50);
     };
 
@@ -177,7 +168,7 @@
     $("mmCredits").onclick = () => $("creditsPanel").classList.remove("hidden");
     $("credClose").onclick = () => $("creditsPanel").classList.add("hidden");
 
-    // Menu button in game returns to main menu
+    // Menu button returns to main menu
     document.addEventListener("click", (e) => {
       if (e.target && e.target.id === "btnMenu") {
         e.preventDefault();
@@ -185,7 +176,6 @@
       }
     });
 
-    // Settings (simple)
     $("setTextSize").onchange = (e) => {
       document.body.dataset.textsize = e.target.value;
     };
@@ -193,11 +183,10 @@
       document.body.dataset.reducemotion = e.target.checked ? "1" : "0";
     };
 
-    // Default start on main menu
     showMainMenu();
   </script>
 
-  <!-- Your engine + story -->
+  <!-- SCRIPTS (ORDER MATTERS) -->
   <script src="./engine.js"></script>
   <script src="./story.js"></script>
 </body>
