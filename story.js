@@ -1,577 +1,1733 @@
-/* Worlds End(s) — Play Novel (Ch 1–2)
-   iPhone-safe VN engine: tap-to-advance + choices + save/load.
-   Shows errors on-screen if something breaks.
-*/
+// ==============================
+// CHAPTER 1 — THE DAY THE SKY BURNED
+// ==============================
 
-(function () {
-  const $ = (id) => document.getElementById(id);
+{ type: "label", id: "ch1_start" },
+{ type: "bg", value: "impact" },
+{ type: "music", value: "" },
 
-  const UI = {
-    screen: $("screen"),
-    speaker: $("speaker"),
-    text: $("text"),
-    choices: $("choices"),
-    toast: $("toast"),
-    err: $("err"),
-    btnNext: $("btnNext"),
-    btnBack: $("btnBack"),
-    btnSave: $("btnSave"),
-    btnLoad: $("btnLoad"),
-    btnMenu: $("btnMenu"),
-  };
+{ type: "narr", text: `
+CHAPTER 1 — THE DAY THE SKY BURNED
 
-  // On-screen error reporting (so we don’t need console)
-  window.addEventListener("error", (e) => showErr("JS ERROR:\n" + (e.message || e.error || e)));
-  window.addEventListener("unhandledrejection", (e) => showErr("PROMISE ERROR:\n" + (e.reason?.message || e.reason || e)));
+The meteor blazed across the sky, carving a line of fire through the clouds.
+`},
 
-  function showErr(msg) {
-    UI.err.classList.remove("hidden");
-    UI.err.textContent = String(msg);
-  }
+{ type: "narr", text: `
+People pointed. People cheered.
+Phones rose like candles.
+For one breath, the world felt united.
+`},
 
-  const SAVE_KEY = "we_novel_save_v1";
-
-  const State = {
-    i: 0,
-    vars: { mercy: 0, resolve: 0, truth: 0 },
-    visited: [],
-  };
-
-  function toast(msg) {
-    UI.toast.textContent = msg;
-    UI.toast.classList.remove("hidden");
-    setTimeout(() => UI.toast.classList.add("hidden"), 1200);
-  }
-
-  // STORY (Chapters 1–2)
-  const Story = [
-    { type: "label", id: "start" },
-    { type: "narr", text: `WORLD END(S)\n\nTap to begin.` },
-
-    // ==========================
-    // CHAPTER 1 — THE DAY THE SKY BURNED
-    // ==========================
-    { type: "narr", text:
-`CHAPTER 1 — THE DAY THE SKY BURNED
-
-The meteor blazed across the sky, leaving a trail of fire in its wake.
-
-At first, people thought it was a miracle.
-A rare light. A once-in-a-lifetime moment.
-Phones rose into the air like candles.
-Voices overlapped—excited, disbelieving, hungry to witness history.
-
-Then the sky answered with heat.
-
-When it struck the ground, the impact was felt for miles around.
-
-But it wasn’t a rock that landed on Earth.
-
-It was a ship.` },
-
-    { type: "narr", text:
-`The next hours were chaos wrapped in fascination.
-
-News helicopters circled the crater.
-Scientists arrived in convoys.
-Officials spoke carefully into microphones about “unknown material” and “no immediate danger.”
-
-And through it all, the same thought kept repeating in your head:
-
-This doesn’t feel like discovery.
-
-It feels like an arrival.` },
-
-    { type: "speaker", name: "Rufki", text:
-`“Keep your eyes open. If this thing has a door… it has something behind it.”` },
-
-    { type: "narr", text:
-`Your friends laugh like you’re being dramatic.
-
-But then the perimeter alarms spike.
-
-A shape moves inside the wreckage—too fast, too sharp.
-Something insect-like.
-
-The first Beta steps into the light…
-
-…and the whole world ignites.` },
-
-    { type: "choice",
-      prompt: "You see the Beta for the first time. What’s your first move?",
-      options: [
-        { text: "Step forward and get a better look.", effect: () => State.vars.truth++, goto: "ch1_truth" },
-        { text: "Pull people back and warn them.", effect: () => State.vars.mercy++, goto: "ch1_mercy" },
-        { text: "Scan for exits and cover.", effect: () => State.vars.resolve++, goto: "ch1_resolve" },
-      ]
+{ type: "choice",
+  prompt: "When the sky burns, what do you do first?",
+  options: [
+    {
+      text: "Record it. If they lie later, you’ll have proof.",
+      effect: () => { State.vars.truth += 1; State.vars.hope += 1; },
+      goto: "ch1_record"
     },
+    {
+      text: "Pull people back. Curiosity gets people killed.",
+      effect: () => { State.vars.mercy += 1; State.vars.resolve += 1; },
+      goto: "ch1_warn"
+    },
+    {
+      text: "Scan for exits and cover. You trust instincts over crowds.",
+      effect: () => { State.vars.resolve += 1; State.vars.fear += 1; },
+      goto: "ch1_cover"
+    }
+  ]
+},
 
-    { type: "label", id: "ch1_truth" },
-    { type: "narr", text:
-`You lean in—dangerously close.
+{ type: "label", id: "ch1_record" },
+{ type: "narr", text: `
+You keep your phone steady.
+If this becomes a story they rewrite—your footage becomes a weapon.
+`},
+{ type: "goto", id: "ch1_common1" },
 
-You memorize details:
-Segmented plating. No wasted motion. A head that tilts like it’s listening.
+{ type: "label", id: "ch1_warn" },
+{ type: "narr", text: `
+“Back up—BACK UP!”
+You shove shoulders, guide strangers, move a kid behind you.
+You don’t know why you’re taking charge.
+You just do.
+`},
+{ type: "goto", id: "ch1_common1" },
 
-This isn’t wildlife.
+{ type: "label", id: "ch1_cover" },
+{ type: "narr", text: `
+You don’t stare. You calculate.
+Distance. Angles. Hard cover.
+Your heart is loud, but your mind is clear.
+`},
+{ type: "goto", id: "ch1_common1" },
 
-It’s engineered.` },
-    { type: "goto", id: "ch1_common" },
+{ type: "label", id: "ch1_common1" },
+{ type: "narr", text: `
+The impact isn’t a sound—it’s pressure in your ribs.
+Windows tremble. Streetlights flicker.
+Then the ground breathes dust.
+`},
 
-    { type: "label", id: "ch1_mercy" },
-    { type: "narr", text:
-`“Back up! Get away from it!”
+{ type: "narr", text: `
+When the smoke thins, you see it:
 
-Your warning hits people before panic does.
-A few actually listen.
-That matters.
+Not a rock.
 
-It always matters.` },
-    { type: "goto", id: "ch1_common" },
+A ship.
+`},
 
-    { type: "label", id: "ch1_resolve" },
-    { type: "narr", text:
-`You don’t waste time staring.
+{ type: "bg", value: "ship" },
 
-Your eyes find angles, barriers, exits.
-Your body moves before your fear can catch up.
+{ type: "narr", text: `
+Metal ribs split open like a wound.
+Heat rolls out of it—wrong heat, like a machine exhaling.
+`},
 
-Survival is a skill. You practice it instantly.` },
-    { type: "goto", id: "ch1_common" },
+{ type: "narr", text: `
+Sirens arrive late.
+Scientists arrive fast.
+Soldiers arrive faster than that.
+`},
 
-    { type: "label", id: "ch1_common" },
-    { type: "narr", text:
-`The first scream comes from the front line.
+{ type: "narr", text: `
+At first, people are fascinated.
+Because humans love mysteries… until mysteries move.
+`},
 
-Then the second.
-Then a chain reaction of screams that turns the crowd into a wave.
+{ type: "bg", value: "beta" },
 
-The Beta moves like a blade through smoke.
+{ type: "narr", text: `
+Something steps into the light.
 
-And you realize something that makes your stomach drop:
+Insect-like.
+Segmented armor.
+A posture that doesn’t look lost.
 
-It’s not confused.
+It looks…
+ready.
+`},
 
-It’s not scared.
+{ type: "narr", text: `
+The Betas have arrived.
+`},
 
-It knows exactly what it’s doing.` },
+{ type: "narr", text: `
+A soldier raises his rifle.
+Muzzle flash.
+A clean shot.
+`},
 
-    { type: "speaker", name: "Rufki", text:
-`“We’re not watching history…”` },
-
-    { type: "speaker", name: "Rufki", text:
-`“…We’re watching the beginning.”` },
-
-    { type: "end", title: "End of Chapter 1", body:
-`Chapter 1 complete.
-
-Next: The Betas
-
-(Your choices are saved and will affect tone later.)` },
-
-    // ==========================
-    // CHAPTER 2 — THE BETAS
-    // ==========================
-    { type: "label", id: "ch2_start" },
-
-    { type: "narr", text:
-`CHAPTER 2 — THE BETAS
-
-You don’t remember falling back.
-
-You remember the sound first—
-a wet, sharp rhythm like something cutting through meat.
-
-Then the crowd breaks.
-Bodies collide. People trip over their own panic.
-Someone drops their phone. Someone drops their child.
-
-The air fills with one terrible realization:
-
-This thing didn’t come to be studied.
-
-It came to hunt.` },
-
-    { type: "speaker", name: "Rufki", text: `“Move! Don’t stare—MOVE!”` },
-
-    { type: "narr", text:
-`Your voice is swallowed by screams.
-
-The Beta darts through the chaos with impossible precision, turning and correcting as if it’s reading the crowd like a map.
-It doesn’t lash out randomly.
-It chooses.
-
-And when it chooses, it doesn’t miss.` },
-
-    { type: "narr", text:
-`A soldier raises his rifle. The muzzle flashes once—twice.
-
-The shots land.
-You see them hit.
-
+{ type: "narr", text: `
 The Beta doesn’t fall.
 
-It only… adjusts.` },
+It only… adjusts.
+`},
 
-    { type: "speaker", name: "Rufki", text: `“…Armor.”` },
+{ type: "speaker", name: "Rufki", text: `
+“…Armor.”
+`},
 
-    { type: "narr", text:
-`It isn’t just tough.
-It’s designed.
+{ type: "narr", text: `
+The word slips out like a curse.
+Because “armor” means design.
+And design means intent.
+`},
 
-Segment plates overlap like a living tank.
-Joints are protected.
-Eyes set deep.
-
-This isn’t an animal.
-
-This is an answer to a question humanity hasn’t even asked yet.` },
-
-    { type: "choice",
-      prompt: "In the stampede, you see someone pinned under a fallen barrier. What do you do?",
-      options: [
-        { text: "Go back and pull them free.", effect: () => State.vars.mercy++, goto: "ch2_save" },
-        { text: "Keep moving and get to cover.", effect: () => State.vars.resolve++, goto: "ch2_cover" },
-        { text: "Shout for help while you scan for the Beta.", effect: () => State.vars.truth++, goto: "ch2_shout" },
-      ]
+{ type: "choice",
+  prompt: "The crowd panics. You spot a kid frozen near the open street. What do you do?",
+  options: [
+    {
+      text: "Sprint for the kid.",
+      effect: () => { State.vars.mercy += 2; State.vars.resolve += 1; State.vars.hope += 1; },
+      goto: "ch1_savekid"
     },
-
-    { type: "label", id: "ch2_save" },
-    { type: "narr", text:
-`You pivot hard against the tide of bodies.
-
-The barrier is heavier than it looks—metal twisted and hot.
-The person under it is half-conscious, eyes wide.
-
-You heave.
-Pain shoots up your shoulders.
-
-The barrier shifts—enough.
-
-You drag them free and shove them toward the nearest doorway.
-
-They don’t thank you.
-
-But they’re alive.` },
-    { type: "goto", id: "ch2_common" },
-
-    { type: "label", id: "ch2_cover" },
-    { type: "narr", text:
-`You force yourself to keep moving.
-
-It feels wrong—like betrayal.
-But staying in the open is suicide.
-
-You slip behind a shattered divider, breath ragged.
-From here you catch flashes of the Beta—like a nightmare skipping frames.` },
-    { type: "goto", id: "ch2_common" },
-
-    { type: "label", id: "ch2_shout" },
-    { type: "narr", text:
-`“HELP! OVER HERE!”
-
-Your shout cuts through the noise for a second.
-A couple people glance your way, but panic doesn’t organize itself.
-
-Still—your eyes stay sharp.
-You track the Beta’s pattern: it angles toward choke points.
-It’s not just chasing prey.
-
-It’s controlling the field.` },
-    { type: "goto", id: "ch2_common" },
-
-    { type: "label", id: "ch2_common" },
-    { type: "narr", text:
-`Minutes later—maybe hours—the scene collapses into sirens and orders.
-
-Military vehicles form a hard perimeter. Soldiers shout commands nobody follows.
-The crater is sealed behind walls of steel and fear.
-
-News anchors call it a “containment incident.”
-Government spokespeople call it “an isolated threat.”
-
-But you saw the way it moved.
-You saw the way it listened.
-
-One Beta was enough to shatter the illusion of safety.
-
-So what happens when there’s more?` },
-
-    { type: "narr", text:
-`Two days later, leaked footage hits your phone.
-
-Grainy video from inside the perimeter.
-
-A shape.
-
-Not one.
-
-Several.` },
-
-    { type: "speaker", name: "Rufki", text: `“…They’re multiplying.”` },
-
-    { type: "narr", text:
-`The video ends with static.
-
-But the static doesn’t sound random.
-It sounds… patterned.
-Like interference.
-Like something broadcasting on a frequency your world wasn’t built to hear.` },
-
-    { type: "narr", text:
-`On the third day, your city changes.
-
-Not by explosion.
-
-By silence.
-
-Streets empty faster than they should.
-Stores close without explanation.
-Hospitals get “new protocols.”
-Police radios run nonstop.
-
-Everyone is waiting for the next thing to happen.
-
-And then it does.` },
-
-    { type: "narr", text:
-`A second impact hits the outskirts.
-
-No warning. No fireball.
-
-Just a distant thud that you feel in your teeth.
-
-Then another.
-
-Then another.
-
-As if something is arriving in pieces.
-
-Or… as if the first ship was never alone.` },
-
-    { type: "speaker", name: "Rufki", text: `“This is a landing.”` },
-
-    { type: "choice",
-      prompt: "A private message hits your phone from an unknown number: “If you want answers, come alone.”",
-      options: [
-        { text: "Go. Answers matter more than fear.", effect: () => State.vars.resolve++, goto: "ch2_meet" },
-        { text: "Don’t go. Track the number instead.", effect: () => State.vars.truth++, goto: "ch2_track" },
-        { text: "Reply: “Who are you?”", effect: () => State.vars.mercy++, goto: "ch2_reply" },
-      ]
+    {
+      text: "Throw something to distract the Beta.",
+      effect: () => { State.vars.resolve += 2; State.vars.truth += 1; },
+      goto: "ch1_distract"
     },
-
-    { type: "label", id: "ch2_meet" },
-    { type: "narr", text:
-`You go.
-
-Not because it’s smart.
-Because waiting is worse.
-
-The meeting point is under an old overpass where the city’s lights don’t reach.
-A figure stands there like a cutout against the dark.
-
-They don’t introduce themselves.
-
-They just say one sentence that changes the shape of your future.` },
-    { type: "speaker", name: "Unknown", text: `“They’re not here to negotiate. They’re here to replace.”` },
-    { type: "goto", id: "ch2_after" },
-
-    { type: "label", id: "ch2_track" },
-    { type: "narr", text:
-`You don’t go.
-
-You pull the number apart instead—reverse lookups, traces, anything.
-
-The result is impossible:
-No carrier. No registration.
-
-As if the message didn’t come from a phone at all.
-
-Then your screen flickers once.
-
-And a new message appears, already knowing what you did.` },
-    { type: "speaker", name: "Unknown", text: `“Smart. But you’re running out of time.”` },
-    { type: "goto", id: "ch2_after" },
-
-    { type: "label", id: "ch2_reply" },
-    { type: "narr", text:
-`Your fingers hover, then type:
-
-“Who are you?”
-
-The reply comes instantly.
-
-No delay. No typing bubble.
-
-Just words, clean as a blade:` },
-    { type: "speaker", name: "Unknown", text: `“Someone who survived the first wave.”` },
-    { type: "goto", id: "ch2_after" },
-
-    { type: "label", id: "ch2_after" },
-    { type: "narr", text:
-`That night, you stop calling it an “incident.”
-
-You call it what it is:
-
-A war—before the first battle line even forms.
-
-You sit alone with the city’s distant sirens and your own thoughts, and you understand something you didn’t understand before:
-
-If humanity waits for permission to fight, it will die waiting.
-
-If humanity waits for a hero, it will die hoping.
-
-So you begin to plan.
-
-Not as a soldier.
-Not as a politician.
-
-As someone who refuses to be prey.` },
-
-    { type: "speaker", name: "Rufki", text: `“If we’re going to survive… we need something bigger than fear.”` },
-
-    { type: "end", title: "End of Chapter 2", body:
-`Chapter 2 complete.
-
-Next: Resistance
-
-(Your choices continue to affect tone and the final message.)` },
-  ];
-
-  // Build label map
-  const labels = {};
-  Story.forEach((s, idx) => { if (s.type === "label") labels[s.id] = idx; });
-
-  function currentStep() { return Story[State.i]; }
-
-  function renderStep(step) {
-    // Clear choices every step
-    UI.choices.innerHTML = "";
-    UI.choices.classList.add("hidden");
-
-    if (!step) return;
-
-    if (step.type === "speaker") {
-      UI.speaker.textContent = step.name;
-      UI.speaker.classList.remove("hidden");
-      UI.text.textContent = step.text;
-    } else if (step.type === "narr") {
-      UI.speaker.classList.add("hidden");
-      UI.text.textContent = step.text;
-    } else if (step.type === "choice") {
-      UI.speaker.classList.add("hidden");
-      UI.text.textContent = step.prompt;
-
-      UI.choices.classList.remove("hidden");
-      step.options.forEach((opt) => {
-        const b = document.createElement("button");
-        b.className = "choiceBtn";
-        b.textContent = opt.text;
-        b.onclick = () => {
-          try { opt.effect?.(); } catch (e) { showErr(e); }
-          gotoLabel(opt.goto);
-        };
-        UI.choices.appendChild(b);
-      });
-    } else if (step.type === "goto") {
-      gotoLabel(step.id);
-      return;
-    } else if (step.type === "end") {
-      UI.speaker.classList.add("hidden");
-      UI.text.textContent = `${step.title}\n\n${step.body}`;
+    {
+      text: "Watch the Beta’s movement—learn the pattern first.",
+      effect: () => { State.vars.truth += 2; State.vars.fear += 1; },
+      goto: "ch1_pattern"
     }
-  }
+  ]
+},
 
-  function gotoLabel(id) {
-    const idx = labels[id];
-    if (typeof idx !== "number") {
-      showErr("Missing label: " + id);
-      return;
+{ type: "label", id: "ch1_savekid" },
+{ type: "narr", text: `
+You run into the open.
+Your lungs burn.
+You grab the kid and pull them back behind a car.
+They don’t even cry at first—just shake like a leaf.
+But they’re alive.
+`},
+{ type: "goto", id: "ch1_common2" },
+
+{ type: "label", id: "ch1_distract" },
+{ type: "narr", text: `
+You rip a metal sign from a post and hurl it.
+It clatters—loud and bright.
+The Beta reacts.
+Not like an animal.
+Like a system switching targets.
+That one second saves people.
+`},
+{ type: "goto", id: "ch1_common2" },
+
+{ type: "label", id: "ch1_pattern" },
+{ type: "narr", text: `
+You force yourself to watch.
+It angles toward bottlenecks.
+It herds panic.
+It uses the crowd like terrain.
+This isn’t a creature.
+
+It’s a tactic.
+`},
+{ type: "goto", id: "ch1_common2" },
+
+{ type: "label", id: "ch1_common2" },
+{ type: "narr", text: `
+The first Beta attack isn’t the end.
+
+It’s the beginning of a spread.
+`},
+
+{ type: "narr", text: `
+In the days that follow, they appear in other places.
+Reports turn into footage.
+Footage turns into massacres.
+`},
+
+{ type: "narr", text: `
+And when the world realizes it isn’t “first contact”…
+it’s an invasion…
+
+humanity does what it always does:
+it scrambles to build something bigger than fear.
+`},
+
+{ type: "bg", value: "base" },
+
+{ type: "narr", text: `
+That’s how the organization begins.
+
+Not with speeches.
+
+With survivors.
+`},
+
+{ type: "narr", text: `
+A handful of young pilots.
+Experimental mechs.
+And people with abilities that should not exist… but do.
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“If they’re designed… then they can be beaten.”
+`},
+
+{ type: "narr", text: `
+Muhammad — telekinetic. The one who can move the impossible.
+`},
+
+{ type: "narr", text: `
+Niko — energy manipulator. The one who turns power into weapons.
+`},
+
+{ type: "narr", text: `
+Alban — super soldier. The one who refuses to fall.
+`},
+
+{ type: "narr", text: `
+And you, Rufki—
+the one who can link systems, synchronize mechs, and push them beyond limits.
+`},
+
+{ type: "choice",
+  prompt: "When the first mission briefing starts, what do you promise your team?",
+  options: [
+    {
+      text: "“We save as many people as we can. Always.”",
+      effect: () => { State.vars.mercy += 1; State.vars.hope += 1; },
+      goto: "ch1_promise_common"
+    },
+    {
+      text: "“We learn everything. Truth is how we win.”",
+      effect: () => { State.vars.truth += 1; State.vars.resolve += 1; },
+      goto: "ch1_promise_common"
+    },
+    {
+      text: "“We end this fast. No hesitation.”",
+      effect: () => { State.vars.resolve += 2; State.vars.fear += 1; },
+      goto: "ch1_promise_common"
     }
-    State.i = idx;
-    renderStep(currentStep());
-  }
+  ]
+},
 
-  function next() {
-    const step = currentStep();
-    if (!step) return;
+{ type: "label", id: "ch1_promise_common" },
+{ type: "narr", text: `
+Your words land heavy.
+Because you can feel it already:
 
-    // If choices are visible, don't skip them
-    if (step.type === "choice") return;
+The ultimate test is still coming.
+`},
 
-    // Move to next step
-    State.visited.push(State.i);
-    State.i = Math.min(State.i + 1, Story.length - 1);
+{ type: "end",
+  title: "End of Chapter 1",
+  body: `
+Chapter 1 complete.
 
-    // Auto-skip label steps
-    while (Story[State.i] && Story[State.i].type === "label") {
-      State.i++;
-      if (State.i >= Story.length) break;
+Next: The Fight Begins
+(Your choices will shape which endings you unlock.)
+`
+},// ==============================
+// CHAPTER 2 — HOLD THE LINE
+// (Based on your Chapter 2: hours-long fight, mechs battered, city center defense)
+// ==============================
+
+{ type: "label", id: "ch2_start" },
+{ type: "bg", value: "battle" },
+{ type: "music", value: "" },
+
+{ type: "narr", text: `
+CHAPTER 2 — HOLD THE LINE
+`},
+
+{ type: "narr", text: `
+Gunfire echoes through the streets.
+Metal screams.
+Concrete turns to dust.
+`},
+
+{ type: "narr", text: `
+Rufki and his team have been fighting for hours.
+`},
+
+{ type: "narr", text: `
+Their mechs are battered—armor plates scorched, joints grinding, alarms blinking like warnings from a dying world.
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“We can’t keep this up much longer!”
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“These things just keep coming!”
+`},
+
+{ type: "narr", text: `
+Your comms crackle under the strain.
+Even radio signals sound afraid.
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“We hold until reinforcements arrive.”
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“We can’t let them reach the city center.”
+`},
+
+{ type: "narr", text: `
+Ahead, the Betas pour through the broken avenue like a living tide.
+Not random. Not frantic.
+Organized.
+`},
+
+{ type: "choice",
+  prompt: "A swarm is pushing hard from the left flank. What call do you make?",
+  options: [
+    {
+      text: "Send Alban to smash the flank head-on.",
+      effect: () => { State.vars.resolve += 2; State.vars.fear += 1; },
+      goto: "ch2_left_alban"
+    },
+    {
+      text: "Have Muhammad lift debris to create a choke point.",
+      effect: () => { State.vars.truth += 1; State.vars.resolve += 1; },
+      goto: "ch2_left_choke"
+    },
+    {
+      text: "Order a retreat to protect civilians behind you.",
+      effect: () => { State.vars.mercy += 2; State.vars.hope += 1; },
+      goto: "ch2_left_retreated"
     }
+  ]
+},
 
-    renderStep(currentStep());
-  }
+{ type: "label", id: "ch2_left_alban" },
+{ type: "speaker", name: "Alban", text: `
+“Finally.”
+`},
 
-  function back() {
-    const prev = State.visited.pop();
-    if (typeof prev === "number") {
-      State.i = prev;
-      renderStep(currentStep());
+{ type: "narr", text: `
+Alban charges like a battering ram.
+His mech’s fists slam into Beta armor with brutal rhythm—CRACK—CRACK—CRACK.
+`},
+
+{ type: "narr", text: `
+For a moment, it works.
+The flank bends.
+But the swarm doesn’t break.
+It adapts—climbing, circling, seeking joints.
+`},
+
+{ type: "narr", text: `
+You feel your stomach drop.
+They’re learning.
+`},
+
+{ type: "goto", id: "ch2_common_after_left" },
+
+{ type: "label", id: "ch2_left_choke" },
+{ type: "speaker", name: "Muhammad", text: `
+“Copy.”
+`},
+
+{ type: "narr", text: `
+Muhammad’s mind reaches out.
+Cars lift.
+Concrete slabs rise.
+A wall forms in midair and slams down—
+turning the street into a narrow kill tunnel.
+`},
+
+{ type: "narr", text: `
+Betas collide into the choke point, forced into a tighter flow.
+`},
+
+{ type: "narr", text: `
+It’s not victory.
+But it’s control.
+`},
+
+{ type: "goto", id: "ch2_common_after_left" },
+
+{ type: "label", id: "ch2_left_retreated" },
+{ type: "speaker", name: "Rufki", text: `
+“Fall back—NOW. Keep them off the civilians.”
+`},
+
+{ type: "narr", text: `
+You hate giving ground.
+But you see people behind you—families trapped between rubble and fear.
+`},
+
+{ type: "narr", text: `
+Your team pulls back in formation, covering the retreat.
+Your mech takes hits meant for strangers.
+`},
+
+{ type: "narr", text: `
+A scream turns into silence somewhere behind you.
+You don’t look.
+You keep moving.
+`},
+
+{ type: "goto", id: "ch2_common_after_left" },
+
+{ type: "label", id: "ch2_common_after_left" },
+{ type: "narr", text: `
+Niko darts through the air, energy blazing from his hands.
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“We’re not going to let them win.”
+`},
+
+{ type: "narr", text: `
+He sounds calm.
+But you can hear the strain behind it.
+His power flickers between precision and exhaustion.
+`},
+
+{ type: "narr", text: `
+A Beta leaps—too fast—aimed straight at the evac route.
+`},
+
+{ type: "choice",
+  prompt: "It’s going to hit the civilians. You have seconds.",
+  options: [
+    {
+      text: "Take the hit—put your mech between the Beta and the people.",
+      effect: () => { State.vars.mercy += 2; State.vars.resolve += 1; State.vars.hope += 1; },
+      goto: "ch2_shield"
+    },
+    {
+      text: "Order Niko to overload it with energy (risky).",
+      effect: () => { State.vars.truth += 1; State.vars.resolve += 1; State.vars.fear += 1; },
+      goto: "ch2_overload"
+    },
+    {
+      text: "Freeze it with Muhammad’s telekinesis and study its armor seams.",
+      effect: () => { State.vars.truth += 2; },
+      goto: "ch2_freeze_study"
     }
-  }
+  ]
+},
 
-  function saveGame() {
-    const payload = { i: State.i, vars: State.vars, visited: State.visited };
-    localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
-    toast("Saved");
-  }
+{ type: "label", id: "ch2_shield" },
+{ type: "narr", text: `
+You slam your mech forward and take the impact.
+`},
 
-  function loadGame() {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) { toast("No save found"); return; }
-    const data = JSON.parse(raw);
-    State.i = data.i ?? 0;
-    State.vars = data.vars ?? State.vars;
-    State.visited = data.visited ?? [];
-    toast("Loaded");
-    renderStep(currentStep());
-  }
+{ type: "narr", text: `
+Claws rake your chassis.
+Warning lights flare red.
+Your systems scream.
+`},
 
-  function menu() {
-    const m =
-`Menu
-- Save: stores progress on this phone
-- Load: restores your last save
-- Restart: clears save + restarts`;
+{ type: "narr", text: `
+But the civilians behind you live another minute.
+And sometimes, a minute is everything.
+`},
 
-    const ok = confirm(m + "\n\nPress OK to Restart, Cancel to close.");
-    if (ok) {
-      localStorage.removeItem(SAVE_KEY);
-      State.i = 0;
-      State.vars = { mercy: 0, resolve: 0, truth: 0 };
-      State.visited = [];
-      toast("Restarted");
-      renderStep(currentStep());
+{ type: "goto", id: "ch2_midbattle" },
+
+{ type: "label", id: "ch2_overload" },
+{ type: "speaker", name: "Rufki", text: `
+“Niko—overload it!”
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“…That could blow my core.”
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“Do it anyway.”
+`},
+
+{ type: "narr", text: `
+Niko’s energy spikes.
+The Beta convulses as arcs rip through its joints.
+`},
+
+{ type: "narr", text: `
+For a second—victory.
+Then Niko’s mech stutters, smoke spilling from vents.
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“I’m… fine.”
+`},
+
+{ type: "narr", text: `
+He’s lying.
+But you let him.
+Because you need him.
+`},
+
+{ type: "goto", id: "ch2_midbattle" },
+
+{ type: "label", id: "ch2_freeze_study" },
+{ type: "speaker", name: "Rufki", text: `
+“Muhammad—pin it!”
+`},
+
+{ type: "narr", text: `
+The Beta stops mid-leap—suspended like an insect in amber.
+`},
+
+{ type: "narr", text: `
+You lean in, scanning the plates.
+Overlapping armor.
+Protected joints.
+But…
+`},
+
+{ type: "narr", text: `
+There’s a seam under the throat.
+A thin line that flexes when it breathes.
+`},
+
+{ type: "narr", text: `
+A weakness.
+Small.
+But real.
+`},
+
+{ type: "goto", id: "ch2_midbattle" },
+
+{ type: "label", id: "ch2_midbattle" },
+{ type: "narr", text: `
+Hours pass like a blur of alarms and bloodless screams.
+`},
+
+{ type: "narr", text: `
+Your hands ache from gripping the controls.
+Your jaw is locked so tight it hurts to breathe.
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“Rufki—look!”
+`},
+
+{ type: "narr", text: `
+A second wave crests the horizon.
+Not just more Betas.
+Different ones.
+
+Bigger.
+Heavier.
+Built for breaking lines.
+`},
+
+{ type: "narr", text: `
+Your HUD labels them with a new warning:
+UNKNOWN CLASS
+`},
+
+{ type: "speaker", name: "Alban", text: `
+“I’ll hold them back as long as I can!”
+`},
+
+{ type: "narr", text: `
+He sounds like someone trying to convince himself.
+`},
+
+{ type: "choice",
+  prompt: "Alban is about to charge the new class alone. What do you do?",
+  options: [
+    {
+      text: "Let him. You need someone to stop the breach.",
+      effect: () => { State.vars.resolve += 2; State.vars.fear += 1; State.vars.flags.alban_risked = true; },
+      goto: "ch2_alban_charge"
+    },
+    {
+      text: "Order him back—no solo heroics.",
+      effect: () => { State.vars.mercy += 1; State.vars.truth += 1; State.vars.flags.alban_saved = true; },
+      goto: "ch2_alban_back"
+    },
+    {
+      text: "Go with him. If anyone falls, you fall together.",
+      effect: () => { State.vars.resolve += 1; State.vars.mercy += 1; State.vars.hope += 1; State.vars.flags.rufki_frontline = true; },
+      goto: "ch2_alban_together"
     }
-  }
+  ]
+},
 
-  // Wire up UI
-  UI.btnNext.onclick = next;
-  UI.btnBack.onclick = back;
-  UI.btnSave.onclick = saveGame;
-  UI.btnLoad.onclick = loadGame;
-  UI.btnMenu.onclick = menu;
+{ type: "label", id: "ch2_alban_charge" },
+{ type: "narr", text: `
+Alban charges like thunder.
+`},
 
-  // Tap story area to advance (mobile friendly)
-  UI.screen.addEventListener("click", (e) => {
-    const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
-    if (tag === "button") return;
-    next();
-  });
+{ type: "narr", text: `
+He hits the new-class Beta—
+and for the first time, you see Alban get pushed back.
+`},
 
-  // Start
-  // Skip initial label automatically
-  if (Story[0].type === "label") State.i = 1;
-  renderStep(currentStep());
-  toast("JS loaded ✅");
-})();
+{ type: "narr", text: `
+His mech skids.
+Armor dents.
+A warning tone you’ve never heard before.
+`},
+
+{ type: "narr", text: `
+He can hold.
+But it’s costing him.
+`},
+
+{ type: "goto", id: "ch2_endpush" },
+
+{ type: "label", id: "ch2_alban_back" },
+{ type: "speaker", name: "Rufki", text: `
+“Alban, NO. Fall back. We do this as a unit.”
+`},
+
+{ type: "narr", text: `
+Alban hesitates—anger flashing.
+Then he obeys.
+`},
+
+{ type: "narr", text: `
+You form a defensive line together.
+It’s uglier.
+Slower.
+But no one is left alone.
+`},
+
+{ type: "goto", id: "ch2_endpush" },
+
+{ type: "label", id: "ch2_alban_together" },
+{ type: "narr", text: `
+You push your mech forward beside Alban’s.
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“Together.”
+`},
+
+{ type: "speaker", name: "Alban", text: `
+“…Together.”
+`},
+
+{ type: "narr", text: `
+Two mechs hit the new-class Beta at once.
+Your systems synchronize—your power threading through both frames.
+For a second, you feel it:
+
+A hidden strength.
+A connection.
+A way to become more than one machine.
+`},
+
+{ type: "goto", id: "ch2_endpush" },
+
+{ type: "label", id: "ch2_endpush" },
+{ type: "narr", text: `
+The line holds.
+Barely.
+`},
+
+{ type: "narr", text: `
+Sirens in the distance shift pitch.
+New engines roar—friendly ones.
+Reinforcements.
+`},
+
+{ type: "narr", text: `
+The Betas don’t retreat like animals.
+They withdraw like soldiers.
+Clean.
+Coordinated.
+As if the point was never to win today…
+`},
+
+{ type: "narr", text: `
+…only to measure you.
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“They were testing us.”
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“That’s… not possible.”
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“It is if they’re learning.”
+`},
+
+{ type: "narr", text: `
+You look out over the ruined street and feel your stomach twist.
+`},
+
+{ type: "narr", text: `
+Because if they learned from this…
+
+What are they building for next?
+`},
+
+{ type: "end",
+  title: "End of Chapter 2",
+  body: `
+Chapter 2 complete.
+
+Next: The Plan
+(Your choices are already shaping what kind of hero you become.)
+`
+},// ==============================
+// CHAPTER 3 — THE PLAN
+// ==============================
+
+{ type: "label", id: "ch3_start" },
+{ type: "bg", value: "base" },
+{ type: "music", value: "" },
+
+{ type: "narr", text: `
+CHAPTER 3 — THE PLAN
+`},
+
+{ type: "narr", text: `
+The fighting doesn’t stop after the battle.
+It just moves indoors.
+`},
+
+{ type: "narr", text: `
+Your team regroups in a makeshift base on the outskirts of the city.
+Concrete walls.
+Flickering lights.
+The smell of coolant and burned metal.
+`},
+
+{ type: "narr", text: `
+Everyone looks exhausted.
+Not just physically.
+
+Spiritually.
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“We can’t keep fighting like this.”
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“We’ll run out of pilots before they run out of Betas.”
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“We’ve tried everything we can think of.”
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“They adapt faster than we can react.”
+`},
+
+{ type: "narr", text: `
+Alban leans against the wall, arms crossed.
+Armor dents still visible across his mech feed.
+`},
+
+{ type: "speaker", name: "Alban", text: `
+“We need their weakness.”
+`},
+
+{ type: "speaker", name: "Alban", text: `
+“Something that actually puts them down.”
+`},
+
+{ type: "narr", text: `
+The room falls silent.
+Because no one has an answer.
+`},
+
+{ type: "narr", text: `
+Then Niko speaks.
+Quiet.
+Careful.
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“I might have something.”
+`},
+
+{ type: "narr", text: `
+Every eye turns toward him.
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“I’ve been watching how they move.”
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“They’re not just reacting to us.”
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“They’re synchronizing.”
+`},
+
+{ type: "narr", text: `
+He brings up a holographic projection.
+Beta movement paths overlap—interlock—repeat.
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“They share a signal.”
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“And if that signal can be disrupted…”
+`},
+
+{ type: "narr", text: `
+The implication hangs in the air.
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“…They fall apart.”
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“Or they turn on each other.”
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“I don’t know which.”
+`},
+
+{ type: "narr", text: `
+Muhammad exhales slowly.
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“What’s the catch?”
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“The signal runs hot.”
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“If I overload it, it could burn me out.”
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“Or worse.”
+`},
+
+{ type: "narr", text: `
+The room tightens.
+`},
+
+{ type: "choice",
+  prompt: "Niko is offering a dangerous plan. How do you respond?",
+  options: [
+    {
+      text: "Approve it. Risk is the price of survival.",
+      effect: () => { State.vars.resolve += 2; State.vars.fear += 1; },
+      goto: "ch3_approve"
+    },
+    {
+      text: "Demand more data before anyone risks their life.",
+      effect: () => { State.vars.truth += 2; },
+      goto: "ch3_analyze"
+    },
+    {
+      text: "Refuse. There has to be another way.",
+      effect: () => { State.vars.mercy += 2; State.vars.hope += 1; },
+      goto: "ch3_refuse"
+    }
+  ]
+},
+
+{ type: "label", id: "ch3_approve" },
+{ type: "narr", text: `
+You nod.
+Slowly.
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“We don’t win wars by playing it safe.”
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“If this works, we save thousands.”
+`},
+
+{ type: "narr", text: `
+Niko meets your eyes.
+No fear.
+Just acceptance.
+`},
+
+{ type: "goto", id: "ch3_common" },
+
+{ type: "label", id: "ch3_analyze" },
+{ type: "narr", text: `
+You raise a hand.
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“Not yet.”
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“We break down the signal first.”
+`},
+
+{ type: "narr", text: `
+Niko nods, relieved.
+Alban looks frustrated.
+`},
+
+{ type: "narr", text: `
+Time bought.
+But time costs lives too.
+`},
+
+{ type: "goto", id: "ch3_common" },
+
+{ type: "label", id: "ch3_refuse" },
+{ type: "narr", text: `
+You shake your head.
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“I won’t trade one of us for a theory.”
+`},
+
+{ type: "narr", text: `
+Niko exhales.
+Muhammad looks relieved.
+Alban looks away.
+`},
+
+{ type: "narr", text: `
+Hope preserved.
+But pressure builds.
+`},
+
+{ type: "goto", id: "ch3_common" },
+
+{ type: "label", id: "ch3_common" },
+{ type: "narr", text: `
+Plans form.
+Simulations run.
+Arguments flare and fade.
+`},
+
+{ type: "narr", text: `
+Hours pass.
+Then alarms sound.
+`},
+
+{ type: "bg", value: "radar" },
+
+{ type: "narr", text: `
+Multiple Beta clusters detected.
+All converging.
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“They’re not spreading out.”
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“They’re gathering.”
+`},
+
+{ type: "narr", text: `
+Niko looks at the signal readout.
+His face goes pale.
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“They felt us watching.”
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“They’re reinforcing the network.”
+`},
+
+{ type: "narr", text: `
+Whatever decision you made…
+`},
+
+{ type: "narr", text: `
+There won’t be time to rethink it.
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“Everyone to your mechs.”
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“We either break them here…”
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“…or we lose the city.”
+`},
+
+{ type: "end",
+  title: "End of Chapter 3",
+  body: `
+Chapter 3 complete.
+
+Next: Execution
+(The path forward is now locked.)
+`
+},// ==============================
+// CHAPTER 4 — EXECUTION
+// ==============================
+
+{ type: "label", id: "ch4_start" },
+{ type: "bg", value: "hangar" },
+{ type: "music", value: "" },
+
+{ type: "narr", text: `
+CHAPTER 4 — EXECUTION
+`},
+
+{ type: "narr", text: `
+The hangar smells like oil, ozone, and fear.
+`},
+
+{ type: "narr", text: `
+Technicians move fast.
+Too fast.
+`},
+
+{ type: "narr", text: `
+No jokes.
+No music.
+Just hands tightening bolts and eyes refusing to meet.
+`},
+
+{ type: "narr", text: `
+Everyone here knows what this is.
+`},
+
+{ type: "narr", text: `
+Not a mission.
+`},
+
+{ type: "narr", text: `
+A gamble.
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“Signal clusters are converging exactly where Niko predicted.”
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“If this fails… they’ll overrun the inner districts in under twenty minutes.”
+`},
+
+{ type: "narr", text: `
+Alban flexes his hands.
+Metal creaks through the feed.
+`},
+
+{ type: "speaker", name: "Alban", text: `
+“Then we don’t let it fail.”
+`},
+
+{ type: "narr", text: `
+Niko stands apart from the others.
+Silent.
+Focused.
+`},
+
+{ type: "narr", text: `
+The signal interface floats beside him—complex, unstable, alive.
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“Talk to me.”
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“If I push the signal hard enough…”
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“…their coordination collapses.”
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“But my nervous system becomes part of the circuit.”
+`},
+
+{ type: "narr", text: `
+The words hang heavy.
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“And if it overloads?”
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“Then I don’t unplug.”
+`},
+
+{ type: "narr", text: `
+No one speaks.
+`},
+
+{ type: "choice",
+  prompt: "Before launch, Niko looks to you for final authorization. What do you say?",
+  options: [
+    {
+      text: "“I trust you. Do what you have to do.”",
+      effect: () => { State.vars.resolve += 2; State.vars.fear += 1; State.vars.flags.niko_authorized = true; },
+      goto: "ch4_launch"
+    },
+    {
+      text: "“We pull you out the second it destabilizes.”",
+      effect: () => { State.vars.mercy += 2; State.vars.hope += 1; State.vars.flags.niko_safeguard = true; },
+      goto: "ch4_launch"
+    },
+    {
+      text: "“We monitor everything. No blind risks.”",
+      effect: () => { State.vars.truth += 2; State.vars.flags.niko_monitored = true; },
+      goto: "ch4_launch"
+    }
+  ]
+},
+
+{ type: "label", id: "ch4_launch" },
+{ type: "bg", value: "launch" },
+
+{ type: "narr", text: `
+Engines roar.
+`},
+
+{ type: "narr", text: `
+The hangar doors peel open.
+`},
+
+{ type: "narr", text: `
+Your mech lifts, systems syncing automatically under your control.
+`},
+
+{ type: "narr", text: `
+You feel it—that strange pull—
+as if your machine is listening to you instead of responding.
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“All units—sync on me.”
+`},
+
+{ type: "narr", text: `
+The battlefield blooms into view.
+`},
+
+{ type: "bg", value: "battlefield" },
+
+{ type: "narr", text: `
+Betas flood the streets below.
+Not scattered.
+Not panicked.
+`},
+
+{ type: "narr", text: `
+Formations.
+Cover.
+Advance patterns.
+`},
+
+{ type: "narr", text: `
+An army.
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“They’ve adjusted since last time.”
+`},
+
+{ type: "speaker", name: "Alban", text: `
+“Good.”
+`},
+
+{ type: "speaker", name: "Alban", text: `
+“I was hoping they would.”
+`},
+
+{ type: "narr", text: `
+The first clash is violent.
+`},
+
+{ type: "narr", text: `
+Metal on armor.
+Energy tearing through air.
+Telekinetic force ripping the ground apart.
+`},
+
+{ type: "narr", text: `
+But this time…
+`},
+
+{ type: "narr", text: `
+You’re watching the signal.
+`},
+
+{ type: "narr", text: `
+Lines of light threading between Betas.
+`},
+
+{ type: "narr", text: `
+A living network.
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“I’m in.”
+`},
+
+{ type: "bg", value: "signal" },
+
+{ type: "narr", text: `
+The signal spikes.
+`},
+
+{ type: "narr", text: `
+Your HUD flickers.
+Static crawls across every channel.
+`},
+
+{ type: "narr", text: `
+Betas hesitate.
+Just for a second.
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“They’re stalling!”
+`},
+
+{ type: "speaker", name: "Alban", text: `
+“Press it!”
+`},
+
+{ type: "choice",
+  prompt: "The signal is destabilizing the Betas—but Niko’s vitals are spiking.",
+  options: [
+    {
+      text: "Push the attack. End it fast.",
+      effect: () => { State.vars.resolve += 2; State.vars.fear += 1; },
+      goto: "ch4_push"
+    },
+    {
+      text: "Pull pressure and stabilize Niko.",
+      effect: () => { State.vars.mercy += 2; State.vars.hope += 1; },
+      goto: "ch4_stabilize"
+    },
+    {
+      text: "Split focus—half offense, half signal analysis.",
+      effect: () => { State.vars.truth += 2; },
+      goto: "ch4_balance"
+    }
+  ]
+},
+
+{ type: "label", id: "ch4_push" },
+{ type: "narr", text: `
+You drive the team forward.
+`},
+
+{ type: "narr", text: `
+Betas collapse into each other.
+Coordination fractures.
+`},
+
+{ type: "narr", text: `
+Niko’s voice tightens.
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“I can… hold it…”
+`},
+
+{ type: "goto", id: "ch4_common" },
+
+{ type: "label", id: "ch4_stabilize" },
+{ type: "narr", text: `
+You pull back.
+Create breathing room.
+`},
+
+{ type: "narr", text: `
+The Betas recover slightly—but Niko’s vitals steady.
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“…Thanks.”
+`},
+
+{ type: "goto", id: "ch4_common" },
+
+{ type: "label", id: "ch4_balance" },
+{ type: "narr", text: `
+You split control.
+`},
+
+{ type: "narr", text: `
+Systems strain under the load.
+`},
+
+{ type: "narr", text: `
+You learn more—but everything slows.
+`},
+
+{ type: "goto", id: "ch4_common" },
+
+{ type: "label", id: "ch4_common" },
+{ type: "narr", text: `
+Then it happens.
+`},
+
+{ type: "narr", text: `
+A new frequency cuts through the signal.
+`},
+
+{ type: "narr", text: `
+Not Beta.
+Not human.
+`},
+
+{ type: "bg", value: "unknown" },
+
+{ type: "narr", text: `
+Something else is listening.
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“…That’s not them.”
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“Rufki—something just piggybacked on the signal.”
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“…Oh no.”
+`},
+
+{ type: "narr", text: `
+The Betas freeze.
+Every single one.
+`},
+
+{ type: "narr", text: `
+Then they all turn their heads.
+At once.
+`},
+
+{ type: "narr", text: `
+Not toward you.
+`},
+
+{ type: "narr", text: `
+Toward the sky.
+`},
+
+{ type: "narr", text: `
+You feel it in your bones.
+`},
+
+{ type: "narr", text: `
+This was never just a weapon.
+`},
+
+{ type: "narr", text: `
+It was a door.
+`},
+
+{ type: "end",
+  title: "End of Chapter 4",
+  body: `
+Chapter 4 complete.
+
+Next: Aftermath
+(You have been noticed.)
+`
+},// ==============================
+// CHAPTER 5 — AFTERMATH
+// ==============================
+
+{ type: "label", id: "ch5_start" },
+{ type: "bg", value: "ruins" },
+{ type: "music", value: "" },
+
+{ type: "narr", text: `
+CHAPTER 5 — AFTERMATH
+`},
+
+{ type: "narr", text: `
+The city doesn’t celebrate victory.
+`},
+
+{ type: "narr", text: `
+It exhales.
+`},
+
+{ type: "narr", text: `
+Fires burn where buildings once stood.
+Sirens cry without urgency—just habit.
+Smoke drifts upward like the world is trying to leave itself.
+`},
+
+{ type: "narr", text: `
+The Betas are gone.
+Not destroyed.
+Withdrawn.
+`},
+
+{ type: "narr", text: `
+That’s worse.
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“All hostile signatures have vanished.”
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“No pursuit vectors. No retreat path.”
+`},
+
+{ type: "speaker", name: "Alban", text: `
+“They didn’t run.”
+`},
+
+{ type: "speaker", name: "Alban", text: `
+“They were recalled.”
+`},
+
+{ type: "narr", text: `
+Your mech powers down.
+The silence afterward is almost painful.
+`},
+
+{ type: "narr", text: `
+You climb out into the wreckage.
+Boots crunch over glass and twisted metal.
+`},
+
+{ type: "narr", text: `
+People are emerging from hiding.
+Slow.
+Careful.
+Like animals after a fire.
+`},
+
+{ type: "narr", text: `
+Some look at you with awe.
+Others with fear.
+A few with anger.
+`},
+
+{ type: "speaker", name: "Civilian", text: `
+“Is it over?”
+`},
+
+{ type: "narr", text: `
+You don’t answer.
+Because you don’t know.
+`},
+
+{ type: "narr", text: `
+Behind you, Niko collapses to one knee.
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“Niko!”
+`},
+
+{ type: "narr", text: `
+You catch him before he hits the ground.
+His skin is cold.
+His eyes unfocused.
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“I can still… hear it.”
+`},
+
+{ type: "speaker", name: "Rufki", text: `
+“The signal?”
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“…Everything.”
+`},
+
+{ type: "narr", text: `
+Muhammad scans him.
+Readings spike and fall like a dying waveform.
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“Neural overload.”
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“He didn’t just connect.”
+`},
+
+{ type: "speaker", name: "Muhammad", text: `
+“He left a piece of himself in there.”
+`},
+
+{ type: "narr", text: `
+Niko looks at you.
+Really looks.
+`},
+
+{ type: "speaker", name: "Niko", text: `
+“Did it work?”
+`},
+
+{ type: "choice",
+  prompt: "How do you answer him?",
+  options: [
+    {
+      text: "“Yes. You saved the city.”",
+      effect: () => { State.vars.hope += 2; State.vars.mercy += 1; },
+      goto: "ch5_truth_soft"
+    },
+    {
+      text: "“It worked… but they noticed us.”",
+      effect: () => { State.vars.truth += 2; },
+      goto: "ch5_truth_hard"
+    },
+    {
+      text: "Say nothing. Just nod.",
+      effect: () => { State.vars.resolve += 1; State.vars.fear += 1; },
+      goto: "ch5_truth_silent"
+    }
+  ]
+},
+
+{ type: "label", id: "ch5_truth_soft" },
+{ type: "narr", text: `
+Niko exhales.
+A faint smile breaks through the pain.
+`},
+{ type: "goto", id: "ch5_base_return" },
+
+{ type: "label", id: "ch5_truth_hard" },
+{ type: "narr", text: `
+Niko closes his eyes.
+`},
+{ type: "speaker", name: "Niko", text: `
+“…Figures.”
+`},
+{ type: "goto", id: "ch5_base_return" },
+
+{ type: "label", id: "ch5_truth_silent" },
+{ type: "narr", text: `
+Niko studies your face.
+He understands anyway.
+`},
+{ type: "goto", id: "ch5_base_return" },
+
+{ type: "label", id: "ch5_base_return" },
+{ type: "bg", value: "base" },
+
+{ type: "narr", text: `
+Night falls by the time you return to base.
+`},
+
+{ type: "narr", text: `
+The victory report plays on repeat.
+“Successful defense.”
+“Minimal losses.”
+“Human resilience.”
+`},
+
+{ type: "narr", text: `
+You turn it off.
+`},
+
+{ type: "narr", text: `
+The numbers don’t show the screams.
+Or the hesitation before pulling a trigger.
+Or the look in Niko’s eyes when the signal spoke back.
+`},
+
+{ type: "narr", text: `
+Later, alone, you review the captured data.
+`},
+
+{ type: "narr", text: `
+The signal wasn’t just coordination.
+`},
+
+{ type: "narr", text: `
+It was observation.
+`},
+
+{ type: "narr", text: `
+The Betas weren’t learning tactics.
+`},
+
+{ type: "narr", text: `
+They were studying intent.
+`},
+
+{ type: "narr", text: `
+What humanity values.
+Who hesitates.
+Who sacrifices.
+`},
+
+{ type: "narr", text: `
+And one pattern appears again and again.
+`},
+
+{ type: "narr", text: `
+You.
+`},
+
+{ type: "choice",
+  prompt: "This data is dangerous. What do you do with it?",
+  options: [
+    {
+      text: "Share it with the team immediately.",
+      effect: () => { State.vars.truth += 2; State.vars.hope += 1; },
+      goto: "ch5_share"
+    },
+    {
+      text: "Keep it to yourself—for now.",
+      effect: () => { State.vars.resolve += 2; State.vars.fear += 1; },
+      goto: "ch5_hide"
+    },
+    {
+      text: "Erase the most disturbing parts.",
+      effect: () => { State.vars.mercy += 2; },
+      goto: "ch5_erase"
+    }
+  ]
+},
+
+{ type: "label", id: "ch5_share" },
+{ type: "narr", text: `
+The room grows quiet as they read.
+No one speaks.
+But everyone understands the weight just increased.
+`},
+{ type: "goto", id: "ch5_end" },
+
+{ type: "label", id: "ch5_hide" },
+{ type: "narr", text: `
+You lock the file behind multiple encryptions.
+If the burden exists—
+you’ll carry it.
+`},
+{ type: "goto", id: "ch5_end" },
+
+{ type: "label", id: "ch5_erase" },
+{ type: "narr", text: `
+You hesitate…
+Then delete.
+`},
+
+{ type: "narr", text: `
+Some knowledge saves lives.
+Some only tells you how they’ll be lost.
+`},
+{ type: "goto", id: "ch5_end" },
+
+{ type: "label", id: "ch5_end" },
+{ type: "narr", text: `
+That night, sleep doesn’t come easy.
+`},
+
+{ type: "narr", text: `
+And when it does—
+`},
+
+{ type: "narr", text: `
+You dream of a small figure alone in the ruins.
+`},
+
+{ type: "narr", text: `
+Crying.
+`},
+
+{ type: "narr", text: `
+Waiting.
+`},
+
+{ type: "narr", text: `
+Someone you haven’t met yet.
+`},
+
+{ type: "narr", text: `
+But already feel responsible for.
+`},
+
+{ type: "end",
+  title: "End of Chapter 5",
+  body: `
+Chapter 5 complete.
+
+Next: The Girl in the Alley
+(The cost of survival becomes personal.)
+`
+},
