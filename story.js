@@ -1,22 +1,13 @@
-// ===================================================
-// WORLD END(S) — GAME NOVEL
-// story.js (WORKING TEMPLATE + LONG CHAPTER 1)
-// ===================================================
+/* =========================================================
+   WORLDS END(S) — Story File
+   Chapter 1 (Long, with choices from the start)
+   Uses: State.vars.truth/resolve/mercy/hope/fear
+   ========================================================= */
 
-// --------- REQUIRED SETUP (MUST BE OUTSIDE THE STORY ARRAY) ----------
-State.vars.truth ??= 0;
-State.vars.resolve ??= 0;
-State.vars.mercy ??= 0;
-State.vars.hope ??= 0;
-State.vars.fear ??= 0;
-State.vars.flags ??= {};
-
-// --------- STORY ARRAY (EVERYTHING BELOW MUST BE INSIDE THIS ARRAY) ----------
-const Story = [
-
-  // ==============================
+Story = [
+  // =======================================================
   // CHAPTER 1 — THE DAY THE SKY BURNED
-  // ==============================
+  // =======================================================
   { type: "label", id: "ch1_start" },
   { type: "bg", value: "impact" },
   { type: "music", value: "" },
@@ -24,23 +15,28 @@ const Story = [
   { type: "narr", text: `
 CHAPTER 1 — THE DAY THE SKY BURNED
 
-The meteor blazed across the sky, leaving a trail of fire in its wake.
-It wasn’t a shooting star.
-It wasn’t pretty.
+The meteor didn’t arrive like a warning.
+It arrived like a verdict.
 
-It looked heavy.
+A blade of fire carved the night sky—bright enough to turn clouds into paper-thin ghosts,
+loud enough to make the city’s windows vibrate in their frames.
 
-Like the sky had thrown something at Earth.
-`},
+People pointed.
+People cheered.
+Phones rose like candles.
 
-  { type: "narr", text: `
-People flooded the street anyway.
+For one breath, the world felt united.
 
-Phones rose.
-Someone laughed.
-Someone said, “We’re seeing history!”
+Then the air changed.
+Heat rolled in waves.
+The light didn’t fade the way shooting stars fade.
 
-And for a moment, the world believed that history only happens in museums.
+It *stayed*.
+It *descended*.
+
+And deep in your chest—where instinct lives—you felt it:
+not wonder…
+but countdown.
 `},
 
   { type: "choice",
@@ -48,358 +44,425 @@ And for a moment, the world believed that history only happens in museums.
     options: [
       {
         text: "Record it. If they lie later, you’ll have proof.",
-        effect: () => { State.vars.truth += 1; State.vars.hope += 1; },
+        effect: () => { State.vars.truth += 1; State.vars.resolve += 1; },
         goto: "ch1_record"
       },
       {
-        text: "Pull people back. Curiosity gets people killed.",
-        effect: () => { State.vars.resolve += 1; State.vars.mercy += 1; },
-        goto: "ch1_warn"
+        text: "Run toward the impact site. If people are hurt, you help.",
+        effect: () => { State.vars.hope += 1; State.vars.resolve += 1; },
+        goto: "ch1_run"
       },
       {
-        text: "Freeze. You can’t look away.",
-        effect: () => { State.vars.fear += 1; },
+        text: "Call your people. If this is a threat, you organize fast.",
+        effect: () => { State.vars.truth += 1; State.vars.hope += 1; },
+        goto: "ch1_call"
+      },
+      {
+        text: "Freeze. Watch. Listen. Learn what everyone else misses.",
+        effect: () => { State.vars.fear += 1; State.vars.truth += 1; },
         goto: "ch1_freeze"
       }
     ]
   },
 
+  // --- Branch: Record ---
   { type: "label", id: "ch1_record" },
   { type: "narr", text: `
-You raise your phone and keep it steady.
+You lift your phone with hands that feel too small for the moment.
 
-Hands trembling.
-Breath shallow.
+The camera struggles to focus—because the sky is too bright, too wrong—
+but it catches the trail: a wound of flame stitched across the stars.
 
-Not because you’re brave—
-because you don’t trust the world to tell the truth later.
-`},
-  { type: "goto", value: "ch1_common1" },
+Around you, strangers shout and laugh.
+Some pray.
+Some scream.
+A kid says, “Make a wish!”
 
-  { type: "label", id: "ch1_warn" },
-  { type: "narr", text: `
-“Back up—BACK UP!”
+And then the sound hits.
 
-You push people away from the crater line.
-A kid bumps into you.
-You guide them behind a parked car like it’s instinct.
+Not a boom—
+a *pressure*.
+As if the sky itself has punched the earth.
 
-Someone rolls their eyes.
+Your screen shakes.
+The image warps.
+A few frames glitch—static crawling across the meteor’s tail like insects.
 
-Then the ground answers you.
-`},
-  { type: "goto", value: "ch1_common1" },
+Insects.
 
-  { type: "label", id: "ch1_freeze" },
-  { type: "narr", text: `
-You stand still.
-
-Your brain refuses to accept it.
-Your body refuses to run.
-
-The flame in the sky grows wider, louder—
-until the world becomes one long, approaching roar.
-`},
-  { type: "goto", value: "ch1_common1" },
-
-  { type: "label", id: "ch1_common1" },
-  { type: "narr", text: `
-The impact hits like a god slamming a fist into the city.
-
-Windows scream.
-Streetlights flicker.
-Air turns thick with dust.
-
-You feel it in your teeth.
-`},
-
-  { type: "narr", text: `
-When the smoke thins, you see the crater.
-
-And inside it—
-
-not rock.
-
-Metal.
-`},
-
-  { type: "bg", value: "ship" },
-
-  { type: "narr", text: `
-A ship.
-
-Split open like a wound.
-Steam rolling out like breath.
-Parts of it still glowing, still alive, still… humming.
-`},
-
-  { type: "narr", text: `
-Sirens arrive late.
-
-Scientists arrive fast.
-
-Soldiers arrive faster than that.
-`},
-
-  { type: "narr", text: `
-The news calls it a “contact event.”
-
-Officials call it “controlled.”
-
-People call it “the greatest discovery in history.”
-
-And you call it what it feels like:
-
-A warning.
-`},
-
-  { type: "narr", text: `
-Hours pass.
-
-Floodlights surround the crater.
-Metal barricades go up.
-Voices blur into a constant murmur of questions.
-
-Then something moves inside the wreckage.
-`},
-
-  { type: "bg", value: "beta" },
-
-  { type: "narr", text: `
-It steps out—slow and precise.
-
-Insect-like.
-Segmented armor overlapping like a living tank.
-Joints protected. Eyes set deep.
-
-It doesn’t stumble.
-It doesn’t explore.
-
-It scans.
-`},
-
-  { type: "narr", text: `
-The Betas have arrived.
-`},
-
-  { type: "narr", text: `
-A soldier raises his rifle.
-
-A single shot cracks the air.
-
-The round hits.
-
-You SEE it hit.
-`},
-
-  { type: "narr", text: `
-The Beta doesn’t fall.
-
-It only… adjusts.
-`},
-
-  { type: "speaker", name: "Rufki", text: `
-“…Armor.”
-`},
-
-  { type: "narr", text: `
-The word comes out like a curse.
-
-Armor means design.
-Design means purpose.
-
-Purpose means this was never a “visit.”
-`},
-
-  { type: "narr", text: `
-The crowd breaks.
-
-Bodies collide.
-People trip over panic like it’s a physical thing.
-Someone drops their phone.
-Someone drops their child.
-
-And the Beta moves—fast.
-Not random.
-
-Choosing.
+That detail makes your stomach tighten.
 `},
 
   { type: "choice",
-    prompt: "A kid is frozen in the open street as the Beta angles toward them. What do you do?",
+    prompt: "The video glitches hard. Do you…",
     options: [
       {
-        text: "Sprint for the kid.",
-        effect: () => { State.vars.mercy += 2; State.vars.resolve += 1; State.vars.hope += 1; },
-        goto: "ch1_save_kid"
+        text: "Keep recording. Whatever this is, it wants to be hidden.",
+        effect: () => { State.vars.truth += 1; State.vars.fear += 1; },
+        goto: "ch1_to_site"
       },
       {
-        text: "Distract the Beta—anything to buy time.",
-        effect: () => { State.vars.resolve += 2; State.vars.fear += 1; },
-        goto: "ch1_distract"
-      },
-      {
-        text: "Watch the Beta’s movement—learn its pattern first.",
-        effect: () => { State.vars.truth += 2; State.vars.fear += 1; },
-        goto: "ch1_pattern"
+        text: "Stop and back up the file immediately.",
+        effect: () => { State.vars.truth += 1; },
+        goto: "ch1_to_site"
       }
     ]
   },
 
-  { type: "label", id: "ch1_save_kid" },
+  // --- Branch: Run ---
+  { type: "label", id: "ch1_run" },
   { type: "narr", text: `
-You run.
+You don’t think. You move.
 
-The world narrows to one thing: reach them.
+Sirens begin to rise—one, then ten, then a whole city’s worth of panic.
 
-You grab the kid and yank them behind a car.
-Your shoulder slams metal.
-Pain shoots up your arm.
+You sprint toward the glow over the horizon. The air tastes metallic.
+Ash drifts down like black snow.
 
-The kid finally cries—like their body remembered it was alive.
+People are running the other way, eyes wide, faces lit by distant fire.
+Someone grabs your sleeve and begs, “Don’t go!”
+
+But you do.
+
+Because if the world ends tonight, you refuse to spend the last minutes as a bystander.
 `},
-  { type: "goto", value: "ch1_common2" },
+  { type: "choice",
+    prompt: "You see a family trapped in a traffic pileup as debris falls. Help or keep moving?",
+    options: [
+      {
+        text: "Help them. No one dies alone if you can stop it.",
+        effect: () => { State.vars.mercy += 1; State.vars.hope += 1; },
+        goto: "ch1_help_family"
+      },
+      {
+        text: "Keep moving. Seconds matter. You can save more later.",
+        effect: () => { State.vars.resolve += 1; State.vars.fear += 1; },
+        goto: "ch1_to_site"
+      }
+    ]
+  },
 
-  { type: "label", id: "ch1_distract" },
+  { type: "label", id: "ch1_help_family" },
   { type: "narr", text: `
-You grab a chunk of broken sign and throw it hard.
+You shove past horns and shouting, wedge your shoulder into a bent door, and pull.
 
-It clatters down the street—sharp and loud.
+A child cries.
+A mother’s hands shake too hard to unbuckle the seatbelt.
+You do it for her.
 
-The Beta snaps its head toward the sound.
-Not like an animal.
+“Go—NOW!” you yell, guiding them away as another chunk of burning debris smashes into the street behind you.
 
-Like a machine switching targets.
+They don’t even thank you.
+They’re too scared.
 
-That half-second is enough.
-People move.
-People live.
+And that’s fine.
+
+Heroes don’t do it for applause.
+They do it because somebody has to.
 `},
-  { type: "goto", value: "ch1_common2" },
+  { type: "jump", goto: "ch1_to_site" },
 
-  { type: "label", id: "ch1_pattern" },
+  // --- Branch: Call your people ---
+  { type: "label", id: "ch1_call" },
   { type: "narr", text: `
-You force yourself to watch.
+You turn away from the crowd and start dialing.
 
-It angles toward choke points.
-It herds the crowd into bottlenecks.
-It doesn’t chase whoever’s closest—
-it chases whoever can’t escape.
+One call becomes five.
+Five becomes a chain.
 
-This isn’t instinct.
+Your voice is calm—because panic is contagious and you refuse to spread it.
+You tell them where to meet.
+You tell them who to contact.
+You tell them to bring whatever they can: medkits, power cells, radios.
 
-This is strategy.
+You don’t know what’s coming.
+
+But leadership is deciding to stand up *before* the danger explains itself.
 `},
-  { type: "goto", value: "ch1_common2" },
+  { type: "choice",
+    prompt: "Your teammate Muhammad answers first. What do you say?",
+    options: [
+      {
+        text: `"Meet me. We protect civilians first."`,
+        effect: () => { State.vars.mercy += 1; State.vars.hope += 1; },
+        goto: "ch1_to_site"
+      },
+      {
+        text: `"Meet me. We find the source and end it fast."`,
+        effect: () => { State.vars.resolve += 1; State.vars.truth += 1; },
+        goto: "ch1_to_site"
+      }
+    ]
+  },
 
-  { type: "label", id: "ch1_common2" },
+  // --- Branch: Freeze ---
+  { type: "label", id: "ch1_freeze" },
   { type: "narr", text: `
-Gunfire multiplies.
-Screams multiply faster.
+You stand still while the city moves around you.
 
-The Beta cuts through the chaos with impossible precision.
+The human brain is built to miss details in chaos.
+But you don’t look at the fire.
+You look at the *pattern*.
 
-Then another shape moves inside the ship.
+The meteor’s trail isn’t smooth.
+It pulses.
+It stutters.
 
-And another.
+And for an instant, the flame parts like a curtain—
+revealing something inside it.
 
-And another.
+Not rock.
+
+Metal.
+
+A shape.
+A silhouette.
+A belly of plating.
+
+A ship.
+
+Your throat goes dry.
+`},
+  { type: "choice",
+    prompt: "Do you tell anyone what you saw?",
+    options: [
+      {
+        text: "Yes. A warning now saves lives later.",
+        effect: () => { State.vars.hope += 1; State.vars.truth += 1; },
+        goto: "ch1_to_site"
+      },
+      {
+        text: "No. People will panic. You need proof first.",
+        effect: () => { State.vars.truth += 1; State.vars.fear += 1; },
+        goto: "ch1_to_site"
+      }
+    ]
+  },
+
+  // =======================================================
+  // Converge: Impact Site
+  // =======================================================
+  { type: "label", id: "ch1_to_site" },
+  { type: "narr", text: `
+By the time you reach the edge of the impact zone, the world looks… edited.
+
+Streetlights flicker.
+Phones die at random.
+Radio stations dissolve into static.
+
+A crater yawns in the earth like a mouth.
+The ground around it is glassed—sand fused into shining black mirrors.
+
+And in the center…
+
+something breathes.
+
+Not smoke—breath.
+A rhythm.
+
+A *living* sound.
+
+A chunk of alien metal sits half-buried, split open like an egg.
+Blue-white light leaks from inside, scanning the air in thin lines.
+
+Then a shape moves.
+A shadow unfolds.
+It steps out of the ship like it owns the planet.
+
+It’s insect-like, but wrong in the way nightmares are wrong:
+too many joints,
+too quiet,
+too sure.
+
+It turns its head toward the distant city lights.
+
+And you realize—
+
+it didn’t crash.
+
+It *arrived*.
 `},
 
-  { type: "narr", text: `
-That’s when the word “incident” dies.
+  { type: "choice",
+    prompt: "The first Beta emerges. What’s your instinct?",
+    options: [
+      {
+        text: "Approach carefully. If it can be reasoned with, try.",
+        effect: () => { State.vars.mercy += 1; State.vars.truth += 1; },
+        goto: "ch1_first_contact"
+      },
+      {
+        text: "Hide and observe. Learn its behavior before acting.",
+        effect: () => { State.vars.truth += 1; State.vars.fear += 1; },
+        goto: "ch1_observe_beta"
+      },
+      {
+        text: "Attack. If it’s here to kill us, you strike first.",
+        effect: () => { State.vars.resolve += 1; State.vars.fear += 1; },
+        goto: "ch1_attack_beta"
+      }
+    ]
+  },
 
-Because one is an incident.
-Several is a beginning.
+  { type: "label", id: "ch1_first_contact" },
+  { type: "narr", text: `
+You raise both hands—slow, nonthreatening.
+
+“Hey,” you say, voice low. “We don’t want a fight.”
+
+The Beta’s head tilts.
+A chorus of clicks answers—like nails on glass.
+
+For one second you think:
+maybe it understands.
+
+Then the light inside the ship flares.
+A second Beta steps out.
+Then a third.
+
+They don’t look at you.
+
+They look past you.
+
+At the city.
+
+The first Beta’s torso opens like a flower of blades—
+and a beam of pale energy slices the ground in front of you,
+warning shot… or measurement.
+
+Either way, the message is clear:
+
+You are not the target.
+You are… an obstacle.
 `},
+  { type: "jump", goto: "ch1_escape" },
 
+  { type: "label", id: "ch1_observe_beta" },
   { type: "narr", text: `
-In the following days, reports hit every city.
-Grainy footage. Static-filled audio. Entire neighborhoods going silent.
+You slip behind a wrecked truck and watch.
 
-The Betas spread across the globe like the world is being tested.
-Measured.
-Softened.
+The Betas move with purpose—no wasted motion.
+They’re not scouting like animals.
+They’re not stumbling like lost explorers.
+
+They’re executing a plan.
+
+One of them taps the black glassed ground.
+A thin vein of light spreads outward in a circle.
+
+A scan.
+
+A mapping.
+
+A *claim*.
+
+Your stomach twists as you realize:
+this is an invasion checklist.
 `},
+  { type: "jump", goto: "ch1_escape" },
 
-  { type: "bg", value: "base" },
-
+  { type: "label", id: "ch1_attack_beta" },
   { type: "narr", text: `
-And in the face of that threat, a response forms.
+You grab a fallen piece of rebar—ridiculous against alien steel—
+and charge anyway.
 
-Not a government plan.
+The Beta pivots.
+Not startled.
+Not angry.
 
-Not a press conference.
+Just precise.
 
-A team.
+It moves once.
+
+Pain erupts across your side as something slams you hard enough to lift you off your feet.
+You skid across glassed earth, breath knocked out.
+
+The Beta stands over you.
+
+And in its reflective armor, you see yourself:
+small.
+fragile.
+human.
+
+Then it turns away.
+
+It doesn’t finish you.
+
+Because it doesn’t need to.
+
+It has a city to take.
 `},
+  { type: "jump", goto: "ch1_escape" },
 
+  { type: "label", id: "ch1_escape" },
   { type: "narr", text: `
-Young pilots.
-Prototype mechs.
-People with abilities that shouldn’t exist but do.
+You scramble up and run as alarms begin to scream from every direction.
 
-Muhammad — telekinetic, moving the impossible like it’s weightless.
-Niko — energy manipulator, turning power itself into a weapon.
-Alban — super soldier, refusing to fall even when the body begs.
+The Betas surge forward like a tide, moving in packs.
+Their shapes blur through smoke and streetlight.
 
-And you—
+You make it to higher ground and look back—
+
+and watch the first neighborhood ignite.
+
+Not from fire…
+
+from *silence*.
+The lights blink out.
+Cars stall.
+People freeze in confusion.
+
+And then the Betas hit.
+
+In minutes, the city becomes a battlefield.
+
+And you know, with cold certainty:
+
+If humanity survives this,
+it won’t be because someone was strong.
+
+It will be because someone chose to stand.
+
+Somewhere in the chaos, your comm buzzes.
+A voice you recognize—Muhammad—ragged with urgency.
+
+“Rufki! Where are you?!”
 
 Rufki.
 
-The one who can synchronize systems.
-Control and enhance multiple mechs at once.
-Make separate machines fight like one organism.
+Your name finally feels like a title.
+
+You swallow, steady your breath, and answer:
+
+“I’m here.”
+
+And you start moving toward the war.
 `},
 
   { type: "choice",
-    prompt: "At the first briefing, what do you promise your team?",
+    prompt: "End of Chapter 1. What does Rufki choose to value right now?",
     options: [
       {
-        text: "“We save people first. Always.”",
+        text: "Protect people first, even if it costs you power.",
         effect: () => { State.vars.mercy += 1; State.vars.hope += 1; },
-        goto: "ch1_promise_common"
+        goto: "ch1_end"
       },
       {
-        text: "“We learn the truth. That’s how we win.”",
-        effect: () => { State.vars.truth += 1; State.vars.resolve += 1; },
-        goto: "ch1_promise_common"
+        text: "Hunt the truth of the Betas, even if it scares people.",
+        effect: () => { State.vars.truth += 1; State.vars.fear += 1; },
+        goto: "ch1_end"
       },
       {
-        text: "“We end this fast. No hesitation.”",
+        text: "Win at any cost. If you hesitate, everyone dies.",
         effect: () => { State.vars.resolve += 2; State.vars.fear += 1; },
-        goto: "ch1_promise_common"
+        goto: "ch1_end"
       }
     ]
   },
 
-  { type: "label", id: "ch1_promise_common" },
-  { type: "speaker", name: "Rufki", text: `
-“If they’re designed… then they can be beaten.”
-`},
-
-  { type: "narr", text: `
-You don’t know it yet—
-
-but this promise is the first thread of your ending.
-
-Because endings aren’t decided by the last fight.
-
-They’re decided by what you choose to be…
-when it's easier to be nothing.
-`},
-
-  // If you haven't added Chapter 2 yet, keep this END.
-  // When you're ready, replace this END with:
-  // { type: "goto", value: "ch2_start" },
+  { type: "label", id: "ch1_end" },
   { type: "end",
     title: "End of Chapter 1",
-    body: `
-Chapter 1 complete.
-
-Next: Hold the Line
-(Your choices are being recorded.)
-`
+    body: "The Betas have arrived.\n\nNext: Chapter 2 — The First Stand\n\n(Your early choices already shape your path.)"
   },
-
 ];
