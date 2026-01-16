@@ -1,152 +1,70 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <title>WORLD END(S)</title>
 
-  <!-- iOS / Mobile -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <!-- Mobile / PWA -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#050510" />
 
-  <!-- Icons (optional for now) -->
-  <link rel="apple-touch-icon" href="icon-180.png" />
-  <link rel="icon" href="icon-192.png" />
+  <!-- Icons (optional but safe if files exist) -->
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="icon" href="icon-192.png">
 
-  <!-- IMPORTANT: cache-bust so GitHub Pages loads latest -->
-  <link rel="stylesheet" href="./style.css?v=99" />
-
-  <!-- Fallback styling (applies even if style.css is missing) -->
-  <style>
-    :root { --bg:#050510; --panel:rgba(10,10,20,.70); --text:#e6e6ff; --stroke:rgba(255,255,255,.12); }
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial; }
-    #app{ min-height:100vh; padding: env(safe-area-inset-top) 14px env(safe-area-inset-bottom); display:flex; flex-direction:column; gap:12px; }
-
-    .top-bar{
-      display:flex; align-items:center; justify-content:space-between;
-      padding:10px 12px; border:1px solid var(--stroke);
-      background:var(--panel); border-radius:16px;
-      backdrop-filter: blur(10px);
-    }
-    .title{ letter-spacing:.18em; font-size:12px; opacity:.9; }
-    .top-buttons{ display:flex; gap:8px; }
-    button{
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.06);
-      color:var(--text);
-      padding:8px 12px;
-      border-radius:999px;
-      font-size:14px;
-    }
-    button.primary{ border-color: rgba(0,255,255,.35); }
-    button:active{ transform: scale(.99); }
-
-    #art-panel{
-      height:38vh;
-      border:1px solid var(--stroke);
-      border-radius:18px;
-      background:
-        radial-gradient(circle at 30% 30%, rgba(90,90,160,.20), transparent 60%),
-        linear-gradient(180deg, rgba(10,10,30,.70), rgba(0,0,0,.92));
-      overflow:hidden;
-    }
-
-    #screen{
-      flex:1;
-      border:1px solid var(--stroke);
-      border-radius:18px;
-      background:var(--panel);
-      padding:14px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      backdrop-filter: blur(10px);
-    }
-
-    .speaker{ font-weight:700; opacity:.95; }
-    .text{ line-height:1.55; white-space:pre-wrap; font-size:16px; }
-    .choices{ display:flex; flex-direction:column; gap:10px; margin-top:8px; }
-    .hidden{ display:none !important; }
-
-    .toast,.err{
-      border:1px solid rgba(255,90,90,.35);
-      background:rgba(120,20,20,.35);
-      border-radius:14px;
-      padding:10px 12px;
-      font-size:13px;
-    }
-
-    .bottom-bar{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:10px;
-      padding:10px 12px;
-      border:1px solid var(--stroke);
-      background:var(--panel);
-      border-radius:16px;
-      backdrop-filter: blur(10px);
-    }
-    .hint{ opacity:.75; font-size:12px; text-align:center; flex:1; }
-
-    /* Simple modal */
-    .modal{ position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; padding:20px; }
-    .modal-card{ width:min(520px, 92vw); border-radius:18px; border:1px solid var(--stroke); background:rgba(10,10,20,.92); padding:14px; }
-    .modal-title{ font-weight:800; margin-bottom:10px; }
-    .modal-actions{ display:flex; gap:10px; flex-wrap:wrap; }
-    .btn.danger{ border-color: rgba(255,70,70,.45); }
-  </style>
+  <!-- Styles -->
+  <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
-  <div id="app">
-
-    <!-- Header -->
-    <header class="top-bar">
-      <div class="title">WORLD END(S)</div>
-      <div class="top-buttons">
-        <button id="btnSave">Save</button>
-        <button id="btnLoad">Load</button>
-        <button id="btnMenu">Menu</button>
-      </div>
-    </header>
-
-    <!-- Artwork area -->
-    <section id="art-panel"></section>
-
-    <!-- Story -->
-    <main id="screen" aria-label="Story screen">
-      <div id="speaker" class="speaker hidden"></div>
-      <div id="text" class="text"></div>
-      <div id="choices" class="choices hidden"></div>
-
-      <div id="toast" class="toast hidden"></div>
-      <div id="err" class="err hidden"></div>
-    </main>
-
-    <!-- Controls -->
-    <footer class="bottom-bar">
-      <button id="btnBack">Back</button>
-      <div class="hint">Tap the story area or press Next</div>
-      <button id="btnNext" class="primary">Next</button>
-    </footer>
-
-  </div>
-
-  <!-- Menu Modal -->
-  <div class="modal hidden" id="menuModal" aria-hidden="true">
-    <div class="modal-card">
-      <div class="modal-title">Menu</div>
-      <div class="modal-actions">
-        <button class="btn" id="btnContinue">Continue</button>
-        <button class="btn" id="btnRestart">Restart</button>
-        <button class="btn danger" id="btnClearSave">Clear Save</button>
-        <button class="btn" id="btnCloseMenu">Close</button>
-      </div>
+  <!-- =========================
+       HEADER / TITLE
+       ========================= -->
+  <header id="topBar">
+    <h1>WORLD END(S)</h1>
+    <div id="topButtons">
+      <button id="btnSave">Save</button>
+      <button id="btnLoad">Load</button>
+      <button id="btnMenu">Menu</button>
     </div>
-  </div>
+  </header>
 
-  <!-- IMPORTANT: cache-bust your JS too -->
-  <script src="./story.js?v=99" defer></script>
+  <!-- =========================
+       MAIN STORY AREA
+       (ARTWORK GOES HERE LATER)
+       ========================= -->
+  <main id="screen" aria-label="Story screen">
+
+    <!-- OPTIONAL ART CONTAINER (empty for now) -->
+    <div id="artLayer"></div>
+
+    <!-- STORY TEXT -->
+    <div id="text" class="text"></div>
+
+    <!-- CHOICES -->
+    <div id="choices" class="choices hidden"></div>
+
+    <!-- TOAST / ERROR -->
+    <div id="toast" class="toast hidden"></div>
+    <div id="err" class="err hidden"></div>
+
+  </main>
+
+  <!-- =========================
+       FOOTER / NAV
+       ========================= -->
+  <footer id="bottomBar">
+    <button id="btnBack">Back</button>
+    <div class="hint">Tap the story area or press Next</div>
+    <button id="btnNext" class="primary">Next</button>
+  </footer>
+
+  <!-- =========================
+       SCRIPTS (ORDER MATTERS)
+       ========================= -->
+  <script src="./engine.js"></script>
+  <script src="./story.js"></script>
 </body>
 </html>
