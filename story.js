@@ -7,6 +7,8 @@ const Story = [
 
   // -------- START --------
 { type: "label", id: "start" },
+{ type: "bg", value: "gradient" },
+{ type: "music", value: "" },
 
 { type: "narr", text: `
 WORLD END(S)
