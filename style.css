@@ -1,400 +1,169 @@
-/* =========================================
-   WORLD END(S) — Game UI Styles (Menu + VN)
-   ========================================= */
-
 :root{
-  --bg: #050510;
-  --panel: rgba(10, 10, 20, 0.78);
-  --panel-strong: rgba(10, 10, 20, 0.92);
-  --border: rgba(255,255,255,0.10);
-  --text: #e6e6ff;
-  --muted: rgba(230,230,255,0.75);
-  --accent: #00ffff;
-  --accent2: #7c4dff;
-  --danger: #ff4444;
-  --shadow: rgba(0,0,0,0.55);
-  --radius: 16px;
-  --radius2: 22px;
+  --bg0:#050510;
+  --bg1:#07122a;
+  --bg2:#101020;
+  --panel:rgba(10,10,20,.72);
+  --stroke:rgba(255,255,255,.12);
+  --text:#e8e8ff;
+  --muted:rgba(232,232,255,.65);
+  --accent:#00ffff;
+  --danger:#ff4444;
 
-  /* Text sizing (default md) */
-  --textSize: 16px;
-  --titleSize: 44px;
+  --radius:18px;
+  --pad:14px;
 }
 
-html, body{
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: ui-sans-serif, system-ui, -apple-system, "SF Pro Display", "SF Pro Text", Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -webkit-tap-highlight-color: transparent;
-}
-
+*{box-sizing:border-box}
+html,body{height:100%}
 body{
-  overflow: hidden; /* app-like */
+  margin:0;
+  color:var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: radial-gradient(1200px 900px at 35% 25%, #0d2b52 0%, var(--bg0) 55%) fixed;
+  overflow:hidden;
 }
 
-/* Text size setting hook */
-body[data-textsize="sm"] { --textSize: 14px; --titleSize: 40px; }
-body[data-textsize="md"] { --textSize: 16px; --titleSize: 44px; }
-body[data-textsize="lg"] { --textSize: 19px; --titleSize: 48px; }
-
-.hidden{ display: none !important; }
-
-/* =========================================
-   MAIN MENU
-   ========================================= */
-
-.menuScreen{
-  position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: radial-gradient(1200px 700px at 30% 20%, rgba(0,255,255,0.10), transparent 55%),
-              radial-gradient(900px 600px at 70% 80%, rgba(124,77,255,0.10), transparent 55%),
-              linear-gradient(180deg, #050510 0%, #07071a 50%, #050510 100%);
+#app{
+  height:100%;
+  display:flex;
+  flex-direction:column;
 }
 
-.menuBg{
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(500px 500px at 20% 30%, rgba(0,255,255,0.08), transparent 60%),
-    radial-gradient(600px 600px at 80% 70%, rgba(124,77,255,0.08), transparent 60%);
-  filter: blur(0px);
-  opacity: 1;
-  animation: bgPulse 6.5s ease-in-out infinite;
+.hud{
+  padding: calc(env(safe-area-inset-top) + 10px) var(--pad) 10px var(--pad);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
 }
-
-@keyframes bgPulse{
-  0%{ transform: scale(1); opacity: 0.95; }
-  50%{ transform: scale(1.04); opacity: 1; }
-  100%{ transform: scale(1); opacity: 0.95; }
+.hudTitle{
+  letter-spacing:.18em;
+  font-weight:700;
+  opacity:.9;
 }
-
-body[data-reducemotion="1"] .menuBg{
-  animation: none;
+.hudRight{
+  display:flex;
+  gap:10px;
 }
-
-.menuCenter{
-  position: relative;
-  width: min(560px, calc(100% - 28px));
-  padding: 22px;
-  border-radius: var(--radius2);
-  background: var(--panel);
-  border: 1px solid var(--border);
-  box-shadow: 0 18px 50px var(--shadow);
+button{
+  border:1px solid var(--stroke);
+  background: rgba(20,20,40,.55);
+  color:var(--text);
+  padding:10px 14px;
+  border-radius:999px;
+  font-weight:600;
   backdrop-filter: blur(10px);
 }
+button.primary{
+  border-color: rgba(0,255,255,.35);
+  box-shadow: 0 0 0 1px rgba(0,255,255,.08) inset;
+}
+button:active{transform:translateY(1px)}
+button[disabled]{opacity:.45}
 
-.logoBlock{
-  text-align: center;
-  padding: 10px 8px 18px 8px;
+#screen{
+  flex:1;
+  margin: 0 var(--pad);
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  padding: 16px;
+  overflow:hidden;
+  position:relative;
 }
 
-.gameTitle{
-  font-size: var(--titleSize);
-  font-weight: 900;
-  letter-spacing: 1.5px;
-  line-height: 1.05;
-  text-transform: uppercase;
-  text-shadow: 0 10px 30px rgba(0,0,0,0.7);
+.speaker{
+  font-weight:800;
+  letter-spacing:.08em;
+  margin-bottom:10px;
+  color: rgba(0,255,255,.9);
 }
-
-.gameTag{
-  margin-top: 8px;
-  font-size: 14px;
-  letter-spacing: 2px;
-  color: var(--muted);
-  text-transform: uppercase;
-}
-
-.menuButtons{
-  display: grid;
-  gap: 10px;
-  padding: 8px 6px 4px 6px;
-}
-
-.menuBtn{
-  width: 100%;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.06);
-  color: var(--text);
-  border-radius: 14px;
-  padding: 14px 14px;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.35);
-}
-
-.menuBtn:active{
-  transform: translateY(1px);
-}
-
-.menuBtn.primary{
-  border: 1px solid rgba(0,255,255,0.35);
-  background: linear-gradient(90deg, rgba(0,255,255,0.18), rgba(124,77,255,0.18));
-}
-
-.menuFooter{
-  margin-top: 14px;
-  text-align: center;
-  color: var(--muted);
-}
-
-.smallText{
-  font-size: 12px;
-  opacity: 0.85;
-}
-
-/* =========================================
-   MODALS (Settings / Credits)
-   ========================================= */
-
-.modal{
-  position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: rgba(0,0,0,0.55);
-  z-index: 50;
-}
-
-.modalCard{
-  width: min(560px, calc(100% - 28px));
-  border-radius: var(--radius2);
-  background: var(--panel-strong);
-  border: 1px solid var(--border);
-  box-shadow: 0 18px 50px var(--shadow);
-  padding: 18px;
-}
-
-.modalTitle{
-  font-weight: 900;
-  letter-spacing: 0.8px;
-  font-size: 20px;
-  margin-bottom: 14px;
-}
-
-.settingRow{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 0;
-  border-top: 1px solid rgba(255,255,255,0.06);
-}
-
-.settingRow label{
-  color: var(--muted);
-  font-size: 14px;
-}
-
-.settingRow select, .settingRow input{
-  font-size: 14px;
-}
-
-.modalActions{
-  margin-top: 14px;
-}
-
-/* =========================================
-   GAME UI (VN)
-   ========================================= */
-
-.gameUI{
-  position: fixed;
-  inset: 0;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  background: var(--bg);
-}
-
-/* Top bar */
-.topBar{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  background: rgba(5,5,16,0.85);
-  backdrop-filter: blur(8px);
-}
-
-.tinyTitle{
-  font-weight: 900;
-  letter-spacing: 1px;
-  font-size: 13px;
-  text-transform: uppercase;
-  color: rgba(230,230,255,0.9);
-}
-
-.chip{
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  color: var(--text);
-  padding: 10px 12px;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 13px;
-}
-
-.chip:active{ transform: translateY(1px); }
-
-/* Stage layout: art + textbox */
-.stage{
-  position: relative;
-  height: 100%;
-  display: grid;
-  grid-template-rows: 1fr auto;
-}
-
-/* ART AREA */
-.artArea{
-  position: relative;
-  min-height: 0;
-  /* You can set a default background here */
-  background:
-    radial-gradient(900px 500px at 20% 30%, rgba(0,255,255,0.06), transparent 60%),
-    radial-gradient(900px 500px at 80% 70%, rgba(124,77,255,0.06), transparent 60%),
-    linear-gradient(180deg, #050510 0%, #080820 100%);
-}
-
-/* Later, you can set backgrounds like:
-   html[data-bg="impact"] .artArea { background-image: url("assets/bg/impact.jpg"); ... }
-*/
-html[data-bg=""] .artArea { /* default */ }
-
-/* DIALOGUE BOX */
-.textBox{
-  padding: 12px;
-  background: rgba(0,0,0,0.0);
-}
+.hidden{display:none !important}
 
 .text{
-  font-size: var(--textSize);
-  line-height: 1.45;
-  white-space: pre-wrap;
-  background: var(--panel-strong);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: var(--radius2);
-  padding: 14px 14px;
-  box-shadow: 0 16px 40px rgba(0,0,0,0.55);
-  backdrop-filter: blur(10px);
-  user-select: none;
+  height:100%;
+  overflow:auto;
+  padding-right:6px;
+  line-height:1.55;
+  font-size: 17px;
+  white-space:pre-wrap;
 }
 
-/* Choices */
 .choices{
-  margin-top: 10px;
-  display: grid;
-  gap: 8px;
+  margin-top:14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
 }
-
-.choiceBtn, .choices button{
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  color: var(--text);
-  padding: 14px 12px;
+.choiceBtn{
+  width:100%;
+  text-align:left;
   border-radius: 14px;
-  text-align: left;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  box-shadow: 0 10px 22px rgba(0,0,0,0.35);
+  padding:12px 14px;
 }
 
-.choiceBtn:active, .choices button:active{
-  transform: translateY(1px);
+.nav{
+  padding:10px var(--pad) calc(env(safe-area-inset-bottom) + 12px) var(--pad);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.hint{color:var(--muted); font-size:13px; text-align:center; flex:1}
+
+.toast,.err{
+  position:absolute;
+  left:14px;
+  right:14px;
+  bottom:14px;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid var(--stroke);
+  background: rgba(20,20,40,.75);
+  backdrop-filter: blur(10px);
+  font-size:13px;
+}
+.err{
+  border-color: rgba(255,68,68,.35);
+  color: #ffd3d3;
 }
 
-.choiceBtn:hover{
-  border-color: rgba(0,255,255,0.25);
+.overlay{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 24px;
+  background: radial-gradient(1200px 900px at 35% 25%, rgba(0,255,255,.10) 0%, rgba(0,0,0,.70) 55%);
+  z-index:999;
 }
-
-/* HUD */
-.hud{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 10px;
+.menuCard{
+  width:min(520px, 100%);
+  border:1px solid var(--stroke);
+  border-radius: var(--radius);
+  background: rgba(10,10,20,.78);
+  padding: 18px;
+  backdrop-filter: blur(12px);
 }
-
-.hudBtn{
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  color: var(--text);
-  padding: 12px 14px;
-  border-radius: 14px;
-  font-weight: 800;
-  font-size: 14px;
+.gameTitle{
+  font-size: 28px;
+  letter-spacing:.16em;
+  font-weight:900;
 }
-
-.hudBtn.primary{
-  border: 1px solid rgba(0,255,255,0.35);
-  background: linear-gradient(90deg, rgba(0,255,255,0.18), rgba(124,77,255,0.18));
+.menuSubtitle{
+  margin-top:6px;
+  color: var(--muted);
 }
-
-.hudBtn:active{ transform: translateY(1px); }
-
-.hint{
-  flex: 1;
-  text-align: center;
+.menuBtns{
+  margin-top:16px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.menuNote{
+  margin-top:12px;
   color: var(--muted);
   font-size: 12px;
-  user-select: none;
 }
-
-/* Toast / Error */
-.toast{
-  margin-top: 10px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: rgba(0,255,255,0.12);
-  border: 1px solid rgba(0,255,255,0.25);
-  color: rgba(230,230,255,0.95);
-  font-weight: 800;
-}
-
-.err{
-  margin-top: 10px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: rgba(255,68,68,0.14);
-  border: 1px solid rgba(255,68,68,0.25);
-  color: rgba(255,220,220,0.98);
-  white-space: pre-wrap;
-  font-weight: 800;
-}
-
-/* =========================================
-   iPhone safe-area padding (Home Screen)
-   ========================================= */
-@supports (padding: env(safe-area-inset-top)){
-  .topBar{
-    padding-top: calc(10px + env(safe-area-inset-top));
-  }
-  .textBox{
-    padding-bottom: calc(12px + env(safe-area-inset-bottom));
-  }
-}
-
-/* =========================================
-   Reduce Motion
-   ========================================= */
-@media (prefers-reduced-motion: reduce){
-  .menuBg{ animation: none; }
-  .menuBtn:active, .chip:active, .hudBtn:active, .choiceBtn:active{
-    transform: none;
-  }
-}
-body[data-reducemotion="1"] .menuBg{ animation: none; }
-body[data-reducemotion="1"] .menuBtn:active,
-body[data-reducemotion="1"] .chip:active,
-body[data-reducemotion="1"] .hudBtn:active,
-body[data-reducemotion="1"] .choiceBtn:active{ transform: none; }
