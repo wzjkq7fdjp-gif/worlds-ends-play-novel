@@ -1,15 +1,35 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>Worlds End(s) — Play Novel</title>
-  <link rel="stylesheet" href="style.css?v=7">
+  <meta charset="UTF-8" />
+
+  <!-- Viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>WORLD END(S)</title>
+
+  <!-- iOS App Mode -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="WORLD END(S)" />
+  <meta name="theme-color" content="#050510" />
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon" href="icon-180.png" />
+  <link rel="icon" href="icon-192.png" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="./style.css?v=9" />
 </head>
+
 <body>
+
+  <!-- APP WRAPPER -->
   <div id="app">
-    <header>
-      <div class="title">WORLDS END(S)</div>
+
+    <!-- TOP BAR -->
+    <header class="topBar">
+      <div class="title">WORLD END(S)</div>
       <div class="topBtns">
         <button id="btnSave">Save</button>
         <button id="btnLoad">Load</button>
@@ -17,24 +37,50 @@
       </div>
     </header>
 
+    <!-- STORY SCREEN -->
     <main id="screen" aria-label="Story screen">
       <div id="speaker" class="speaker hidden"></div>
       <div id="text" class="text"></div>
-
       <div id="choices" class="choices hidden"></div>
-
       <div id="toast" class="toast hidden"></div>
       <div id="err" class="err hidden"></div>
     </main>
 
-    <footer>
+    <!-- FOOTER -->
+    <footer class="footer">
       <button id="btnBack">Back</button>
       <div class="hint">Tap the story area or press Next</div>
       <button id="btnNext" class="primary">Next</button>
     </footer>
+
   </div>
 
-  <!-- IMPORTANT: cache buster so iPhone loads newest JS -->
-  <script src="story.js?v=7"></script>
+  <!-- MENU MODAL -->
+  <div class="modal hidden" id="menuModal">
+    <div class="modal-card">
+      <div class="modal-title">Menu</div>
+      <div class="modal-actions">
+        <button class="btn" id="btnContinue">Continue</button>
+        <button class="btn" id="btnRestart">Restart</button>
+        <button class="btn danger" id="btnClear">Clear Save</button>
+      </div>
+      <div class="modal-foot">
+        <button class="btn small" id="btnCloseMenu">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SERVICE WORKER (SAFE FOR iOS) -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      });
+    }
+  </script>
+
+  <!-- ENGINE + STORY -->
+  <script src="./story.js?v=9" defer></script>
+
 </body>
 </html>
