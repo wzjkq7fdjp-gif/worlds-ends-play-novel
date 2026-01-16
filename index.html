@@ -1,193 +1,68 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>WORLD END(S)</title>
 
-  <!-- Mobile / PWA -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#050510" />
-
-  <link rel="apple-touch-icon" href="icon-180.png">
-  <link rel="icon" href="icon-192.png">
-
-  <link rel="stylesheet" href="./style.css">
+  <!-- Cache-buster: change v= number if you update files -->
+  <link rel="stylesheet" href="./style.css?v=10">
 </head>
 
-<body class="game">
-  <!-- =========================
-       MAIN MENU (GAME FEEL)
-  ========================== -->
-  <div id="mainMenu" class="menuScreen">
-    <div class="menuBg"></div>
+<body>
+  <div id="app">
 
-    <div class="menuCenter">
-      <div class="logoBlock">
+    <!-- MAIN MENU -->
+    <div id="mainMenu" class="overlay">
+      <div class="menuCard">
         <div class="gameTitle">WORLD END(S)</div>
-        <div class="gameTag">Interactive Novel</div>
-      </div>
+        <div class="menuSubtitle">Play Novel</div>
 
-      <div class="menuButtons">
-        <button class="menuBtn primary" id="mmContinue">Continue</button>
-        <button class="menuBtn" id="mmNew">New Game</button>
-        <button class="menuBtn" id="mmLoad">Load</button>
-        <button class="menuBtn" id="mmSettings">Settings</button>
-        <button class="menuBtn" id="mmCredits">Credits</button>
-      </div>
+        <div class="menuBtns">
+          <button id="btnStart" class="primary">Start</button>
+          <button id="btnContinue">Continue</button>
+          <button id="btnOptions">Options</button>
+          <button id="btnCredits">Credits</button>
+        </div>
 
-      <div class="menuFooter">
-        <span class="smallText">Tip: Add to Home Screen for full-screen play.</span>
+        <div id="menuNote" class="menuNote"></div>
       </div>
     </div>
-  </div>
 
-  <!-- =========================
-       SETTINGS PANEL
-  ========================== -->
-  <div id="settingsPanel" class="modal hidden">
-    <div class="modalCard">
-      <div class="modalTitle">Settings</div>
-
-      <div class="settingRow">
-        <label>Text size</label>
-        <select id="setTextSize">
-          <option value="sm">Small</option>
-          <option value="md" selected>Medium</option>
-          <option value="lg">Large</option>
-        </select>
+    <!-- TOP HUD -->
+    <header class="hud">
+      <div class="hudLeft">
+        <div class="hudTitle">WORLD END(S)</div>
       </div>
-
-      <div class="settingRow">
-        <label>Tap anywhere to advance</label>
-        <input id="setTapAdvance" type="checkbox" checked />
-      </div>
-
-      <div class="settingRow">
-        <label>Reduce motion</label>
-        <input id="setReduceMotion" type="checkbox" />
-      </div>
-
-      <div class="modalActions">
-        <button id="setClose" class="menuBtn">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- =========================
-       CREDITS PANEL
-  ========================== -->
-  <div id="creditsPanel" class="modal hidden">
-    <div class="modalCard">
-      <div class="modalTitle">Credits</div>
-      <div class="creditsText">
-        <p><strong>Story:</strong> Rufki Vila</p>
-        <p><strong>Interactive Novel Engine:</strong> Custom Web VN</p>
-        <p><strong>World:</strong> WORLD END(S)</p>
-        <p class="smallText">Add music/art/voice credits later.</p>
-      </div>
-      <div class="modalActions">
-        <button id="credClose" class="menuBtn">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- =========================
-       GAME UI (VN SCREEN)
-       Keep these IDs for engine.js
-  ========================== -->
-  <div id="gameUI" class="gameUI hidden">
-    <header class="topBar">
-      <div class="topLeft">
-        <div class="tinyTitle">WORLD END(S)</div>
-      </div>
-      <div class="topRight">
-        <button id="btnSave" class="chip">Save</button>
-        <button id="btnLoad" class="chip">Load</button>
-        <button id="btnMenu" class="chip">Menu</button>
+      <div class="hudRight">
+        <button id="btnSave">Save</button>
+        <button id="btnLoad">Load</button>
+        <button id="btnMenu">Menu</button>
       </div>
     </header>
 
-    <main id="screen" class="stage" aria-label="Story screen">
-      <!-- ART/SCENE AREA -->
-      <section id="artLayer" class="artArea" aria-label="Artwork area"></section>
+    <!-- STORY SCREEN -->
+    <main id="screen" aria-label="Story screen">
+      <div id="speaker" class="speaker hidden"></div>
+      <div id="text" class="text"></div>
 
-      <!-- TEXT BOX -->
-      <section class="textBox" aria-label="Text box">
-        <div id="text" class="text"></div>
+      <div id="choices" class="choices hidden"></div>
 
-        <div id="choices" class="choices hidden"></div>
-
-        <div class="hud">
-          <button id="btnBack" class="hudBtn">Back</button>
-          <div class="hint">Tap the story area or press Next</div>
-          <button id="btnNext" class="hudBtn primary">Next</button>
-        </div>
-
-        <div id="toast" class="toast hidden"></div>
-        <div id="err" class="err hidden"></div>
-      </section>
+      <div id="toast" class="toast hidden"></div>
+      <div id="err" class="err hidden"></div>
     </main>
+
+    <!-- BOTTOM NAV -->
+    <footer class="nav">
+      <button id="btnBack">Back</button>
+      <div class="hint">Tap the story area or press Next</div>
+      <button id="btnNext" class="primary">Next</button>
+    </footer>
+
   </div>
 
-  <!-- =========================
-       MENU FLOW SCRIPT
-  ========================== -->
-  <script>
-    const $ = (id) => document.getElementById(id);
-
-    function showMainMenu() {
-      $("mainMenu").classList.remove("hidden");
-      $("gameUI").classList.add("hidden");
-    }
-    function showGame() {
-      $("mainMenu").classList.add("hidden");
-      $("gameUI").classList.remove("hidden");
-    }
-
-    $("mmNew").onclick = () => {
-      try { localStorage.removeItem("worlds_ends_save"); } catch(e){}
-      showGame();
-    };
-
-    $("mmContinue").onclick = () => {
-      showGame();
-      // If you saved before, press Load:
-      setTimeout(() => $("btnLoad")?.click(), 50);
-    };
-
-    $("mmLoad").onclick = () => {
-      showGame();
-      setTimeout(() => $("btnLoad")?.click(), 50);
-    };
-
-    $("mmSettings").onclick = () => $("settingsPanel").classList.remove("hidden");
-    $("setClose").onclick = () => $("settingsPanel").classList.add("hidden");
-
-    $("mmCredits").onclick = () => $("creditsPanel").classList.remove("hidden");
-    $("credClose").onclick = () => $("creditsPanel").classList.add("hidden");
-
-    // Menu button returns to main menu
-    document.addEventListener("click", (e) => {
-      if (e.target && e.target.id === "btnMenu") {
-        e.preventDefault();
-        showMainMenu();
-      }
-    });
-
-    $("setTextSize").onchange = (e) => {
-      document.body.dataset.textsize = e.target.value;
-    };
-    $("setReduceMotion").onchange = (e) => {
-      document.body.dataset.reducemotion = e.target.checked ? "1" : "0";
-    };
-
-    showMainMenu();
-  </script>
-
-  <!-- Load story FIRST, then engine -->
-<script defer src="./story.js"></script>
-<script defer src="./engine.js"></script>
+  <!-- IMPORTANT: order matters -->
+  <script src="./engine.js?v=10"></script>
+  <script src="./story.js?v=10"></script>
 </body>
 </html>
