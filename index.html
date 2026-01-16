@@ -5,64 +5,73 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>WORLD END(S)</title>
 
-  <!-- Cache-buster: change v= number if you update files -->
-  <link rel="stylesheet" href="./style.css?v=10">
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="WORLD END(S)" />
+  <meta name="theme-color" content="#050510" />
+
+  <link rel="manifest" href="./manifest.webmanifest?v=1" />
+  <link rel="apple-touch-icon" href="./icon-180.png" />
+  <link rel="icon" href="./icon-192.png" />
+
+  <link rel="stylesheet" href="./style.css?v=1" />
 </head>
 
 <body>
   <div id="app">
-
-    <!-- MAIN MENU -->
-    <div id="mainMenu" class="overlay">
-      <div class="menuCard">
-        <div class="gameTitle">WORLD END(S)</div>
-        <div class="menuSubtitle">Play Novel</div>
-
-        <div class="menuBtns">
-          <button id="btnStart" class="primary">Start</button>
-          <button id="btnContinue">Continue</button>
-          <button id="btnOptions">Options</button>
-          <button id="btnCredits">Credits</button>
-        </div>
-
-        <div id="menuNote" class="menuNote"></div>
-      </div>
-    </div>
-
-    <!-- TOP HUD -->
-    <header class="hud">
-      <div class="hudLeft">
-        <div class="hudTitle">WORLD END(S)</div>
-      </div>
-      <div class="hudRight">
-        <button id="btnSave">Save</button>
-        <button id="btnLoad">Load</button>
-        <button id="btnMenu">Menu</button>
+    <header class="topbar">
+      <div class="title">WORLD END(S)</div>
+      <div class="topBtns">
+        <button id="btnSave" type="button">Save</button>
+        <button id="btnLoad" type="button">Load</button>
+        <button id="btnMenu" type="button">Menu</button>
       </div>
     </header>
 
-    <!-- STORY SCREEN -->
     <main id="screen" aria-label="Story screen">
-      <div id="speaker" class="speaker hidden"></div>
-      <div id="text" class="text"></div>
+      <!-- MAIN MENU (clickable) -->
+      <section id="mainMenu" class="panel">
+        <h1 class="logo">WORLD END(S)</h1>
+        <p class="subtitle">Play Novel</p>
 
-      <div id="choices" class="choices hidden"></div>
+        <div class="menuBtns">
+          <button id="btnStart" class="primary" type="button">Start</button>
+          <button id="btnContinue" type="button">Continue</button>
+          <button id="btnOptions" type="button">Options</button>
+          <button id="btnCredits" type="button">Credits</button>
+        </div>
+
+        <div class="tinyHint">Tap Start to begin. (If buttons don’t click, it’s a layout/CSS overlay issue.)</div>
+      </section>
+
+      <!-- STORY VIEW -->
+      <section id="storyView" class="panel hidden">
+        <div id="speaker" class="speaker hidden"></div>
+        <div id="text" class="text"></div>
+        <div id="choices" class="choices hidden"></div>
+      </section>
 
       <div id="toast" class="toast hidden"></div>
       <div id="err" class="err hidden"></div>
     </main>
 
-    <!-- BOTTOM NAV -->
-    <footer class="nav">
-      <button id="btnBack">Back</button>
+    <footer class="footer">
+      <button id="btnBack" type="button">Back</button>
       <div class="hint">Tap the story area or press Next</div>
-      <button id="btnNext" class="primary">Next</button>
+      <button id="btnNext" class="primary" type="button">Next</button>
     </footer>
-
   </div>
 
-  <!-- IMPORTANT: order matters -->
-  <script src="./engine.js?v=20"></script>
-<script src="./story.js?v=20"></script>
+  <!-- scripts -->
+  <script src="./engine.js?v=1"></script>
+  <script src="./story.js?v=1"></script>
+
+  <script>
+    // Register service worker (PWA / Home Screen)
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js").catch(()=>{});
+    }
+  </script>
 </body>
 </html>
