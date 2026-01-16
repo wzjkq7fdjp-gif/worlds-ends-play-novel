@@ -1,278 +1,131 @@
 // Worlds End(s) — Play Novel Engine (simple iOS-friendly VN)
 // Save format: localStorage "we_save_v1" with { idx, history, vars }
 
-const UI = {
-  bg: document.getElementById("bg"),
-  menu: document.getElementById("menu"),
-  novel: document.getElementById("novel"),
-  ending: document.getElementById("ending"),
-  nameplate: document.getElementById("nameplate"),
-  text: document.getElementById("text"),
-  choices: document.getElementById("choices"),
-  btnStart: document.getElementById("btnStart"),
-  btnContinue: document.getElementById("btnContinue"),
-  btnClear: document.getElementById("btnClear"),
-  btnRestart: document.getElementById("btnRestart"),
-  btnNext: document.getElementById("btnNext"),
-  btnBack: document.getElementById("btnBack"),
-  btnSave: document.getElementById("btnSave"),
-  btnLoad: document.getElementById("btnLoad"),
-  btnMenu: document.getElementById("btnMenu"),
-  btnEndingLoad: document.getElementById("btnEndingLoad"),
-  endingTitle: document.getElementById("endingTitle"),
-  endingBody: document.getElementById("endingBody"),
-  music: document.getElementById("music"),
-  sfx: document.getElementById("sfx"),
-  toast: document.getElementById("toast"),
-};
-
-const SAVE_KEY = "we_save_v1";
-
-// Simple global state
-const State = {
-  idx: 0,
-  history: [], // store previous indices for Back
-  vars: {
-    // flags affecting tone/endings later
-    mercy: 0,
-    resolve: 0,
-    truth: 0,
-  },
-};
-
-// --- Story Data (Chapter 1 fully playable) ---
 const Story = [
-  // Utility: set background and music
+  // =========================
+  // CHAPTER 1 — THE DAY THE SKY BURNED
+  // =========================
   { type: "bg", value: "gradient" },
-  { type: "music", value: "" }, // put "assets/music/ambient1.mp3" later
+  { type: "music", value: "" }, // optional: "assets/music/ambient1.mp3"
 
   { type: "narr", text:
 `CHAPTER 1 — THE DAY THE SKY BURNED
 
-The first sign wasn’t the sirens.
-It wasn’t the news.
-It wasn’t even the panic.
+The meteor blazed across the sky, leaving a trail of fire in its wake.
 
-It was the sky—splitting open like a wound.` },
+At first, people thought it was a miracle.
+A rare light. A once-in-a-lifetime moment.
+Phones rose into the air like candles.
+Voices overlapped—excited, disbelieving, hungry for something beautiful to happen.
 
-  { type: "narr", text:
-`The meteor appeared without warning, a bright slash carving across the night.
-Fire trailed behind it—too clean, too controlled, like it wanted to be seen.` },
+The sky answered with heat.
 
-  { type: "narr", text:
-`People ran outside. They filmed it. They cheered.
-Somewhere, someone whispered the first lie:
+When it struck the ground, the impact was felt for miles around—less a crash, more a deep, violent shudder that rolled through the earth like a warning.
 
-“It’s just a rock.”` },
+But it wasn’t a rock that landed on Earth.
 
-  { type: "bg", value: "impact" }, // replace with image later
-  { type: "sfx", value: "" },      // optional: "assets/sfx/boom.mp3"
+It was a ship.` },
 
   { type: "narr", text:
-`When it hit, the ground didn’t shake.
+`The next hours were chaos wrapped in fascination.
 
-It screamed.
+News helicopters circled the crater.
+Scientists arrived in convoys.
+Officials spoke carefully into microphones about safety and protocols and “nonhuman material.”
 
-A pulse rolled outward—like the planet exhaled in pain.
-Windows trembled. Streetlights flickered.
-For a moment, the city forgot how to breathe.` },
+And through it all, the same thought kept repeating in your mind like a heartbeat:
 
-  { type: "narr", text:
-`You stood in the crowd, staring at the distant glow on the horizon.
-Not fear.
-Not yet.
+This doesn’t feel like discovery.
 
-Just that quiet feeling that the world had shifted—
-and would never shift back.` },
+It feels like arrival.` },
 
   { type: "speaker", name: "Rufki", text:
 `“…That wasn’t a meteor.”` },
 
   { type: "narr", text:
-`The words left your mouth before you decided to speak.
-They tasted like metal.
+`The world didn’t listen.
 
-And then the feed came in—broken audio, government channels overriding everything.
-Static. A stutter. A voice trying to sound calm.` },
+It never does at first.
 
-  { type: "speaker", name: "Broadcast", text:
-`“—unidentified object—impact zone quarantined—remain indoors—repeat—remain indoors—”` },
+People gathered near screens. People gathered near fences.
+They wanted to see it. To understand it. To claim it.
 
-  { type: "narr", text:
-`But people didn’t go indoors.
-They moved toward the light like moths toward a flame.
+To own it.
 
-And you…
-you didn’t move at all.` },
+And then the Betas stepped into human history like a knife entering skin.
 
-  { type: "choice",
-    prompt: "What do you do?",
-    options: [
-      {
-        text: "Run toward the impact zone.",
-        effect: () => { State.vars.resolve += 1; },
-        goto: "toward"
-      },
-      {
-        text: "Go home and check the news.",
-        effect: () => { State.vars.truth += 1; },
-        goto: "home"
-      },
-      {
-        text: "Call someone you care about first.",
-        effect: () => { State.vars.mercy += 1; },
-        goto: "call"
-      }
-    ]
-  },
+Insect-like shapes.
+Too many limbs.
+Too clean. Too intentional.
+Their bodies were plated, segmented, built as if nature had been given blueprints and told to follow them.
 
-  // --- Branch: toward ---
-  { type: "label", id: "toward" },
-  { type: "narr", text:
-`Your legs move before your mind catches up.
+At first, they just… moved.
+Slowly. Curiously.
+Almost gently.
 
-The streets are clogged with people and cars, everyone chasing the same glow.
-The closer you get, the more the air changes—
-warm, electric, wrong.` },
+And for a moment the world convinced itself it could survive this.
 
-  { type: "speaker", name: "Rufki", text:
-`“If that thing is still active… we’re already late.”` },
-
-  { type: "goto", id: "common" },
-
-  // --- Branch: home ---
-  { type: "label", id: "home" },
-  { type: "narr", text:
-`You turn away from the crowd.
-
-At home the screens stutter between emergency banners and frozen frames.
-Every channel shows the same distant crater—
-but none of them explain why the “meteor” has edges.
-None of them explain the lights inside it.` },
-
-  { type: "speaker", name: "Rufki", text:
-`“…They’re hiding something.”` },
-
-  { type: "goto", id: "common" },
-
-  // --- Branch: call ---
-  { type: "label", id: "call" },
-  { type: "narr", text:
-`Your thumb hovers over the contact list.
-
-One call. One voice.
-Something to prove the night is still normal.
-
-It isn’t.
-
-The line connects, then cuts into static—like the air itself is jammed.` },
-
-  { type: "speaker", name: "Rufki", text:
-`“No… no, pick up.”` },
+Then the first attack happened.` },
 
   { type: "narr", text:
-`The call dies. The screen goes black.
+`It wasn’t loud in the way people expected.
 
-You stare at your reflection for half a second—
-and realize the sky’s glow is brighter now.` },
+It was quick.
 
-  { type: "goto", id: "common" },
+A single motion.
+A single scream that cut off too fast.
 
-  // --- Common continuation ---
-  { type: "label", id: "common" },
-  { type: "bg", value: "ship" },
+Panic spread like fire, and the Betas followed it like hunters following blood.
 
-  { type: "narr", text:
-`By morning, the truth leaks out in pieces.
+They were unlike anything anyone had ever seen—
+and within minutes, they proved something that would define the coming years:
 
-Not a meteor.
-A ship.
+They didn’t come to be studied.
 
-Half-buried in the earth like a blade driven into the world.` },
+They came to take.` },
 
   { type: "narr", text:
-`Scientists arrive first. Soldiers after that.
-And then the cameras—
-because humanity can’t stop itself from staring at its own ending.` },
+`In the days that followed, the damage multiplied.
 
-  { type: "speaker", name: "Rufki", text:
-`“If this is a first contact… why does it feel like a warning?”` },
+Cities locked down.
+Borders closed.
+Emergency broadcasts played on repeat until the words lost meaning.
 
-  { type: "narr", text:
-`You don’t get an answer.
+People still argued online about what they were seeing.
+People still made jokes.
+People still said, “It can’t be that bad.”
 
-Not until the first Beta crawls into the light.` },
+Then the footage came out.
+The bodies.
+The tearing.
+The way the Betas moved through groups like they already knew how humans ran.
 
-  { type: "bg", value: "beta" },
-  { type: "narr", text:
-`It looks insect-like at first glance—segmented armor, jointed limbs.
-But the movement is wrong.
-Too intelligent.
-Too deliberate.
+And finally—finally—the world understood:
 
-The crowd goes silent.
+This wasn’t a disaster.
 
-Then someone laughs, nervous.
-Someone else claps.
-A child points.` },
+It was a war.` },
 
   { type: "narr", text:
-`And the Beta… turns its head as if it heard the child breathe.` },
+`But wars are supposed to have a front line.
 
-  { type: "speaker", name: "Rufki", text:
-`“…Back up.”` },
+This had none.
+
+The Betas didn’t march like armies.
+They spread like a disease, appearing in places that made no sense, hitting targets that felt chosen.
+
+And humanity—humanity responded the only way it knew how at first:
+
+With noise.
+
+With meetings.
+With speeches.
+With flags and promises.
+
+With fear dressed up as control.` },
 
   { type: "narr", text:
-`No one listens.
-
-The Beta moves.
-
-Fast.` },
-
-  { type: "choice",
-    prompt: "Do you shout a warning or pull someone back?",
-    options: [
-      {
-        text: "Shout: “GET BACK!”",
-        effect: () => { State.vars.resolve += 1; },
-        goto: "warning"
-      },
-      {
-        text: "Grab the nearest person and yank them away.",
-        effect: () => { State.vars.mercy += 1; },
-        goto: "saveone"
-      }
-    ]
-  },
-
-  { type: "label", id: "warning" },
-  { type: "narr", text:
-`Your voice cuts through the air like glass.
-
-People flinch. Some finally step back.
-Not enough.
-
-The Beta is already in the crowd.` },
-  { type: "goto", id: "ch1end" },
-
-  { type: "label", id: "saveone" },
-  { type: "narr", text:
-`You grab a stranger by the jacket and pull hard.
-
-They stumble, angry—until they see the Beta’s limbs unfold.
-Their anger dies instantly.
-
-You saved one person.
-
-The crowd didn’t move fast enough.` },
-  { type: "goto", id: "ch1end" },
-
-  { type: "label", id: "ch1end" },
-  { type: "bg", value: "chaos" },
-  { type: "narr", text:
-`The first screams start like sparks—small, scattered.
-
-Then the whole world ignites.
+`Then the whole world ignites.
 
 This is the moment history will name later.
 The moment people will argue about.
@@ -285,299 +138,352 @@ You feel one thing:
 
 The beginning.` },
 
+  // =========================
+  // CHAPTER 2 — THE BETAS
+  // =========================
+  { type: "label", id: "ch2_start" },
+  { type: "bg", value: "chaos" },
+  { type: "music", value: "" }, // optional: "assets/music/ambient2.mp3"
+
+  { type: "narr", text:
+`CHAPTER 2 — THE BETAS
+
+You don’t remember falling back.
+
+You remember the sound first—
+a wet, sharp rhythm like something cutting through meat.
+
+Then the crowd breaks.
+Bodies collide. People trip over their own panic.
+Someone drops their phone. Someone drops their child.
+The air fills with one terrible realization:
+
+This thing didn’t come to be studied.
+
+It came to hunt.` },
+
+  { type: "speaker", name: "Rufki", text:
+`“Move! Don’t stare—MOVE!”` },
+
+  { type: "narr", text:
+`Your voice is swallowed by screams.
+
+The Beta darts through the chaos with impossible precision, turning and correcting as if it’s reading the crowd like a map.
+It doesn’t lash out randomly.
+It chooses.
+
+And when it chooses, it doesn’t miss.` },
+
+  { type: "narr", text:
+`A soldier raises his rifle. The muzzle flashes once—twice.
+
+The shots land.
+You see them hit.
+
+The Beta doesn’t fall.
+
+It only… adjusts.` },
+
+  { type: "speaker", name: "Rufki", text:
+`“…Armor.”` },
+
+  { type: "narr", text:
+`The word comes out like a curse.
+
+It isn’t just tough.
+It’s designed.
+
+You catch a glimpse of its body—segment plates overlapping like a living tank, joints protected, eyes set deep.
+This isn’t an animal.
+
+This is an answer to a question humanity hasn’t even asked yet.` },
+
+  { type: "choice",
+    prompt: "In the stampede, you see someone pinned under a fallen barrier. What do you do?",
+    options: [
+      {
+        text: "Go back and pull them free.",
+        effect: () => { State.vars.mercy += 1; },
+        goto: "ch2_save"
+      },
+      {
+        text: "Keep moving and get to cover.",
+        effect: () => { State.vars.resolve += 1; },
+        goto: "ch2_cover"
+      },
+      {
+        text: "Shout for help while you scan for the Beta.",
+        effect: () => { State.vars.truth += 1; },
+        goto: "ch2_shout"
+      }
+    ]
+  },
+
+  { type: "label", id: "ch2_save" },
+  { type: "narr", text:
+`You pivot hard against the tide of bodies.
+
+The barrier is heavier than it looks—metal twisted and hot.
+The person under it is half-conscious, eyes wide, lips moving without sound.
+
+You hook your arms beneath the edge and heave.
+
+Pain shoots up your shoulders.
+The barrier shifts—enough.
+
+You drag them free and shove them toward the nearest doorway.
+
+They don’t thank you.
+They can’t.
+
+But they’re alive.` },
+  { type: "goto", id: "ch2_common" },
+
+  { type: "label", id: "ch2_cover" },
+  { type: "narr", text:
+`You force yourself to keep moving.
+
+It feels wrong—like betrayal.
+But staying in the open is suicide.
+
+You slip behind a shattered concrete divider, breath ragged.
+From here you can see the crowd thin out into scattered clusters.
+You can see the Beta too—brief flashes of motion, like a nightmare skipping frames.` },
+  { type: "goto", id: "ch2_common" },
+
+  { type: "label", id: "ch2_shout" },
+  { type: "narr", text:
+`“HELP! OVER HERE!”
+
+Your shout cuts through the noise for a second.
+A couple of people glance your way, but panic doesn’t organize itself.
+It only spreads.
+
+Still—your eyes stay sharp.
+You track the Beta’s pattern: it angles toward choke points, corners, bottlenecks.
+It’s not just chasing prey.
+
+It’s controlling the field.` },
+  { type: "goto", id: "ch2_common" },
+
+  { type: "label", id: "ch2_common" },
+  { type: "bg", value: "ship" },
+
+  { type: "narr", text:
+`Minutes later—maybe hours—the scene collapses into sirens and orders.
+
+Military vehicles form a hard perimeter. Soldiers shout commands nobody follows.
+The crater is sealed behind walls of steel and fear.
+
+News anchors call it a “containment incident.”
+Government spokespeople call it “an isolated threat.”
+
+But you saw the way it moved.
+You saw the way it listened.
+
+One Beta was enough to shatter the illusion of safety.
+
+So what happens when there’s more?` },
+
+  { type: "narr", text:
+`That question follows you for the next two days.
+
+It follows you into your sleep.
+It follows you into the dead quiet of early morning when your phone buzzes with the first leaked video—
+grainy footage from inside the perimeter.
+
+A shape.
+
+Not one.
+
+Several.` },
+
+  { type: "speaker", name: "Rufki", text:
+`“…They’re multiplying.”` },
+
+  { type: "bg", value: "beta" },
+  { type: "narr", text:
+`The video ends with static.
+
+But the static doesn’t sound random.
+It sounds… patterned.
+Like interference.
+Like something broadcasting on a frequency your world wasn’t built to hear.` },
+
+  { type: "narr", text:
+`On the third day, your city changes.
+
+Not by explosion.
+Not by invasion.
+
+By silence.
+
+Streets empty faster than they should.
+Stores close without explanation.
+Hospitals get “new protocols.”
+Police radios run nonstop.
+
+Everyone is waiting for the next thing to happen.
+
+And then it does.` },
+
+  { type: "bg", value: "impact" },
+  { type: "narr", text:
+`A second impact hits the outskirts.
+
+No warning. No fireball across the sky.
+
+Just a distant thud that you feel in your teeth.
+
+Then another.
+
+Then another.
+
+As if something is arriving in pieces.
+
+Or… as if the first ship was never alone.` },
+
+  { type: "speaker", name: "Rufki", text:
+`“This is a landing.”` },
+
+  { type: "narr", text:
+`Your hands are shaking, but your mind is clear.
+Clear enough to recognize what’s happening:
+
+The world is being paced.
+Softened.
+Tested.
+
+A predator doesn’t always strike with full force.
+Sometimes it circles first, watching for weaknesses.
+
+And humanity—humanity is all weakness right now.` },
+
+  { type: "choice",
+    prompt: "A private message hits your phone from an unknown number: “If you want answers, come alone.”",
+    options: [
+      {
+        text: "Go. Answers matter more than fear.",
+        effect: () => { State.vars.resolve += 1; },
+        goto: "ch2_meet"
+      },
+      {
+        text: "Don’t go. Track the number instead.",
+        effect: () => { State.vars.truth += 1; },
+        goto: "ch2_track"
+      },
+      {
+        text: "Reply: “Who are you?”",
+        effect: () => { State.vars.mercy += 1; },
+        goto: "ch2_reply"
+      }
+    ]
+  },
+
+  { type: "label", id: "ch2_meet" },
+  { type: "bg", value: "chaos" },
+  { type: "narr", text:
+`You go.
+
+Not because it’s smart.
+Because waiting is worse.
+
+The meeting point is under an old overpass where the city’s lights don’t reach.
+A figure stands there like a cutout against the dark.
+
+They don’t introduce themselves.
+
+They just say one sentence that changes the shape of your future.` },
+
+  { type: "speaker", name: "Unknown", text:
+`“They’re not here to negotiate. They’re here to replace.”` },
+  { type: "goto", id: "ch2_after_contact" },
+
+  { type: "label", id: "ch2_track" },
+  { type: "bg", value: "gradient" },
+  { type: "narr", text:
+`You don’t go.
+
+You pull the number apart instead—reverse lookups, carrier traces, anything.
+
+The result is impossible:
+No carrier.
+No registration.
+As if the message didn’t come from a phone at all.
+
+As if it came from inside the static.
+
+Then your screen flickers once.
+
+And a new message appears, already knowing what you did.` },
+
+  { type: "speaker", name: "Unknown", text:
+`“Smart. But you’re running out of time.”` },
+  { type: "goto", id: "ch2_after_contact" },
+
+  { type: "label", id: "ch2_reply" },
+  { type: "bg", value: "gradient" },
+  { type: "narr", text:
+`Your fingers hover, then type:
+
+“Who are you?”
+
+The reply comes instantly.
+
+No typing bubbles.
+No delay.
+
+Just words, clean as a blade.` },
+
+  { type: "speaker", name: "Unknown", text:
+`“Someone who survived the first wave.”` },
+  { type: "goto", id: "ch2_after_contact" },
+
+  { type: "label", id: "ch2_after_contact" },
+  { type: "bg", value: "ship" },
+  { type: "narr", text:
+`That night, you stop calling it an “incident.”
+
+You call it what it is.
+
+A war—before the first battle line even forms.
+
+You sit alone with the city’s distant sirens and your own thoughts, and you understand something you didn’t understand before:
+
+If humanity waits for permission to fight, it will die waiting.
+
+If humanity waits for a hero, it will die hoping.
+
+So you begin to plan.
+
+Not as a soldier.
+Not as a politician.
+
+As someone who refuses to be prey.` },
+
+  { type: "speaker", name: "Rufki", text:
+`“If we’re going to survive… we need something bigger than fear.”` },
+
+  { type: "narr", text:
+`Outside, the sky is quiet.
+
+Too quiet.
+
+But you can feel it now—like a hum beneath the world.
+
+A signal.
+
+A countdown.
+
+And somewhere out there, the Betas are learning your planet’s name.` },
+
   { type: "end",
-    title: "End of Chapter 1",
+    title: "End of Chapter 2",
     body:
-`Chapter 1 complete.
+`Chapter 2 complete.
 
-Next: The Betas
+Next: Resistance
 
-(Your choices are saved and will affect tone later.)`
+(Your choices continue to affect tone and the final message.)`
   },
 ];
-
-// --- Engine helpers ---
-function showToast(msg) {
-  UI.toast.textContent = msg;
-  UI.toast.classList.remove("hidden");
-  setTimeout(() => UI.toast.classList.add("hidden"), 1200);
-}
-
-function setBG(value) {
-  // Replace these with real images later:
-  // e.g. setBG("assets/bg/impact.jpg")
-  const presets = {
-    gradient: "radial-gradient(circle at 30% 30%, rgba(90,90,160,0.14), transparent 60%), linear-gradient(180deg, rgba(10,10,30,0.7), rgba(0,0,0,0.9))",
-    impact: "radial-gradient(circle at 50% 50%, rgba(255,120,80,0.18), transparent 55%), linear-gradient(180deg, rgba(10,10,20,0.6), rgba(0,0,0,0.95))",
-    ship: "radial-gradient(circle at 40% 40%, rgba(120,220,255,0.12), transparent 55%), linear-gradient(180deg, rgba(10,10,25,0.65), rgba(0,0,0,0.95))",
-    beta: "radial-gradient(circle at 50% 30%, rgba(200,255,160,0.10), transparent 55%), linear-gradient(180deg, rgba(8,8,18,0.65), rgba(0,0,0,0.96))",
-    chaos: "radial-gradient(circle at 60% 40%, rgba(255,70,70,0.14), transparent 60%), linear-gradient(180deg, rgba(10,10,25,0.65), rgba(0,0,0,0.96))",
-  };
-
-  const v = presets[value] || presets.gradient;
-  UI.bg.style.backgroundImage = v.startsWith("url(") ? v : v;
-  UI.bg.style.backgroundSize = "cover";
-  UI.bg.style.backgroundPosition = "center";
-}
-
-function playMusic(src) {
-  if (!src) {
-    UI.music.pause();
-    UI.music.removeAttribute("src");
-    return;
-  }
-  if (UI.music.getAttribute("src") === src) return;
-  UI.music.setAttribute("src", src);
-  UI.music.volume = 0.6;
-  UI.music.play().catch(()=>{});
-}
-
-function playSFX(src) {
-  if (!src) return;
-  UI.sfx.setAttribute("src", src);
-  UI.sfx.volume = 0.8;
-  UI.sfx.play().catch(()=>{});
-}
-
-function findLabelIndex(id) {
-  return Story.findIndex(x => x.type === "label" && x.id === id);
-}
-
-function gotoLabel(id) {
-  const idx = findLabelIndex(id);
-  if (idx >= 0) {
-    State.idx = idx + 1; // jump to line after label
-    render();
-  } else {
-    console.warn("Label not found:", id);
-  }
-}
-
-function saveGame() {
-  const payload = {
-    idx: State.idx,
-    history: State.history.slice(-200),
-    vars: State.vars
-  };
-  localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
-  showToast("Saved.");
-}
-
-function loadGame() {
-  const raw = localStorage.getItem(SAVE_KEY);
-  if (!raw) { showToast("No save found."); return false; }
-  try {
-    const payload = JSON.parse(raw);
-    State.idx = payload.idx ?? 0;
-    State.history = payload.history ?? [];
-    State.vars = payload.vars ?? State.vars;
-    showToast("Loaded.");
-    return true;
-  } catch {
-    showToast("Save corrupted.");
-    return false;
-  }
-}
-
-function clearSave() {
-  localStorage.removeItem(SAVE_KEY);
-  showToast("Save cleared.");
-}
-
-function showMenu() {
-  UI.menu.classList.remove("hidden");
-  UI.ending.classList.add("hidden");
-  UI.novel.classList.add("hidden");
-}
-
-function startGameFresh() {
-  State.idx = 0;
-  State.history = [];
-  State.vars = { mercy: 0, resolve: 0, truth: 0 };
-  UI.menu.classList.add("hidden");
-  UI.ending.classList.add("hidden");
-  UI.novel.classList.remove("hidden");
-  render();
-}
-
-function continueGame() {
-  const ok = loadGame();
-  UI.menu.classList.add("hidden");
-  UI.ending.classList.add("hidden");
-  UI.novel.classList.remove("hidden");
-  if (ok) render();
-  else startGameFresh();
-}
-
-function showEnding(title, body) {
-  UI.endingTitle.textContent = title || "The End";
-  UI.endingBody.textContent = body || "";
-  UI.ending.classList.remove("hidden");
-  UI.novel.classList.add("hidden");
-  UI.menu.classList.add("hidden");
-}
-
-function setSpeaker(name) {
-  if (!name) {
-    UI.nameplate.classList.add("hidden");
-    UI.nameplate.textContent = "";
-  } else {
-    UI.nameplate.textContent = name;
-    UI.nameplate.classList.remove("hidden");
-  }
-}
-
-function clearChoices() {
-  UI.choices.innerHTML = "";
-  UI.choices.classList.add("hidden");
-}
-
-function showChoices(prompt, options) {
-  UI.choices.classList.remove("hidden");
-  UI.choices.innerHTML = "";
-
-  const promptEl = document.createElement("div");
-  promptEl.className = "textbox";
-  promptEl.innerHTML = `<div class="text">${prompt}</div>`;
-  UI.choices.appendChild(promptEl);
-
-  options.forEach(opt => {
-    const btn = document.createElement("button");
-    btn.className = "choice";
-    btn.textContent = opt.text;
-    btn.onclick = () => {
-      if (typeof opt.effect === "function") opt.effect();
-      clearChoices();
-      // push current idx to history so Back works after choice
-      State.history.push(State.idx);
-      gotoLabel(opt.goto);
-      saveGame();
-    };
-    UI.choices.appendChild(btn);
-  });
-}
-
-function stepForward() {
-  clearChoices();
-  if (State.idx >= Story.length) {
-    showEnding("The End", "No more story content loaded.");
-    return;
-  }
-  State.history.push(State.idx);
-  State.idx += 1;
-  render();
-}
-
-function stepBack() {
-  clearChoices();
-  const prev = State.history.pop();
-  if (prev === undefined) return;
-  State.idx = prev;
-  render();
-}
-
-function render() {
-  // Skip labels automatically
-  while (State.idx < Story.length && Story[State.idx].type === "label") {
-    State.idx += 1;
-  }
-
-  const node = Story[State.idx];
-  if (!node) {
-    showEnding("The End", "Story complete.");
-    return;
-  }
-
-  if (node.type === "bg") {
-    setBG(node.value);
-    State.idx += 1;
-    render();
-    return;
-  }
-
-  if (node.type === "music") {
-    playMusic(node.value);
-    State.idx += 1;
-    render();
-    return;
-  }
-
-  if (node.type === "sfx") {
-    playSFX(node.value);
-    State.idx += 1;
-    render();
-    return;
-  }
-
-  if (node.type === "goto") {
-    gotoLabel(node.id);
-    return;
-  }
-
-  if (node.type === "narr") {
-    setSpeaker("");
-    UI.text.textContent = node.text;
-    return;
-  }
-
-  if (node.type === "speaker") {
-    setSpeaker(node.name);
-    UI.text.textContent = node.text;
-    return;
-  }
-
-  if (node.type === "choice") {
-    setSpeaker("");
-    UI.text.textContent = "";
-    showChoices(node.prompt, node.options);
-    return;
-  }
-
-  if (node.type === "end") {
-    saveGame();
-    showEnding(node.title, node.body);
-    return;
-  }
-
-  console.warn("Unknown node type:", node.type);
-}
-
-function init() {
-  // Bind UI
-  UI.btnStart.onclick = startGameFresh;
-  UI.btnContinue.onclick = continueGame;
-  UI.btnClear.onclick = clearSave;
-
-  UI.btnNext.onclick = () => {
-    // if choices are visible, prevent skipping
-    if (!UI.choices.classList.contains("hidden")) return;
-    stepForward();
-  };
-  UI.btnBack.onclick = () => {
-    if (!UI.choices.classList.contains("hidden")) return;
-    stepBack();
-  };
-
-  UI.btnSave.onclick = saveGame;
-  UI.btnLoad.onclick = () => { if (loadGame()) render(); };
-  UI.btnMenu.onclick = showMenu;
-
-  UI.btnRestart.onclick = startGameFresh;
-  UI.btnEndingLoad.onclick = () => { continueGame(); };
-
-  // Tap anywhere on textbox to advance (mobile-friendly)
-  document.getElementById("textbox").addEventListener("click", (e) => {
-    const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
-    if (tag === "button") return;
-    if (!UI.choices.classList.contains("hidden")) return;
-    stepForward();
-  });
-
-  // Start at menu; enable Continue only if save exists
-  const hasSave = !!localStorage.getItem(SAVE_KEY);
-  UI.btnContinue.disabled = !hasSave;
-
-  showMenu();
-}
-
-init();
