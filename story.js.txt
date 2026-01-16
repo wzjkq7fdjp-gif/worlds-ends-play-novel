@@ -1,0 +1,583 @@
+// Worlds End(s) — Play Novel Engine (simple iOS-friendly VN)
+// Save format: localStorage "we_save_v1" with { idx, history, vars }
+
+const UI = {
+  bg: document.getElementById("bg"),
+  menu: document.getElementById("menu"),
+  novel: document.getElementById("novel"),
+  ending: document.getElementById("ending"),
+  nameplate: document.getElementById("nameplate"),
+  text: document.getElementById("text"),
+  choices: document.getElementById("choices"),
+  btnStart: document.getElementById("btnStart"),
+  btnContinue: document.getElementById("btnContinue"),
+  btnClear: document.getElementById("btnClear"),
+  btnRestart: document.getElementById("btnRestart"),
+  btnNext: document.getElementById("btnNext"),
+  btnBack: document.getElementById("btnBack"),
+  btnSave: document.getElementById("btnSave"),
+  btnLoad: document.getElementById("btnLoad"),
+  btnMenu: document.getElementById("btnMenu"),
+  btnEndingLoad: document.getElementById("btnEndingLoad"),
+  endingTitle: document.getElementById("endingTitle"),
+  endingBody: document.getElementById("endingBody"),
+  music: document.getElementById("music"),
+  sfx: document.getElementById("sfx"),
+  toast: document.getElementById("toast"),
+};
+
+const SAVE_KEY = "we_save_v1";
+
+// Simple global state
+const State = {
+  idx: 0,
+  history: [], // store previous indices for Back
+  vars: {
+    // flags affecting tone/endings later
+    mercy: 0,
+    resolve: 0,
+    truth: 0,
+  },
+};
+
+// --- Story Data (Chapter 1 fully playable) ---
+const Story = [
+  // Utility: set background and music
+  { type: "bg", value: "gradient" },
+  { type: "music", value: "" }, // put "assets/music/ambient1.mp3" later
+
+  { type: "narr", text:
+`CHAPTER 1 — THE DAY THE SKY BURNED
+
+The first sign wasn’t the sirens.
+It wasn’t the news.
+It wasn’t even the panic.
+
+It was the sky—splitting open like a wound.` },
+
+  { type: "narr", text:
+`The meteor appeared without warning, a bright slash carving across the night.
+Fire trailed behind it—too clean, too controlled, like it wanted to be seen.` },
+
+  { type: "narr", text:
+`People ran outside. They filmed it. They cheered.
+Somewhere, someone whispered the first lie:
+
+“It’s just a rock.”` },
+
+  { type: "bg", value: "impact" }, // replace with image later
+  { type: "sfx", value: "" },      // optional: "assets/sfx/boom.mp3"
+
+  { type: "narr", text:
+`When it hit, the ground didn’t shake.
+
+It screamed.
+
+A pulse rolled outward—like the planet exhaled in pain.
+Windows trembled. Streetlights flickered.
+For a moment, the city forgot how to breathe.` },
+
+  { type: "narr", text:
+`You stood in the crowd, staring at the distant glow on the horizon.
+Not fear.
+Not yet.
+
+Just that quiet feeling that the world had shifted—
+and would never shift back.` },
+
+  { type: "speaker", name: "Rufki", text:
+`“…That wasn’t a meteor.”` },
+
+  { type: "narr", text:
+`The words left your mouth before you decided to speak.
+They tasted like metal.
+
+And then the feed came in—broken audio, government channels overriding everything.
+Static. A stutter. A voice trying to sound calm.` },
+
+  { type: "speaker", name: "Broadcast", text:
+`“—unidentified object—impact zone quarantined—remain indoors—repeat—remain indoors—”` },
+
+  { type: "narr", text:
+`But people didn’t go indoors.
+They moved toward the light like moths toward a flame.
+
+And you…
+you didn’t move at all.` },
+
+  { type: "choice",
+    prompt: "What do you do?",
+    options: [
+      {
+        text: "Run toward the impact zone.",
+        effect: () => { State.vars.resolve += 1; },
+        goto: "toward"
+      },
+      {
+        text: "Go home and check the news.",
+        effect: () => { State.vars.truth += 1; },
+        goto: "home"
+      },
+      {
+        text: "Call someone you care about first.",
+        effect: () => { State.vars.mercy += 1; },
+        goto: "call"
+      }
+    ]
+  },
+
+  // --- Branch: toward ---
+  { type: "label", id: "toward" },
+  { type: "narr", text:
+`Your legs move before your mind catches up.
+
+The streets are clogged with people and cars, everyone chasing the same glow.
+The closer you get, the more the air changes—
+warm, electric, wrong.` },
+
+  { type: "speaker", name: "Rufki", text:
+`“If that thing is still active… we’re already late.”` },
+
+  { type: "goto", id: "common" },
+
+  // --- Branch: home ---
+  { type: "label", id: "home" },
+  { type: "narr", text:
+`You turn away from the crowd.
+
+At home the screens stutter between emergency banners and frozen frames.
+Every channel shows the same distant crater—
+but none of them explain why the “meteor” has edges.
+None of them explain the lights inside it.` },
+
+  { type: "speaker", name: "Rufki", text:
+`“…They’re hiding something.”` },
+
+  { type: "goto", id: "common" },
+
+  // --- Branch: call ---
+  { type: "label", id: "call" },
+  { type: "narr", text:
+`Your thumb hovers over the contact list.
+
+One call. One voice.
+Something to prove the night is still normal.
+
+It isn’t.
+
+The line connects, then cuts into static—like the air itself is jammed.` },
+
+  { type: "speaker", name: "Rufki", text:
+`“No… no, pick up.”` },
+
+  { type: "narr", text:
+`The call dies. The screen goes black.
+
+You stare at your reflection for half a second—
+and realize the sky’s glow is brighter now.` },
+
+  { type: "goto", id: "common" },
+
+  // --- Common continuation ---
+  { type: "label", id: "common" },
+  { type: "bg", value: "ship" },
+
+  { type: "narr", text:
+`By morning, the truth leaks out in pieces.
+
+Not a meteor.
+A ship.
+
+Half-buried in the earth like a blade driven into the world.` },
+
+  { type: "narr", text:
+`Scientists arrive first. Soldiers after that.
+And then the cameras—
+because humanity can’t stop itself from staring at its own ending.` },
+
+  { type: "speaker", name: "Rufki", text:
+`“If this is a first contact… why does it feel like a warning?”` },
+
+  { type: "narr", text:
+`You don’t get an answer.
+
+Not until the first Beta crawls into the light.` },
+
+  { type: "bg", value: "beta" },
+  { type: "narr", text:
+`It looks insect-like at first glance—segmented armor, jointed limbs.
+But the movement is wrong.
+Too intelligent.
+Too deliberate.
+
+The crowd goes silent.
+
+Then someone laughs, nervous.
+Someone else claps.
+A child points.` },
+
+  { type: "narr", text:
+`And the Beta… turns its head as if it heard the child breathe.` },
+
+  { type: "speaker", name: "Rufki", text:
+`“…Back up.”` },
+
+  { type: "narr", text:
+`No one listens.
+
+The Beta moves.
+
+Fast.` },
+
+  { type: "choice",
+    prompt: "Do you shout a warning or pull someone back?",
+    options: [
+      {
+        text: "Shout: “GET BACK!”",
+        effect: () => { State.vars.resolve += 1; },
+        goto: "warning"
+      },
+      {
+        text: "Grab the nearest person and yank them away.",
+        effect: () => { State.vars.mercy += 1; },
+        goto: "saveone"
+      }
+    ]
+  },
+
+  { type: "label", id: "warning" },
+  { type: "narr", text:
+`Your voice cuts through the air like glass.
+
+People flinch. Some finally step back.
+Not enough.
+
+The Beta is already in the crowd.` },
+  { type: "goto", id: "ch1end" },
+
+  { type: "label", id: "saveone" },
+  { type: "narr", text:
+`You grab a stranger by the jacket and pull hard.
+
+They stumble, angry—until they see the Beta’s limbs unfold.
+Their anger dies instantly.
+
+You saved one person.
+
+The crowd didn’t move fast enough.` },
+  { type: "goto", id: "ch1end" },
+
+  { type: "label", id: "ch1end" },
+  { type: "bg", value: "chaos" },
+  { type: "narr", text:
+`The first screams start like sparks—small, scattered.
+
+Then the whole world ignites.
+
+This is the moment history will name later.
+The moment people will argue about.
+The moment they’ll say they “felt coming.”
+
+But you don’t feel clever.
+You don’t feel brave.
+
+You feel one thing:
+
+The beginning.` },
+
+  { type: "end",
+    title: "End of Chapter 1",
+    body:
+`Chapter 1 complete.
+
+Next: The Betas
+
+(Your choices are saved and will affect tone later.)`
+  },
+];
+
+// --- Engine helpers ---
+function showToast(msg) {
+  UI.toast.textContent = msg;
+  UI.toast.classList.remove("hidden");
+  setTimeout(() => UI.toast.classList.add("hidden"), 1200);
+}
+
+function setBG(value) {
+  // Replace these with real images later:
+  // e.g. setBG("assets/bg/impact.jpg")
+  const presets = {
+    gradient: "radial-gradient(circle at 30% 30%, rgba(90,90,160,0.14), transparent 60%), linear-gradient(180deg, rgba(10,10,30,0.7), rgba(0,0,0,0.9))",
+    impact: "radial-gradient(circle at 50% 50%, rgba(255,120,80,0.18), transparent 55%), linear-gradient(180deg, rgba(10,10,20,0.6), rgba(0,0,0,0.95))",
+    ship: "radial-gradient(circle at 40% 40%, rgba(120,220,255,0.12), transparent 55%), linear-gradient(180deg, rgba(10,10,25,0.65), rgba(0,0,0,0.95))",
+    beta: "radial-gradient(circle at 50% 30%, rgba(200,255,160,0.10), transparent 55%), linear-gradient(180deg, rgba(8,8,18,0.65), rgba(0,0,0,0.96))",
+    chaos: "radial-gradient(circle at 60% 40%, rgba(255,70,70,0.14), transparent 60%), linear-gradient(180deg, rgba(10,10,25,0.65), rgba(0,0,0,0.96))",
+  };
+
+  const v = presets[value] || presets.gradient;
+  UI.bg.style.backgroundImage = v.startsWith("url(") ? v : v;
+  UI.bg.style.backgroundSize = "cover";
+  UI.bg.style.backgroundPosition = "center";
+}
+
+function playMusic(src) {
+  if (!src) {
+    UI.music.pause();
+    UI.music.removeAttribute("src");
+    return;
+  }
+  if (UI.music.getAttribute("src") === src) return;
+  UI.music.setAttribute("src", src);
+  UI.music.volume = 0.6;
+  UI.music.play().catch(()=>{});
+}
+
+function playSFX(src) {
+  if (!src) return;
+  UI.sfx.setAttribute("src", src);
+  UI.sfx.volume = 0.8;
+  UI.sfx.play().catch(()=>{});
+}
+
+function findLabelIndex(id) {
+  return Story.findIndex(x => x.type === "label" && x.id === id);
+}
+
+function gotoLabel(id) {
+  const idx = findLabelIndex(id);
+  if (idx >= 0) {
+    State.idx = idx + 1; // jump to line after label
+    render();
+  } else {
+    console.warn("Label not found:", id);
+  }
+}
+
+function saveGame() {
+  const payload = {
+    idx: State.idx,
+    history: State.history.slice(-200),
+    vars: State.vars
+  };
+  localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
+  showToast("Saved.");
+}
+
+function loadGame() {
+  const raw = localStorage.getItem(SAVE_KEY);
+  if (!raw) { showToast("No save found."); return false; }
+  try {
+    const payload = JSON.parse(raw);
+    State.idx = payload.idx ?? 0;
+    State.history = payload.history ?? [];
+    State.vars = payload.vars ?? State.vars;
+    showToast("Loaded.");
+    return true;
+  } catch {
+    showToast("Save corrupted.");
+    return false;
+  }
+}
+
+function clearSave() {
+  localStorage.removeItem(SAVE_KEY);
+  showToast("Save cleared.");
+}
+
+function showMenu() {
+  UI.menu.classList.remove("hidden");
+  UI.ending.classList.add("hidden");
+  UI.novel.classList.add("hidden");
+}
+
+function startGameFresh() {
+  State.idx = 0;
+  State.history = [];
+  State.vars = { mercy: 0, resolve: 0, truth: 0 };
+  UI.menu.classList.add("hidden");
+  UI.ending.classList.add("hidden");
+  UI.novel.classList.remove("hidden");
+  render();
+}
+
+function continueGame() {
+  const ok = loadGame();
+  UI.menu.classList.add("hidden");
+  UI.ending.classList.add("hidden");
+  UI.novel.classList.remove("hidden");
+  if (ok) render();
+  else startGameFresh();
+}
+
+function showEnding(title, body) {
+  UI.endingTitle.textContent = title || "The End";
+  UI.endingBody.textContent = body || "";
+  UI.ending.classList.remove("hidden");
+  UI.novel.classList.add("hidden");
+  UI.menu.classList.add("hidden");
+}
+
+function setSpeaker(name) {
+  if (!name) {
+    UI.nameplate.classList.add("hidden");
+    UI.nameplate.textContent = "";
+  } else {
+    UI.nameplate.textContent = name;
+    UI.nameplate.classList.remove("hidden");
+  }
+}
+
+function clearChoices() {
+  UI.choices.innerHTML = "";
+  UI.choices.classList.add("hidden");
+}
+
+function showChoices(prompt, options) {
+  UI.choices.classList.remove("hidden");
+  UI.choices.innerHTML = "";
+
+  const promptEl = document.createElement("div");
+  promptEl.className = "textbox";
+  promptEl.innerHTML = `<div class="text">${prompt}</div>`;
+  UI.choices.appendChild(promptEl);
+
+  options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "choice";
+    btn.textContent = opt.text;
+    btn.onclick = () => {
+      if (typeof opt.effect === "function") opt.effect();
+      clearChoices();
+      // push current idx to history so Back works after choice
+      State.history.push(State.idx);
+      gotoLabel(opt.goto);
+      saveGame();
+    };
+    UI.choices.appendChild(btn);
+  });
+}
+
+function stepForward() {
+  clearChoices();
+  if (State.idx >= Story.length) {
+    showEnding("The End", "No more story content loaded.");
+    return;
+  }
+  State.history.push(State.idx);
+  State.idx += 1;
+  render();
+}
+
+function stepBack() {
+  clearChoices();
+  const prev = State.history.pop();
+  if (prev === undefined) return;
+  State.idx = prev;
+  render();
+}
+
+function render() {
+  // Skip labels automatically
+  while (State.idx < Story.length && Story[State.idx].type === "label") {
+    State.idx += 1;
+  }
+
+  const node = Story[State.idx];
+  if (!node) {
+    showEnding("The End", "Story complete.");
+    return;
+  }
+
+  if (node.type === "bg") {
+    setBG(node.value);
+    State.idx += 1;
+    render();
+    return;
+  }
+
+  if (node.type === "music") {
+    playMusic(node.value);
+    State.idx += 1;
+    render();
+    return;
+  }
+
+  if (node.type === "sfx") {
+    playSFX(node.value);
+    State.idx += 1;
+    render();
+    return;
+  }
+
+  if (node.type === "goto") {
+    gotoLabel(node.id);
+    return;
+  }
+
+  if (node.type === "narr") {
+    setSpeaker("");
+    UI.text.textContent = node.text;
+    return;
+  }
+
+  if (node.type === "speaker") {
+    setSpeaker(node.name);
+    UI.text.textContent = node.text;
+    return;
+  }
+
+  if (node.type === "choice") {
+    setSpeaker("");
+    UI.text.textContent = "";
+    showChoices(node.prompt, node.options);
+    return;
+  }
+
+  if (node.type === "end") {
+    saveGame();
+    showEnding(node.title, node.body);
+    return;
+  }
+
+  console.warn("Unknown node type:", node.type);
+}
+
+function init() {
+  // Bind UI
+  UI.btnStart.onclick = startGameFresh;
+  UI.btnContinue.onclick = continueGame;
+  UI.btnClear.onclick = clearSave;
+
+  UI.btnNext.onclick = () => {
+    // if choices are visible, prevent skipping
+    if (!UI.choices.classList.contains("hidden")) return;
+    stepForward();
+  };
+  UI.btnBack.onclick = () => {
+    if (!UI.choices.classList.contains("hidden")) return;
+    stepBack();
+  };
+
+  UI.btnSave.onclick = saveGame;
+  UI.btnLoad.onclick = () => { if (loadGame()) render(); };
+  UI.btnMenu.onclick = showMenu;
+
+  UI.btnRestart.onclick = startGameFresh;
+  UI.btnEndingLoad.onclick = () => { continueGame(); };
+
+  // Tap anywhere on textbox to advance (mobile-friendly)
+  document.getElementById("textbox").addEventListener("click", (e) => {
+    const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
+    if (tag === "button") return;
+    if (!UI.choices.classList.contains("hidden")) return;
+    stepForward();
+  });
+
+  // Start at menu; enable Continue only if save exists
+  const hasSave = !!localStorage.getItem(SAVE_KEY);
+  UI.btnContinue.disabled = !hasSave;
+
+  showMenu();
+}
+
+init();

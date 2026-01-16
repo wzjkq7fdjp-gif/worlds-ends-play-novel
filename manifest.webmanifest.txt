@@ -1,0 +1,9 @@
+{
+  "name": "Worlds End(s) — Play Novel",
+  "short_name": "Worlds End(s)",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#050510",
+  "theme_color": "#050510",
+  "icons": []
+}
