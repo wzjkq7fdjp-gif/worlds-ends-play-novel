@@ -8,7 +8,7 @@ const Story = [
   // =======================================================
   // CHAPTER 1 — THE DAY THE SKY BURNED
   // =======================================================
-  { type: "label", id: "ch1_start" },
+  { type: "label", id: "start" },
   { type: "bg", value: "impact" },
   { type: "music", value: "" },
 
