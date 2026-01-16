@@ -7,8 +7,7 @@ const Story = [
   // =========================
   { type: "bg", value: "gradient" },
   { type: "music", value: "" },
-
-  { type: "narr", text:
+ { type: "narr", text:
 `CHAPTER 1 — THE DAY THE SKY BURNED
 ...
 
