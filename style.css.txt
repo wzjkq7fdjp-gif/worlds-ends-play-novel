@@ -1,0 +1,69 @@
+:root{
+  --bg1:#050510; --bg2:#0b0b1a; --fg:#e7e7ff; --muted:#a9a9c9;
+  --btn:#141427; --btn2:#1c1c34; --accent:#73f0ff; --danger:#ff4b4b;
+}
+*{box-sizing:border-box}
+html,body{height:100%; margin:0; font-family: -apple-system, system-ui, Segoe UI, Roboto, Arial;}
+body{
+  background: radial-gradient(circle at 25% 25%, rgba(120,220,255,.12), transparent 55%),
+              radial-gradient(circle at 70% 60%, rgba(140,120,255,.10), transparent 55%),
+              linear-gradient(180deg, var(--bg2), var(--bg1));
+  color:var(--fg);
+}
+
+#app{height:100%; display:flex; flex-direction:column; padding:18px 16px 22px; gap:12px}
+
+header{display:flex; align-items:center; justify-content:space-between; gap:10px}
+.title{letter-spacing:.28em; font-size:12px; opacity:.8}
+.topBtns{display:flex; gap:10px}
+button{
+  background: rgba(20,20,39,.55);
+  border: 1px solid rgba(255,255,255,.12);
+  color: var(--fg);
+  border-radius: 18px;
+  padding: 9px 14px;
+  font-size: 14px;
+}
+button.primary{border-color: rgba(115,240,255,.35); box-shadow: 0 0 0 2px rgba(115,240,255,.08) inset;}
+button:active{transform:scale(.99)}
+button:disabled{opacity:.4}
+
+#screen{
+  flex:1;
+  border-radius: 18px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.22);
+  padding: 18px 16px;
+  overflow:auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.speaker{font-weight:700; color: var(--accent); margin-bottom:8px}
+.text{white-space:pre-wrap; line-height:1.55; font-size:16px}
+.choices{margin-top:14px; display:flex; flex-direction:column; gap:10px}
+.choiceBtn{width:100%; text-align:left; padding:12px 14px; border-radius:14px; background: rgba(20,20,39,.60);}
+.hidden{display:none}
+
+footer{display:flex; align-items:center; justify-content:space-between; gap:10px}
+.hint{font-size:12px; color: var(--muted); opacity:.8; text-align:center; flex:1}
+
+.toast{
+  position: sticky; bottom: 10px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(0,0,0,.55);
+  border: 1px solid rgba(255,255,255,.12);
+  color: var(--fg);
+}
+.err{
+  margin-top:14px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,75,75,.12);
+  border: 1px solid rgba(255,75,75,.35);
+  color: #ffd9d9;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+}

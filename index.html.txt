@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Worlds End(s) — Play Novel</title>
+  <link rel="stylesheet" href="style.css?v=7">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="title">WORLDS END(S)</div>
+      <div class="topBtns">
+        <button id="btnSave">Save</button>
+        <button id="btnLoad">Load</button>
+        <button id="btnMenu">Menu</button>
+      </div>
+    </header>
+
+    <main id="screen" aria-label="Story screen">
+      <div id="speaker" class="speaker hidden"></div>
+      <div id="text" class="text"></div>
+
+      <div id="choices" class="choices hidden"></div>
+
+      <div id="toast" class="toast hidden"></div>
+      <div id="err" class="err hidden"></div>
+    </main>
+
+    <footer>
+      <button id="btnBack">Back</button>
+      <div class="hint">Tap the story area or press Next</div>
+      <button id="btnNext" class="primary">Next</button>
+    </footer>
+  </div>
+
+  <!-- IMPORTANT: cache buster so iPhone loads newest JS -->
+  <script src="story.js?v=7"></script>
+</body>
+</html>
