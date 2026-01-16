@@ -1,0 +1,10 @@
+{
+  "name": "Worlds End(s) — Play Novel",
+  "short_name": "Worlds End(s)",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#070A12",
+  "theme_color": "#070A12",
+  "description": "A story-driven playable novel set in the Worlds End(s) universe."
+}
