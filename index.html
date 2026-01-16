@@ -1,37 +1,31 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>WORLD END(S)</title>
-
-  <!-- iOS App Mode -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="WORLD END(S)">
-  <meta name="theme-color" content="#050510">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
-  <!-- Icons -->
-  <link rel="apple-touch-icon" href="icon-180.png">
-  <link rel="icon" href="icon-192.png">
-
-  <link rel="stylesheet" href="./style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Worlds End(s) — Play Novel</title>
+  <link rel="stylesheet" href="style.css?v=7">
 </head>
-
 <body>
+  <div id="app">
+    <header>
+      <div class="title">WORLDS END(S)</div>
+      <div class="topBtns">
+        <button id="btnSave">Save</button>
+        <button id="btnLoad">Load</button>
+        <button id="btnMenu">Menu</button>
+      </div>
+    </header>
 
-<header class="topBar">
-  <div class="title">WORLD END(S)</div>
-  <div class="topBtns">
-    <button id="btnSave">Save</button>
-    <button id="btnLoad">Load</button>
-    <button id="btnMenu">Menu</button>
-  </div>
-</header>
+    <main id="screen" aria-label="Story screen">
+      <div id="speaker" class="speaker hidden"></div>
+      <div id="text" class="text"></div>
 
-<main id="screen" aria-label="Story screen">
-  ...
-</main>
+      <div id="choices" class="choices hidden"></div>
+
+      <div id="toast" class="toast hidden"></div>
+      <div id="err" class="err hidden"></div>
+    </main>
 
     <footer>
       <button id="btnBack">Back</button>
