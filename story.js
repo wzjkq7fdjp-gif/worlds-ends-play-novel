@@ -6,8 +6,9 @@
 const Story = [
 
   // -------- START --------
-  { type: "label", id: "start" },
-  { type: "narr", text: `
+{ type: "label", id: "start" },
+
+{ type: "narr", text: `
 WORLD END(S)
 
 Tap to begin.
