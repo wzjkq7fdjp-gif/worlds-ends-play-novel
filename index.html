@@ -10,60 +10,52 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#050510" />
 
-  <!-- Icons (optional but safe if files exist) -->
   <link rel="apple-touch-icon" href="icon-180.png">
   <link rel="icon" href="icon-192.png">
 
-  <!-- Styles -->
   <link rel="stylesheet" href="./style.css">
 </head>
 
-<body>
-  <!-- =========================
-       HEADER / TITLE
-       ========================= -->
-  <header id="topBar">
-    <h1>WORLD END(S)</h1>
-    <div id="topButtons">
+<body class="vn">
+  <!-- TOP BAR -->
+  <header class="vnTop">
+    <div class="vnTitle">WORLD END(S)</div>
+    <div class="vnTopBtns">
       <button id="btnSave">Save</button>
       <button id="btnLoad">Load</button>
       <button id="btnMenu">Menu</button>
     </div>
   </header>
 
-  <!-- =========================
-       MAIN STORY AREA
-       (ARTWORK GOES HERE LATER)
-       ========================= -->
-  <main id="screen" aria-label="Story screen">
+  <!-- MAIN VN STAGE -->
+  <main id="screen" class="vnStage" aria-label="Story screen">
 
-    <!-- OPTIONAL ART CONTAINER (empty for now) -->
-    <div id="artLayer"></div>
+    <!-- ART / BACKGROUND LAYER -->
+    <!-- Later you’ll swap the background image with CSS or JS -->
+    <section id="artLayer" class="vnArt" aria-label="Artwork area">
+      <!-- optional: you can place an <img> here later if you want -->
+      <!-- <img id="sceneArt" src="art/ch1-001.jpg" alt=""> -->
+    </section>
 
-    <!-- STORY TEXT -->
-    <div id="text" class="text"></div>
+    <!-- TEXT BOX -->
+    <section class="vnBox" aria-label="Text box">
+      <div id="text" class="vnText"></div>
 
-    <!-- CHOICES -->
-    <div id="choices" class="choices hidden"></div>
+      <div id="choices" class="vnChoices hidden"></div>
 
-    <!-- TOAST / ERROR -->
-    <div id="toast" class="toast hidden"></div>
-    <div id="err" class="err hidden"></div>
+      <div class="vnHud">
+        <button id="btnBack">Back</button>
+        <div class="vnHint">Tap the art or text to continue</div>
+        <button id="btnNext" class="primary">Next</button>
+      </div>
+
+      <div id="toast" class="toast hidden"></div>
+      <div id="err" class="err hidden"></div>
+    </section>
 
   </main>
 
-  <!-- =========================
-       FOOTER / NAV
-       ========================= -->
-  <footer id="bottomBar">
-    <button id="btnBack">Back</button>
-    <div class="hint">Tap the story area or press Next</div>
-    <button id="btnNext" class="primary">Next</button>
-  </footer>
-
-  <!-- =========================
-       SCRIPTS (ORDER MATTERS)
-       ========================= -->
+  <!-- Scripts (order matters) -->
   <script src="./engine.js"></script>
   <script src="./story.js"></script>
 </body>
