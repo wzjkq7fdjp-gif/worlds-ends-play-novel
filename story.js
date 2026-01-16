@@ -1,12 +1,15 @@
 const Story = [
+  { type: "narr", text: " " },
+
   // =========================
   // CHAPTER 1 — THE DAY THE SKY BURNED
   // =========================
   { type: "bg", value: "gradient" },
-  { type: "music", value: "" }, // optional: "assets/music/ambient1.mp3"
+  { type: "music", value: "" },
 
   { type: "narr", text:
 `CHAPTER 1 — THE DAY THE SKY BURNED
+...
 
 The meteor blazed across the sky, leaving a trail of fire in its wake.
 
