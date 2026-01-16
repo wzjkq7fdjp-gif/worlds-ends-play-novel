@@ -1,4 +1,6 @@
 const Story = [
+  { type: "label", id: "start" },
+  { type: "narr", text: " " },
   // =========================
   // CHAPTER 1 — THE DAY THE SKY BURNED
   // =========================
