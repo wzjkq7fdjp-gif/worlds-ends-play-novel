@@ -1,21 +1,12 @@
-Whats this ?  /* ============================================================
-   WORLD END(S) — story.js
-   Works with engine.js that reads: window.Story (array of nodes)
-   Node types used:
-     - label: { type:"label", id:"some_id" }
-     - narr:  { type:"narr", text:`...` }
-     - say:   { type:"say", who:"Name", text:`...` }
-     - choice:{ type:"choice", prompt:"...", options:[{text, effect, goto}, ...] }
-     - goto:  { type:"goto", id:"label_id" }
-     - set:   { type:"set", key:"varName", value:0 }   (optional)
-     - add:   { type:"add", key:"varName", value:1 }   (optional)
-     - if:    { type:"if", cond:(S)=>boolean, then:"label", else:"label" } (optional)
-   Stats tracked (for endings later):
-     truth, resolve, mercy, hope, fear
-   ============================================================ */
-
 (() => {
-  // Ensure stats exist even if engine doesn't pre-create them
+  // ============================================================
+  // WORLD END(S) — story.js (FULL 26-CH BUILD)
+  // Works with engine.js that reads: window.Story (array of nodes)
+  //
+  // Stats for endings:
+  // truth, resolve, mercy, hope, fear
+  // ============================================================
+
   window.State = window.State || {};
   State.vars = State.vars || {};
   State.vars.truth ??= 0;
@@ -24,1187 +15,1122 @@ Whats this ?  /* ============================================================
   State.vars.hope ??= 0;
   State.vars.fear ??= 0;
 
+  // Story flags
+  State.vars.flags ??= {};
+  State.vars.flags.mia_saved ??= false;
+  State.vars.flags.mia_adopted ??= false;
+  State.vars.flags.alban_saved ??= true;
+  State.vars.flags.angel_trust ??= 0;
+  State.vars.flags.raul_trust ??= 0;
+
   const add = (k, v) => () => { State.vars[k] = (State.vars[k] ?? 0) + v; };
-  const setv = (k, v) => () => { State.vars[k] = v; };
+  const flag = (k, v) => () => { State.vars.flags[k] = v; };
+  const fadd = (k, v) => () => { State.vars.flags[k] = (State.vars.flags[k] ?? 0) + v; };
+
+  const score = () =>
+    (State.vars.truth ?? 0) +
+    (State.vars.resolve ?? 0) +
+    (State.vars.mercy ?? 0) +
+    (State.vars.hope ?? 0) -
+    (State.vars.fear ?? 0);
 
   // ============================================================
   // STORY ARRAY
   // ============================================================
   window.Story = [
-    // -------------------------
-    // MAIN MENU HANDOFF POINT
-    // (engine.js can goto "start" when pressing Start)
-    // -------------------------
-    { type: "label", id: "start" },
 
+    // ------------------------------------------------------------
+    // START (engine's Start button should goto "start")
+    // ------------------------------------------------------------
+    { type: "label", id: "start" },
     { type: "bg", value: "gradient" },
     { type: "music", value: "" },
 
     { type: "narr", text: `
 WORLD END(S)
 
-Tap the screen to advance.
-Choices shape your endings.
-
-(If you're seeing this, story.js is loading correctly.)
+Tap to advance.
+Choices shape your path.
+Endings remember who you were.
 `},
 
-    // Player’s very first meaningful choice (sets tone)
     {
       type: "choice",
-      prompt: "Before the sky breaks… what kind of person are you when something feels wrong?",
+      prompt: "When the sky changes… what do you do first?",
       options: [
-        {
-          text: "I document everything. Truth matters.",
-          effect: add("truth", 1),
-          goto: "ch1_open_record"
-        },
-        {
-          text: "I move first. People need action, not theories.",
-          effect: add("resolve", 1),
-          goto: "ch1_open_move"
-        },
-        {
-          text: "I look for who might be hurt. Protect them first.",
-          effect: add("mercy", 1),
-          goto: "ch1_open_protect"
-        },
-        {
-          text: "I try to keep people calm. If we lose hope, we lose everything.",
-          effect: add("hope", 1),
-          goto: "ch1_open_hope"
-        }
+        { text: "Record everything. Truth matters.", effect: add("truth", 1), goto: "ch1_start" },
+        { text: "Move now. Action saves lives.", effect: add("resolve", 1), goto: "ch1_start" },
+        { text: "Find who might be hurt. Protect them.", effect: add("mercy", 1), goto: "ch1_start" },
+        { text: "Keep people calm. Hope is a weapon.", effect: add("hope", 1), goto: "ch1_start" }
       ]
     },
 
     // ============================================================
-    // CHAPTER 1 — THE DAY THE SKY BURNED (LONG)
+    // CHAPTER 1 — THE DAY THE SKY BURNED
     // ============================================================
-    { type: "label", id: "ch1_open_record" },
-    { type: "label", id: "ch1_open_move" },
-    { type: "label", id: "ch1_open_protect" },
-    { type: "label", id: "ch1_open_hope" },
-
+    { type: "label", id: "ch1_start" },
     { type: "bg", value: "impact" },
-
     { type: "narr", text: `
 CHAPTER 1 — THE DAY THE SKY BURNED
 
-The meteor didn’t arrive like a warning.
+The meteor carved a line of fire across the night.
+People cheered—until it didn’t fade.
 
-It arrived like a verdict.
+Shooting stars don’t steer.
 
-A blade of fire carved the night open—bright enough to bleach the city’s color, loud enough to rattle glass in its frames. People poured onto balconies, rooftops, sidewalks. Phones rose like candles.
+This one did.
 
-For one breath, the world felt united.
-
-Then the air changed.
-
-Heat rolled in waves. The light didn’t fade the way shooting stars fade.
-
-It *stayed*.
-It *descended*.
-
-And deep in your chest—where instinct lives—you felt it:
-
-This isn’t natural.
-This isn’t ours.
+It hit the outskirts like a verdict.
+And the crater… opened.
 `},
 
     { type: "narr", text: `
-Sirens began late, like the city itself needed a second to believe what it was seeing.
+They climbed out like nightmares with purpose.
+Plated. Insect-like. Too coordinated.
 
-A streak slammed into the outskirts—far enough that the skyline still stood, close enough that the shock traveled through the ground like a second heartbeat.
-
-Windows shivered.
-
-People screamed.
-
-Then… silence.
-
-That’s what scared you most.
-
-Because silence means the world is holding its breath.
-`},
-
-    {
-      type: "choice",
-      prompt: "The impact site is on the edge of the city. News feeds are chaos. What do you do *first*?",
-      options: [
-        {
-          text: "Run toward the impact. If there are survivors, they need help now.",
-          effect: add("resolve", 1),
-          goto: "ch1_choice_run"
-        },
-        {
-          text: "Call it in, coordinate, and gather info before moving.",
-          effect: add("truth", 1),
-          goto: "ch1_choice_coord"
-        },
-        {
-          text: "Help people nearby—kids, elderly, anyone panicking.",
-          effect: add("mercy", 1),
-          goto: "ch1_choice_help"
-        },
-        {
-          text: "Find high ground and watch. Something about this feels like a trap.",
-          effect: add("fear", 1),
-          goto: "ch1_choice_watch"
-        }
-      ]
-    },
-
-    { type: "label", id: "ch1_choice_run" },
-    { type: "narr", text: `
-You move.
-
-Not because you’re fearless—because fear wastes time.
-
-You weave through streets choked with people and headlights. The closer you get, the more the air tastes like metal and burnt rain. Ash falls like gray snow.
-
-Somewhere ahead, something *hums*—low, deep, wrong—like a giant engine sleeping under the earth.
-`},
-    { type: "goto", id: "ch1_meet_team" },
-
-    { type: "label", id: "ch1_choice_coord" },
-    { type: "narr", text: `
-You breathe. You force your hands steady.
-
-You pull every feed you can—police chatter, emergency dispatch, amateur livestreams. People keep calling it a meteor, but the footage tells a different story:
-
-The “rock” changed direction.
-
-Midair.
-
-Like it was steering.
-
-You mark routes. You flag hazards. You send coordinates and warnings—because if this is *intelligent*, rushing in blind is how heroes die for nothing.
-`},
-    { type: "goto", id: "ch1_meet_team" },
-
-    { type: "label", id: "ch1_choice_help" },
-    { type: "narr", text: `
-You stop where others stampede.
-
-A child’s crying cuts through the sirens. Someone’s grandmother sits on a curb, shaking, clutching a purse like it’s a lifeline. You kneel, you speak, you guide, you get them moving.
-
-It’s not glamorous.
-
-But later—when history tries to decide what mattered most—someone will still be alive because you chose them over adrenaline.
-`},
-    { type: "goto", id: "ch1_meet_team" },
-
-    { type: "label", id: "ch1_choice_watch" },
-    { type: "narr", text: `
-You climb. You watch.
-
-From high ground, you see the impact zone smoking like an open wound. Rescue vehicles slow at the perimeter—then stop completely, as if an invisible line has been drawn.
-
-And then you see it:
-
-A shape in the crater.
-Not rock.
-Not debris.
-
-*Hull.*
-
-Something landed here on purpose.
-
-Your stomach turns.
-
-Because you understand the oldest rule:
-If something crosses the stars to reach you, it didn’t come just to say hello.
-`},
-    { type: "goto", id: "ch1_meet_team" },
-
-    // --- meet the core cast, first “game” feeling scene
-    { type: "label", id: "ch1_meet_team" },
-
-    { type: "narr", text: `
-By the time you reach the perimeter, the air is thick with static.
-
-Floodlights paint the smoke. Soldiers shout. Engineers argue. Cameras hover like vultures.
-
-Then the ground trembles again—not from aftershock.
-
-From *movement*.
-
-A section of the crater wall peels open like a wound splitting wider.
-
-And something climbs out.
-`},
-
-    { type: "narr", text: `
-They are insect-like, but not like anything nature makes on Earth.
-
-Their bodies are plated, segmented, too efficient. Their limbs fold and unfold with mechanical precision. Their eyes reflect light like dead gems.
-
-Someone whispers, “Aliens…”
-
-Someone else laughs—high, hysterical—because the human brain sometimes tries to turn terror into a joke.
-
-The creatures don’t laugh.
-
-They *listen*.
-
-Then they lunge.
-`},
-
-    { type: "narr", text: `
-The first attack is fast.
-
-A beta crosses twenty feet like it’s nothing. Claws tear into armor. Another spits something that hisses on contact—acid or something worse.
-
-Screams erupt.
-
-The perimeter collapses in seconds.
-
-And in the chaos, you hear a voice in your comms—steady, commanding, *furious*:
-“Form up! Protect civilians first! If you can’t fight, move people away from the line!”
-`},
-
-    { type: "say", who: "Rufki", text: `This is Rufki. If you can hear me, get behind cover. Do NOT engage alone.` },
-
-    { type: "narr", text: `
-Rufki.
-
-The name spreads fast—because people cling to names when they need a symbol.
-
-You spot him near a transport rig—young, battle-worn, eyes locked like he’s already accepted that today might be his last.
-
-Around him: machines.
-
-Not tanks. Not drones.
-
-Mechs.
-
-Metal giants with human hearts inside.
-`},
-
-    { type: "narr", text: `
-Three others move with him like they’ve been forged together:
-
-Muhammad — calm, focused. He lifts a wrecked barrier with a gesture like the world is weightless, slamming it down between civilians and claws. Telekinesis, controlled like a blade.
-
-Niko — lightning in a human body. He flicks his hand and energy blooms—clean, bright, surgical—dropping a beta mid-leap. He doesn’t waste motion. He doesn’t waste breath.
-
-Alban — a wall. When a beta charges, Alban meets it head-on. The creature hits him like a truck—and bounces. Strength and durability beyond normal, like the universe forgot to give him a limit.
-`},
-
-    { type: "say", who: "Muhammad", text: `Rufki—more incoming. Left flank.` },
-    { type: "say", who: "Niko", text: `I see them. Five… no, seven.` },
-    { type: "say", who: "Alban", text: `Good.` },
-
-    { type: "narr", text: `
-Rufki raises a hand—fingers spread like he’s conducting an orchestra.
-
-Your stomach tightens as the mechs respond.
-
-Not one mech.
-
-Multiple.
-
-They move smoother, faster, *together*—as if a single mind threads through them.
-
-Rufki’s gift isn’t brute force.
-
-It’s command.
-
-Enhance. Synchronize. Push beyond safe limits—then pull back before the machine tears itself apart.
-`},
-
-    {
-      type: "choice",
-      prompt: "A beta breaks through toward a family trapped behind a crushed car. Your move?",
-      options: [
-        {
-          text: "Rush the beta and distract it—pull it away, even if it targets you.",
-          effect: add("resolve", 1),
-          goto: "ch1_save_family_resolve"
-        },
-        {
-          text: "Shout directions and help the family crawl out while staying in cover.",
-          effect: add("mercy", 1),
-          goto: "ch1_save_family_mercy"
-        },
-        {
-          text: "Watch its pattern—then call out a precise opening to Rufki’s team.",
-          effect: add("truth", 1),
-          goto: "ch1_save_family_truth"
-        },
-        {
-          text: "Freeze for a second—then move, because fear is real but not in charge.",
-          effect: add("hope", 1),
-          goto: "ch1_save_family_hope"
-        }
-      ]
-    },
-
-    { type: "label", id: "ch1_save_family_resolve" },
-    { type: "narr", text: `
-You go in.
-
-The beta turns—eyes catching you like a spotlight. You throw something—metal, stone, anything. It hisses and charges.
-
-For a heartbeat, you think: *this was stupid.*
-
-Then a mech foot slams down between you and the creature, cracking asphalt like glass.
-
-Rufki’s voice snaps through comms: “Good bait. Move the civilians—NOW!”
-`},
-    { type: "goto", id: "ch1_after_save" },
-
-    { type: "label", id: "ch1_save_family_mercy" },
-    { type: "narr", text: `
-You don’t chase glory. You chase survival.
-
-You point. You direct. You pull the smallest kid first, then the parent, then the last one—hands trembling, breath ragged.
-
-The beta lunges—
-
-And Muhammad yanks it sideways with invisible force, smashing it into a wall hard enough to crater concrete.
-
-He looks at you once—an unspoken nod.
-
-You did your part.
-`},
-    { type: "goto", id: "ch1_after_save" },
-
-    { type: "label", id: "ch1_save_family_truth" },
-    { type: "narr", text: `
-You study it.
-
-The beta’s forelimb twitches before it pounces. It always overcommits with the right claw first.
-
-You shout: “Right claw leads—dodge left!”
-
-Niko hears you. Moves like he already knew. Energy flashes. The beta drops mid-strike.
-
-Rufki’s voice, sharp with approval: “Keep calling patterns. That helps more than you think.”
-`},
-    { type: "goto", id: "ch1_after_save" },
-
-    { type: "label", id: "ch1_save_family_hope" },
-    { type: "narr", text: `
-Fear hits you like a wave.
-
-Then you push through it.
-
-You raise your voice—not in panic, but in command—like you’re lending your calm to everyone who’s drowning.
-
-“MOVE! This way! Don’t stop—keep going!”
-
-The family stumbles free at the last second. Alban slams into the beta like a wrecking ball and keeps it away from them.
-
-You realize something:
-
-Hope isn’t a feeling.
-
-It’s a decision.
-`},
-    { type: "goto", id: "ch1_after_save" },
-
-    { type: "label", id: "ch1_after_save" },
-    { type: "narr", text: `
-The perimeter becomes a battlefield.
-
-Smoke. Screams. Metal.
-
-But Rufki’s team holds a line that shouldn’t be holdable.
-
-They carve space for evacuation.
-They buy minutes the world will never repay.
-
-And just when it seems like the betas might retreat—
-
-A larger one rises from the crater.
-
-Its plates are thicker. Its movements… smarter.
-
-It doesn’t rush.
-
-It *points*.
-
-As if giving orders.
-
-The smaller betas respond instantly.
-
-That’s when you understand the second rule:
-
-They’re not just monsters.
-
-They’re organized.
-`},
-
-    { type: "say", who: "Rufki", text: `That one’s a commander. If it controls the swarm, we take it down.` },
-    { type: "say", who: "Muhammad", text: `If I pin it, can you strike?` },
-    { type: "say", who: "Niko", text: `I’ll burn a path.` },
-    { type: "say", who: "Alban", text: `I’ll break it.` },
-
-    { type: "narr", text: `
-Rufki lifts his hand again—mechs synchronize tighter than before. You can almost *see* the invisible thread connecting them, pulling them into one perfect formation.
-
-This is where heroes are born:
-
-Not in safety.
-Not in speeches.
-
-In the moment you choose to stand when running would be easier.
-`},
-
-    {
-      type: "choice",
-      prompt: "Rufki glances your way. You’re not in a mech. You’re still here. He shouts: “You—can you help?”",
-      options: [
-        {
-          text: "“Tell me where.” Step into danger without hesitation.",
-          effect: add("resolve", 1),
-          goto: "ch1_help_where"
-        },
-        {
-          text: "“Give me a job that saves civilians.” You prioritize lives over kills.",
-          effect: add("mercy", 1),
-          goto: "ch1_help_civ"
-        },
-        {
-          text: "“I can call patterns and weaknesses.” You act as their eyes.",
-          effect: add("truth", 1),
-          goto: "ch1_help_call"
-        },
-        {
-          text: "“We can win this.” You throw belief into the air like fuel.",
-          effect: add("hope", 1),
-          goto: "ch1_help_hope"
-        }
-      ]
-    },
-
-    { type: "label", id: "ch1_help_where" },
-    { type: "narr", text: `
-You point yourself like a weapon.
-
-Rufki snaps coordinates. You sprint, dragging a crate of emergency flares into position—creating a bright marker the mechs can see through smoke.
-
-“Target marked!” you shout.
-
-Muhammad pins the commander.
-Niko blasts open the armor seam.
-Alban drives through with a brutal strike.
-
-The commander collapses.
-
-The swarm hesitates.
-
-For the first time tonight—
-
-They look unsure.
-`},
-    { type: "goto", id: "ch1_end" },
-
-    { type: "label", id: "ch1_help_civ" },
-    { type: "narr", text: `
-You don’t chase the commander.
-
-You chase the people it would kill.
-
-You guide a wave of civilians through a gap—hands pushing strollers, shoulders carrying the injured, voices cracking but moving.
-
-Behind you, the team fights like a storm.
-
-Ahead of you, life continues by inches.
-
-When you finally look back, the commander is down.
-
-And the street is… quieter.
-
-Not safe.
-
-But quieter.
-`},
-    { type: "goto", id: "ch1_end" },
-
-    { type: "label", id: "ch1_help_call" },
-    { type: "narr", text: `
-You watch the commander’s armor.
-
-You notice a rhythm—plates flexing when it issues signals. A soft seam near the neck that opens for a heartbeat.
-
-“Neck seam opens when it signals!” you yell.
-
-Rufki’s mechs adjust instantly. Muhammad forces it to signal—then Niko threads an energy blade through the opening.
-
-Alban finishes it.
-
-The commander drops like a tower losing its foundation.
-
-The swarm stutters—confused, angry, suddenly less controlled.
-`},
-    { type: "goto", id: "ch1_end" },
-
-    { type: "label", id: "ch1_help_hope" },
-    { type: "narr", text: `
-You raise your voice like it can become armor.
-
-“We’re still here! We’re still fighting! Keep moving—don’t stop!”
-
-You see it in people’s eyes—fear turning into motion, despair turning into direction.
-
-Rufki’s team strikes the commander in a coordinated burst that looks almost unreal—like a cutscene the world doesn’t deserve.
-
-The commander falls.
-
-And even though the night is still burning—
-
-Somewhere inside the crowd, something fragile survives:
-
-Belief.
-`},
-    { type: "goto", id: "ch1_end" },
-
-    { type: "label", id: "ch1_end" },
-    { type: "narr", text: `
-By dawn, the city is changed.
-
-The crater still smokes.
-The skyline still stands.
-
-But the world is no longer innocent.
-
-The footage goes global.
-Governments make promises.
-Scientists argue about origin, intent, biology.
-
-And one name begins to feel inevitable:
+Someone named them fast—like naming horror makes it smaller:
 
 Betas.
-
-Not because they’re simple.
-
-Because humanity has always tried to rename horror into something manageable.
-
-Rufki and his team don’t celebrate.
-
-They don’t have time.
-
-Because the betas weren’t an accident.
-
-They were an arrival.
-
-And the first day the sky burned…
-
-was only the opening chapter.
 `},
 
-    // Chapter 1 complete -> go to chapter 2 start label
+    { type: "narr", text: `
+You see four mechs surge forward—moving as one.
+
+Rufki at the center—his ability syncing multiple machines at once.
+Muhammad—telekinesis, precise and brutal.
+Niko—energy manipulation, sharp as lightning.
+Alban—super-soldier strength, unbreakable.
+`},
+
+    {
+      type: "choice",
+      prompt: "A beta breaks toward civilians. You—",
+      options: [
+        { text: "Pull it away. Take the risk.", effect: add("resolve", 1), goto: "ch1_after_choice" },
+        { text: "Move people first. No one dies here.", effect: add("mercy", 1), goto: "ch1_after_choice" },
+        { text: "Call its pattern. Help the team strike.", effect: add("truth", 1), goto: "ch1_after_choice" },
+        { text: "Fight fear and lead the crowd to safety.", effect: add("hope", 1), goto: "ch1_after_choice" }
+      ]
+    },
+
+    { type: "label", id: "ch1_after_choice" },
+    { type: "narr", text: `
+The commander beta appears—larger, smarter, directing the swarm.
+
+Rufki’s mechs synchronize.
+A conductor with steel giants as instruments.
+
+The commander falls.
+The swarm hesitates.
+
+And in that hesitation, the world changes.
+
+This wasn’t a meteor.
+It was an arrival.
+`},
     { type: "goto", id: "ch2_start" },
 
     // ============================================================
-    // CHAPTER 2 — HOLD THE LINE (medium, but solid)
-    // (You can paste your longer version later if you want;
-    //  this ensures the game isn't blank after Ch1.)
+    // CHAPTER 2 — HOLD THE LINE
     // ============================================================
     { type: "label", id: "ch2_start" },
     { type: "bg", value: "war" },
-    { type: "music", value: "" },
-
     { type: "narr", text: `
 CHAPTER 2 — HOLD THE LINE
 
-The sound of gunfire echoes through streets that used to be loud with music.
-
-Now the only rhythm is: reload, breathe, survive.
-
-Rufki’s team has been fighting for hours. Mechs are scarred, systems running hot, pilots pushing past what bodies are supposed to handle.
+Gunfire echoes through streets that used to sing.
+Mechs burn hot. Pilots shake. The city evacuates in waves.
 
 And still the betas keep coming.
 `},
 
-    { type: "say", who: "Muhammad", text: `We can’t keep this up much longer. They just… keep coming.` },
-    { type: "say", who: "Rufki", text: `We hold until reinforcements arrive. If they reach the city center, it’s over.` },
-    { type: "say", who: "Alban", text: `Then they don’t reach it.` },
-    { type: "say", who: "Niko", text: `Left side is breaking. I’m moving.` },
-
-    { type: "narr", text: `
-Rufki tracks three mechs at once—boosting one pilot’s stability, pushing another’s thrusters, rerouting power to keep a shield online that should’ve died minutes ago.
-
-This is what leadership is:
-Not a crown.
-
-A burden you carry until your spine is screaming.
-
-Then you carry it anyway.
-`},
+    { type: "say", who: "Muhammad", text: "We can’t keep this up much longer. They don’t stop." },
+    { type: "say", who: "Rufki", text: "We hold. If they reach the center—everything collapses." },
+    { type: "say", who: "Alban", text: "Then they don’t reach it." },
+    { type: "say", who: "Niko", text: "Left flank’s breaking. I’m moving." },
 
     {
       type: "choice",
-      prompt: "A beta pack targets an evacuation route. Rufki has one decision to make. What do you push for?",
+      prompt: "What do you push Rufki to prioritize?",
       options: [
-        {
-          text: "Protect the evacuation route, even if it costs ground elsewhere.",
-          effect: add("mercy", 1),
-          goto: "ch2_evacuate"
-        },
-        {
-          text: "Take the offensive and break the pack fast—save time, save lives.",
-          effect: add("resolve", 1),
-          goto: "ch2_offense"
-        },
-        {
-          text: "Analyze the route—find a choke point and turn it into a trap.",
-          effect: add("truth", 1),
-          goto: "ch2_trap"
-        },
-        {
-          text: "Rally everyone—if morale collapses, the city collapses.",
-          effect: add("hope", 1),
-          goto: "ch2_rally"
-        }
+        { text: "Protect evac routes.", effect: add("mercy", 1), goto: "ch2_end" },
+        { text: "Go offensive—break the wave fast.", effect: add("resolve", 1), goto: "ch2_end" },
+        { text: "Set a trap—study and exploit.", effect: add("truth", 1), goto: "ch2_end" },
+        { text: "Rally morale—if hope dies, we die.", effect: add("hope", 1), goto: "ch2_end" }
       ]
     },
-
-    { type: "label", id: "ch2_evacuate" },
-    { type: "narr", text: `
-You choose people over pride.
-
-The team shifts. Shields angle toward the route. Alban becomes a moving wall. Muhammad lifts debris into barricades. Niko clears anything that gets too close.
-
-The convoy survives.
-
-A small victory.
-
-But in war, small victories are what keep you alive long enough to see the big one.
-`},
-    { type: "goto", id: "ch2_end" },
-
-    { type: "label", id: "ch2_offense" },
-    { type: "narr", text: `
-You choose speed.
-
-Rufki pushes systems into the red. Niko becomes a streak of light. Alban tears through the pack like a battering ram. Muhammad pins the largest beta long enough for a clean finish.
-
-The pack breaks.
-
-The route holds.
-
-But the cost is heat—overload warnings screaming across cockpit glass.
-`},
-    { type: "goto", id: "ch2_end" },
-
-    { type: "label", id: "ch2_trap" },
-    { type: "narr", text: `
-You choose precision.
-
-You funnel the pack into a narrow street between collapsed buildings. Muhammad seals the exit with telekinetic force. Niko hits them with controlled bursts that herd them deeper.
-
-Then Rufki syncs the mechs.
-
-One coordinated strike.
-
-The pack drops like dominoes.
-
-For a moment, the city breathes.
-`},
-    { type: "goto", id: "ch2_end" },
-
-    { type: "label", id: "ch2_rally" },
-    { type: "narr", text: `
-You choose spirit.
-
-You speak into the comms—calm, sharp, unwavering.
-
-“Hold. Don’t break. We are the line.”
-
-It’s not magic.
-
-But the team steadies.
-
-And in the second that steadiness creates, they make the moves that keep the evacuation route alive.
-`},
-    { type: "goto", id: "ch2_end" },
 
     { type: "label", id: "ch2_end" },
     { type: "narr", text: `
 Night falls again.
 
-And still the betas keep coming.
-
-Rufki looks at the burning horizon and understands something the world hasn’t accepted yet:
-
+Rufki watches the horizon and understands:
 This isn’t a single invasion.
 
 It’s a campaign.
 
-And if humanity is going to survive…
-
-they’ll need more than machines.
-
-They’ll need a reason.
-
-They’ll need a meaning.
-
-They’ll need heroes.
+And if humanity survives… it’ll be because someone decided to be a hero anyway.
 `},
+    { type: "goto", id: "ch3_start" },
 
-    // Stop here for now. (You can add chapter 3+ later.)
-    // Move from Chapter 2 to Chapter 3
-{ type: "goto", id: "ch3_start" },
-
-// ============================================================
-// CHAPTER 3 — THE WEAKNESS
-// ============================================================
-{ type: "label", id: "ch3_start" },
-// ============================================================
-// CHAPTER 3 — THE WEAKNESS
-// ============================================================
-
-{ type: "label", id: "ch3_start" },
-{ type: "bg", value: "ship" },
-{ type: "music", value: "" },
-
-{ type: "narr", text: `
+    // ============================================================
+    // CHAPTER 3 — THE WEAKNESS
+    // ============================================================
+    { type: "label", id: "ch3_start" },
+    { type: "bg", value: "base" },
+    { type: "narr", text: `
 CHAPTER 3 — THE WEAKNESS
 
-By day three, the city stops pretending this is temporary.
+The team regroups in a makeshift base.
+Exhaustion sits in your bones.
 
-The streets aren’t “evacuated.”
-They’re abandoned.
+The betas adapt.
+They coordinate.
+They learn.
 
-The skyline isn’t “holding strong.”
-It’s holding its breath.
-
-And the betas… they aren’t just attacking.
-
-They’re learning.
-
-Every hour, the swarms adjust. They stop charging open lanes. They stop biting armor that can’t be pierced. They begin striking joints, targeting comm arrays, destroying fuel lines—like they’ve read your manuals.
-
-Like they’ve already fought humans before.
+You can’t win a war against learning…
+unless you learn faster.
 `},
 
-{ type: "narr", text: `
-Your team regroups in a half-collapsed underground transit station repurposed into a base.
+    { type: "say", who: "Rufki", text: "We need a weakness. Something real." },
+    { type: "say", who: "Alban", text: "I can’t punch an endless wave forever." },
+    { type: "say", who: "Muhammad", text: "We’re reacting. We need control." },
+    { type: "say", who: "Niko", text: "I might have an idea. But it’s risky." },
 
-The air smells like oil, sweat, and overheated circuitry.
-
-Mechs stand in silence like injured giants—patchwork repairs, scorch marks, dents in places steel should never bend.
-
-Rufki sits with his elbows on his knees, staring at a tactical map like he’s trying to force the universe to confess.
-`},
-
-{ type: "say", who: "Rufki", text: `We’re not losing because they’re stronger. We’re losing because they’re adapting faster than we can.` },
-
-{ type: "say", who: "Muhammad", text: `We’ve held them back… but every time we win a fight, the next one costs more.` },
-
-{ type: "say", who: "Alban", text: `Then we hit harder.` },
-
-{ type: "say", who: "Niko", text: `That’s the problem. “Harder” is predictable.` },
-
-{ type: "narr", text: `
-Silence spreads after Niko speaks.
-
-Not awkward silence.
-
-The kind that means he said something true, and nobody wants it to be.
-
-Niko steps forward and throws down a chunk of beta plating on the table. It’s black-gray, layered like armor… but the inside is wrong. Not bone. Not meat.
-
-Something in between.
-`},
-
-{ type: "say", who: "Niko", text: `I’ve been studying the remains. Watching their movement. Recording their reactions.` },
-
-{ type: "say", who: "Rufki", text: `And?` },
-
-{ type: "narr", text: `
-Niko doesn’t answer right away.
-
-He looks at Muhammad, then Alban.
-
-Then he looks at you.
-
-Like he’s measuring whether you can handle the truth.
-`},
-
-{ type: "narr", text: `
-He taps the plating. A faint ripple runs across it, like a nerve twitching.
-
-It reacts.
-
-Even after death.
-`},
-
-{ type: "say", who: "Niko", text: `They’re not just organisms. They’re… networked.` },
-
-{ type: "narr", text: `
-Rufki’s eyes sharpen. Muhammad leans forward. Alban’s jaw tightens.
-
-Niko continues.
-`},
-
-{ type: "say", who: "Niko", text: `Every pack has a pattern. Every pack has a “leader.” When the leader dies, the rest hesitate—like the signal drops.` },
-
-{ type: "say", who: "Muhammad", text: `So… it’s a hive?` },
-
-{ type: "say", who: "Niko", text: `Yes. But worse.` },
-
-{ type: "narr", text: `
-Niko flips a tablet around. Grainy footage plays—beta movement slowed down frame by frame.
-
-At first it looks random.
-
-Then you see it.
-
-Tiny micro-pauses. Group turns. Synchronized flanks.
-
-The betas aren’t reacting to *each other*.
-
-They’re reacting to a command you can’t hear.
-`},
-
-{ type: "say", who: "Niko", text: `They’re receiving something. A frequency. A pulse.` },
-
-{ type: "say", who: "Rufki", text: `From the ship?` },
-
-{ type: "narr", text: `
-Niko nods once.
-
-That nod feels like a door closing.
-`},
-
-{ type: "say", who: "Niko", text: `From the ship… and possibly from somewhere else.` },
-
-{ type: "narr", text: `
-Outside, a distant boom shakes dust from the ceiling.
-
-Not artillery.
-
-Impact.
-
-Something arriving again.
-
-The city’s bones flinch under it.
-`},
-
-// -------- Choice: how Rufki leads the strategy ----------
-{
-  type: "choice",
-  prompt: "Rufki looks around the table. The team needs direction. How do you push the strategy?",
-  options: [
     {
-      text: "We need hard intel. Find the signal source and expose it.",
-      effect: () => { State.vars.truth += 1; },
-      goto: "ch3_truth_path"
+      type: "choice",
+      prompt: "How do you respond to Niko’s risky plan?",
+      options: [
+        { text: "Trust him. Execute fast.", effect: add("resolve", 1), goto: "ch4_start" },
+        { text: "Demand details. No blind leaps.", effect: add("truth", 1), goto: "ch4_start" },
+        { text: "Ask: who gets hurt if it fails?", effect: add("mercy", 1), goto: "ch4_start" },
+        { text: "Tell him: we believe in you.", effect: add("hope", 1), goto: "ch4_start" }
+      ]
     },
+
+    // ============================================================
+    // CHAPTER 4 — THE RISK
+    // ============================================================
+    { type: "label", id: "ch4_start" },
+    { type: "bg", value: "hangar" },
+    { type: "narr", text: `
+CHAPTER 4 — THE RISK
+
+Niko’s plan: disrupt the beta signal—force the swarm to lose coordination.
+It means baiting a commander into range…
+and surviving long enough to strike.
+
+There’s no guarantee.
+
+Only choice.
+`},
+
+    { type: "say", who: "Niko", text: "If we break their signal, they stumble. Then we can breathe." },
+    { type: "say", who: "Rufki", text: "We do it together. No one runs alone." },
+
     {
-      text: "We save lives first. Pull civilians back and fortify safe corridors.",
-      effect: () => { State.vars.mercy += 1; },
-      goto: "ch3_mercy_path"
+      type: "choice",
+      prompt: "Who do you assign to the most dangerous role?",
+      options: [
+        { text: "Rufki. He can sync and hold the line.", effect: add("resolve", 1), goto: "ch5_start" },
+        { text: "Muhammad. Pin the commander with telekinesis.", effect: add("truth", 1), goto: "ch5_start" },
+        { text: "Alban. He can survive the impact.", effect: add("resolve", 1), goto: "ch5_start" },
+        { text: "Niko. His plan, his hands on the trigger.", effect: add("hope", 1), goto: "ch5_start" }
+      ]
     },
+
+    // ============================================================
+    // CHAPTER 5 — THE EXECUTION
+    // ============================================================
+    { type: "label", id: "ch5_start" },
+    { type: "bg", value: "war" },
+    { type: "narr", text: `
+CHAPTER 5 — THE EXECUTION
+
+The city becomes a chessboard of fire.
+You lure the commander.
+You feel its attention lock onto you like a knife.
+
+Rufki synchronizes the mechs—engines screaming.
+Muhammad braces his mind—hands shaking.
+Alban steps forward like a wall.
+Niko charges energy—eyes burning.
+`},
+
     {
-      text: "We strike now. Decapitate the hive before it grows.",
-      effect: () => { State.vars.resolve += 1; },
-      goto: "ch3_resolve_path"
+      type: "choice",
+      prompt: "The commander turns toward civilians mid-plan. What do you do?",
+      options: [
+        { text: "Stay on plan. End the signal now.", effect: add("truth", 1), goto: "ch5_result" },
+        { text: "Break formation to save civilians.", effect: add("mercy", 1), goto: "ch5_result" },
+        { text: "Taunt it—pull it back yourself.", effect: add("resolve", 1), goto: "ch5_result" },
+        { text: "Shout courage and move the crowd.", effect: add("hope", 1), goto: "ch5_result" }
+      ]
     },
+
+    { type: "label", id: "ch5_result" },
+    { type: "narr", text: `
+The strike lands.
+
+For one heartbeat, the commander’s signal cuts out.
+
+The swarm… stutters.
+
+They still kill.
+But they hesitate.
+
+And hesitation is the first crack in an unbeatable enemy.
+`},
+    { type: "goto", id: "ch6_start" },
+
+    // ============================================================
+    // CHAPTER 6 — VICTORY (AND THE LIE OF “OVER”)
+    // ============================================================
+    { type: "label", id: "ch6_start" },
+    { type: "bg", value: "base" },
+    { type: "narr", text: `
+CHAPTER 6 — AFTER THE ROAR
+
+It worked.
+
+The city breathes.
+People cheer.
+The team laughs—exhausted, half-delirious.
+
+But Rufki can’t shake it:
+
+If this was only a wave…
+what sent it?
+`},
+
+    { type: "say", who: "Muhammad", text: "We actually did it…" },
+    { type: "say", who: "Alban", text: "We made them bleed." },
+    { type: "say", who: "Niko", text: "Then we can make them fall." },
+    { type: "say", who: "Rufki", text: "Or they wanted us to think that." },
+
+    { type: "goto", id: "ch7_start" },
+
+    // ============================================================
+    // CHAPTER 7 — MIA
+    // ============================================================
+    { type: "label", id: "ch7_start" },
+    { type: "bg", value: "streets" },
+    { type: "narr", text: `
+CHAPTER 7 — THE GIRL IN THE ALLEY
+
+On patrol, Rufki hears crying.
+An alley.
+A small girl, bruised and terrified.
+
+Her name: Mia.
+
+Separated from her mother during the attack.
+`},
+
     {
-      text: "If we panic, we die. We need a symbol—hope has to stay alive.",
-      effect: () => { State.vars.hope += 1; },
-      goto: "ch3_hope_path"
-    }
-  ]
-},
-
-{ type: "label", id: "ch3_truth_path" },
-{ type: "narr", text: `
-You force the conversation onto one track:
-
-Answers.
-
-Because without answers, every battle is just a delay until extinction.
-
-Rufki nods slowly. He’s not smiling, but something steadies in him.
-`},
-{ type: "goto", id: "ch3_common" },
-
-{ type: "label", id: "ch3_mercy_path" },
-{ type: "narr", text: `
-You remind them what the mission always was:
-
-People.
-
-Not victory screenshots. Not headlines.
-
-Lives.
-
-Rufki’s eyes soften for half a second—then harden again.
-`},
-{ type: "goto", id: "ch3_common" },
-
-{ type: "label", id: "ch3_resolve_path" },
-{ type: "narr", text: `
-You say what everyone’s thinking but nobody wants to own:
-
-We cannot wait for permission to survive.
-
-Rufki’s voice drops.
-`},
-{ type: "say", who: "Rufki", text: `Then we cut the head off.` },
-{ type: "goto", id: "ch3_common" },
-
-{ type: "label", id: "ch3_hope_path" },
-{ type: "narr", text: `
-You talk about morale like it’s fuel—because it is.
-
-You’ve seen the difference between a crowd that believes and a crowd that gives up.
-
-Rufki takes a slow breath.
-`},
-{ type: "say", who: "Rufki", text: `Then we become what they need us to be.` },
-{ type: "goto", id: "ch3_common" },
-
-// -------- Common plan reveal ----------
-{ type: "label", id: "ch3_common" },
-
-{ type: "narr", text: `
-Niko slides a rough map toward Rufki.
-
-A ring around the crater.
-
-Hot zones.
-
-Patrol routes.
-
-And one point circled so many times the paper looks bruised.
-`},
-
-{ type: "say", who: "Niko", text: `Every time a commander issues a signal, it creates a spike. The spike always aligns… to that point.` },
-
-{ type: "narr", text: `
-Rufki stares at the circled spot.
-
-It’s a substation near the crater—old infrastructure, heavy power, buried lines.
-
-A place people used to ignore.
-
-Now it feels like the center of the world.
-`},
-
-{ type: "say", who: "Muhammad", text: `A relay?` },
-
-{ type: "say", who: "Niko", text: `A relay—or a doorway.` },
-
-{ type: "narr", text: `
-Alban cracks his knuckles, sound sharp in the underground chamber.
-`},
-
-{ type: "say", who: "Alban", text: `Then we break it.` },
-
-{ type: "narr", text: `
-Niko shakes his head.
-
-This time, he looks almost… afraid.
-`},
-
-{ type: "say", who: "Niko", text: `It’s not that simple.` },
-
-{ type: "narr", text: `
-He points to a waveform on his tablet—a repeating pattern, like a heartbeat.
-
-But it’s not human.
-
-And it’s getting louder.
-`},
-
-{ type: "say", who: "Niko", text: `I think the signal is tied to their nervous system. If we hit it wrong, they won’t scatter…` },
-
-{ type: "say", who: "Niko", text: `…they’ll frenzy.` },
-
-{ type: "narr", text: `
-Rufki leans back, rubbing his temples.
-
-The kind of exhaustion that doesn’t come from fighting.
-
-It comes from realizing the world is bigger than your strength.
-`},
-
-{ type: "say", who: "Rufki", text: `So what’s your plan, Niko?` },
-
-{ type: "narr", text: `
-Niko hesitates.
-
-Then he says it.
-
-And the air in the room changes.
-`},
-
-{ type: "say", who: "Niko", text: `We don’t destroy the relay.` },
-
-{ type: "say", who: "Niko", text: `We hijack it.` },
-
-{ type: "narr", text: `
-Muhammad’s eyes widen. Alban blinks like he didn’t hear right. Rufki goes still.
-`},
-
-{ type: "say", who: "Muhammad", text: `You want to… speak their language?` },
-
-{ type: "say", who: "Niko", text: `Not speak it. Jam it. Interrupt it.` },
-
-{ type: "narr", text: `
-He taps the plating again, harder.
-
-A ripple.
-
-A response.
-`},
-
-{ type: "say", who: "Niko", text: `If we can cut the signal for even a minute, their coordination collapses. Commanders lose control. Packs stop moving like one mind.` },
-
-{ type: "say", who: "Alban", text: `And then we kill them.` },
-
-{ type: "say", who: "Niko", text: `And then we survive.` },
-
-{ type: "narr", text: `
-Rufki’s fingers tighten on the table.
-
-Because he understands what Niko isn’t saying:
-
-A plan like this isn’t safe.
-
-It’s not tested.
-
-And the moment it fails—
-
-The betas won’t just hunt the city.
-
-They’ll hunt *you*.
-`},
-
-// -------- Choice: risk acceptance ----------
-{
-  type: "choice",
-  prompt: "Niko’s plan is risky and untested. Rufki needs consensus. What do you say?",
-  options: [
-    {
-      text: "We do it. No more reacting—this is our chance to take control.",
-      effect: () => { State.vars.resolve += 1; },
-      goto: "ch3_accept"
+      type: "choice",
+      prompt: "How does Rufki approach Mia?",
+      options: [
+        { text: "Gentle truth. Promise nothing you can’t keep.", effect: add("truth",1), goto: "ch7_save" },
+        { text: "Protective action. Carry her to safety now.", effect: add("resolve",1), goto: "ch7_save" },
+        { text: "Kindness first. Let her choose to trust.", effect: add("mercy",1), goto: "ch7_save" },
+        { text: "Give her hope. Tell her she’s not alone.", effect: add("hope",1), goto: "ch7_save" }
+      ]
     },
-    {
-      text: "We need proof first. One field test before we bet the city.",
-      effect: () => { State.vars.truth += 1; },
-      goto: "ch3_test_first"
+
+    { type: "label", id: "ch7_save" },
+    { type: "add", key: "fear", value: 0 }, // harmless if engine supports add node; if not, ignored
+    { type: "narr", text: `
+Mia takes Rufki’s hand.
+
+She’s light as ash.
+But her grip is desperate—like she’s holding onto the last warm thing in the world.
+
+Rufki brings her to the base.
+
+And something inside him quietly changes.
+`},
+    // flag
+    { type: "narr", text: `(Mia has joined your story.)` },
+    { type: "choice",
+      prompt: "That night, Rufki decides:",
+      options: [
+        { text: "We find her mother. No matter what.", effect: flag("mia_saved", true), goto: "ch8_start" },
+        { text: "We keep her safe first. The search comes second.", effect: flag("mia_saved", true), goto: "ch8_start" }
+      ]
     },
+
+    // ============================================================
+    // CHAPTER 8 — THE SEARCH
+    // ============================================================
+    { type: "label", id: "ch8_start" },
+    { type: "bg", value: "streets" },
+    { type: "narr", text: `
+CHAPTER 8 — THE SEARCH
+
+A week of ruins.
+A week of dead ends.
+Then a lead.
+
+A building.
+A whisper.
+A chance.
+
+Mia walks beside Rufki like a shadow that wants to be a daughter.
+`},
+
     {
-      text: "If it endangers civilians, we don’t do it. We relocate first.",
-      effect: () => { State.vars.mercy += 1; },
-      goto: "ch3_relocate"
+      type: "choice",
+      prompt: "You reach the building. How do you enter?",
+      options: [
+        { text: "Quietly. Recon first.", effect: add("truth",1), goto: "ch8_found" },
+        { text: "Fast. In and out.", effect: add("resolve",1), goto: "ch8_found" },
+        { text: "Safest route. Protect Mia.", effect: add("mercy",1), goto: "ch8_found" },
+        { text: "Speak to Mia. Keep her heart steady.", effect: add("hope",1), goto: "ch8_found" }
+      ]
     },
+
+    { type: "label", id: "ch8_found" },
+    { type: "narr", text: `
+Inside… you find her.
+
+Mia’s mother is alive—but hollow-eyed, injured, exhausted.
+When Mia runs to her, the room becomes something sacred.
+
+For one moment, the war feels far away.
+
+Then the walls shake.
+`},
+    { type: "goto", id: "ch9_start" },
+
+    // ============================================================
+    // CHAPTER 9 — A MOTHER’S LOVE
+    // ============================================================
+    { type: "label", id: "ch9_start" },
+    { type: "bg", value: "war" },
+    { type: "narr", text: `
+CHAPTER 9 — A MOTHER’S LOVE
+
+Betas breach the room.
+
+No plan.
+No time.
+Only instinct.
+
+Mia’s mother pushes her daughter toward the exit.
+
+“RUN.”
+`},
+
     {
-      text: "We do it—but we make it mean something. We fight like heroes.",
-      effect: () => { State.vars.hope += 1; },
-      goto: "ch3_hero"
-    }
-  ]
-},
+      type: "choice",
+      prompt: "What does Rufki do?",
+      options: [
+        { text: "Grab Mia and escape—protect the child.", effect: add("mercy",1), goto: "ch9_outcome" },
+        { text: "Fight to save the mother too.", effect: add("resolve",1), goto: "ch9_outcome" },
+        { text: "Look for an opening, a tactic, a way out.", effect: add("truth",1), goto: "ch9_outcome" },
+        { text: "Promise Mia she won’t be alone—move.", effect: add("hope",1), goto: "ch9_outcome" }
+      ]
+    },
 
-{ type: "label", id: "ch3_accept" },
-{ type: "narr", text: `
-You don’t hesitate.
+    { type: "label", id: "ch9_outcome" },
+    { type: "narr", text: `
+A blast.
+A scream.
+Silence.
 
-Because you’ve seen what hesitation costs.
+Mia’s mother… doesn’t make it.
 
-Rufki nods once, slow and final.
+She saves her daughter with the oldest power on Earth:
+
+Love that sacrifices itself.
 `},
-{ type: "goto", id: "ch3_hook" },
+    { type: "goto", id: "ch10_start" },
 
-{ type: "label", id: "ch3_test_first" },
-{ type: "narr", text: `
-You insist on proof.
+    // ============================================================
+    // CHAPTER 10 — PAPERWORK AND PROMISES
+    // ============================================================
+    { type: "label", id: "ch10_start" },
+    { type: "bg", value: "base" },
+    { type: "narr", text: `
+CHAPTER 10 — PAPERWORK AND PROMISES
 
-Not because you doubt Niko—because this world punishes blind faith.
+Rufki signs forms with hands that still remember blood.
+He doesn’t feel like a hero.
+He feels like a man holding a child’s world together with tape.
 
-Niko nods reluctantly.
+Mia sleeps in a spare room.
+
+And Rufki decides he won’t let her become another statistic.
 `},
-{ type: "say", who: "Niko", text: `One test… then we commit.` },
-{ type: "goto", id: "ch3_hook" },
 
-{ type: "label", id: "ch3_relocate" },
-{ type: "narr", text: `
-You draw the line where it matters:
+    {
+      type: "choice",
+      prompt: "Rufki tells Mia:",
+      options: [
+        { text: "The truth—gently, completely.", effect: add("truth",1), goto: "ch10_adopt" },
+        { text: "We keep moving. We survive.", effect: add("resolve",1), goto: "ch10_adopt" },
+        { text: "I’m here. You’re safe with me.", effect: add("mercy",1), goto: "ch10_adopt" },
+        { text: "Your mom was a hero. You can be too.", effect: add("hope",1), goto: "ch10_adopt" }
+      ]
+    },
 
-Civilians don’t become collateral.
+    { type: "label", id: "ch10_adopt" },
+    { type: "narr", text: `
+Rufki begins the adoption.
 
-Rufki exhales through his nose.
+Not because it’s easy.
+
+Because some promises are heavier than fear.
 `},
-{ type: "say", who: "Rufki", text: `Then we clear the corridor first. No one dies because we were impatient.` },
-{ type: "goto", id: "ch3_hook" },
+    { type: "narr", text: `(Flag set: Rufki adopts Mia.)` },
+    { type: "choice",
+      prompt: "Confirm adoption path?",
+      options: [
+        { text: "Yes. Rufki adopts Mia.", effect: flag("mia_adopted", true), goto: "ch11_start" },
+        { text: "Yes. Rufki adopts Mia.", effect: flag("mia_adopted", true), goto: "ch11_start" }
+      ]
+    },
 
-{ type: "label", id: "ch3_hero" },
-{ type: "narr", text: `
-You say the word out loud:
+    // ============================================================
+    // CHAPTER 11 — ALBAN ON THE ROOF
+    // ============================================================
+    { type: "label", id: "ch11_start" },
+    { type: "bg", value: "base" },
+    { type: "narr", text: `
+CHAPTER 11 — THE ROOF
 
-Hero.
+Alban disappears.
 
-Not as a title.
+You find him on the roof with a katana, staring down at the city like he’s deciding whether to jump into it… or out of it.
+`},
+
+    { type: "say", who: "Alban", text: "I can’t do this anymore… I miss her. I miss all of it." },
+    {
+      type: "choice",
+      prompt: "How do you pull Alban back?",
+      options: [
+        { text: "Truth: grief means you cared. Don’t run from it.", effect: add("truth",1), goto: "ch11_save" },
+        { text: "Resolve: we keep going—together.", effect: add("resolve",1), goto: "ch11_save" },
+        { text: "Mercy: it’s okay to break. We’ll hold you.", effect: add("mercy",1), goto: "ch11_save" },
+        { text: "Hope: she’d want you to live for something.", effect: add("hope",1), goto: "ch11_save" }
+      ]
+    },
+
+    { type: "label", id: "ch11_save" },
+    { type: "narr", text: `
+Alban’s grip loosens.
+He breathes like he’s returning from underwater.
+
+He stays.
+
+A life saved without firing a shot.
+`},
+    { type: "goto", id: "ch12_start" },
+
+    // ============================================================
+    // CHAPTER 12 — THE DREAM
+    // ============================================================
+    { type: "label", id: "ch12_start" },
+    { type: "bg", value: "base" },
+    { type: "narr", text: `
+CHAPTER 12 — THE DREAM
+
+People are disappearing.
+Rumors spread of a “figure” guiding the betas.
+
+Then Mia wakes up shaking.
+
+“I saw it,” she whispers.
+“They’re taking people… for something.”
+`},
+
+    {
+      type: "choice",
+      prompt: "How does Rufki respond to Mia’s vision?",
+      options: [
+        { text: "Investigate. Dreams can be clues.", effect: add("truth",1), goto: "ch13_start" },
+        { text: "Mobilize now. We can’t wait.", effect: add("resolve",1), goto: "ch13_start" },
+        { text: "Comfort Mia first. She’s a child.", effect: add("mercy",1), goto: "ch13_start" },
+        { text: "Give her purpose—she can help save lives.", effect: add("hope",1), goto: "ch13_start" }
+      ]
+    },
+
+    // ============================================================
+    // CHAPTER 13 — TRAINING
+    // ============================================================
+    { type: "label", id: "ch13_start" },
+    { type: "bg", value: "training" },
+    { type: "narr", text: `
+CHAPTER 13 — TRAINING
+
+The team trains like the next day is the last day.
+Because it might be.
+
+Steel rings.
+Energy snaps.
+Telekinesis crushes concrete.
+Rufki pushes synchronization until sparks fly.
+
+Heroes aren’t born.
+They’re forged.
+`},
+
+    { type: "goto", id: "ch14_start" },
+
+    // ============================================================
+    // CHAPTER 14 — THE CLICK
+    // ============================================================
+    { type: "label", id: "ch14_start" },
+    { type: "bg", value: "training" },
+    { type: "narr", text: `
+CHAPTER 14 — THE CLICK
+
+Rufki and Muhammad spar until their muscles scream.
+
+Then—something inside Rufki shifts.
+
+Power opens like a door that was always there.
+
+Not rage.
+
+Not luck.
+
+Something deeper.
+
+A core.
+`},
+
+    {
+      type: "choice",
+      prompt: "What does Rufki believe this power is?",
+      options: [
+        { text: "A tool. Learn it, control it.", effect: add("truth",1), goto: "ch15_start" },
+        { text: "A weapon. Use it without hesitation.", effect: add("resolve",1), goto: "ch15_start" },
+        { text: "A responsibility. Protect others with it.", effect: add("mercy",1), goto: "ch15_start" },
+        { text: "A symbol. Inspire people with it.", effect: add("hope",1), goto: "ch15_start" }
+      ]
+    },
+
+    // ============================================================
+    // CHAPTER 15 — BEFORE THE STORM
+    // ============================================================
+    { type: "label", id: "ch15_start" },
+    { type: "bg", value: "roof" },
+    { type: "narr", text: `
+CHAPTER 15 — BEFORE THE STORM
+
+The betas go quiet.
+
+That’s when veterans get scared.
+
+Niko joins Rufki on the roof.
+
+“We’re ready,” Niko says.
+Rufki isn’t sure that’s true.
+
+But he’s sure of this:
+
+They’ll stand anyway.
+`},
+    { type: "goto", id: "ch16_start" },
+
+    // ============================================================
+    // CHAPTER 16 — THE BROTHERS
+    // ============================================================
+    { type: "label", id: "ch16_start" },
+    { type: "bg", value: "base" },
+    { type: "narr", text: `
+CHAPTER 16 — THE BROTHERS
+
+Niko isn’t alone.
+
+His twin brother, Soso, arrives—same eyes, different weight.
+And Raul, an older strategist figure, calls them in.
+
+“Something is coming,” Raul says.
+“The betas aren’t the whole story.”
+`},
+
+    {
+      type: "choice",
+      prompt: "Do you trust Raul’s instincts?",
+      options: [
+        { text: "Yes. He sees patterns.", effect: fadd("raul_trust", 1), goto: "ch17_start" },
+        { text: "Not fully. Verify everything.", effect: add("truth",1), goto: "ch17_start" }
+      ]
+    },
+
+    // ============================================================
+    // CHAPTER 17 — THE WARNING
+    // ============================================================
+    { type: "label", id: "ch17_start" },
+    { type: "bg", value: "briefing" },
+    { type: "narr", text: `
+CHAPTER 17 — THE WARNING
+
+Disappearances increase.
+Reports get darker.
+Mia has another dream—stronger, clearer.
+
+A figure.
+A leader.
+A “dawn strike.”
+
+Time is running out.
+`},
+    { type: "goto", id: "ch18_start" },
+
+    // ============================================================
+    // CHAPTER 18 — ANGEL
+    // ============================================================
+    { type: "label", id: "ch18_start" },
+    { type: "bg", value: "briefing" },
+    { type: "narr", text: `
+CHAPTER 18 — ANGEL
+
+A new fighter walks in: Angel.
+Black suit. Silver blade. Eyes that don’t blink.
+
+“I know what they’re planning,” she says.
+“I can take you to the source.”
+
+Trust is a weapon too.
+So is betrayal.
+`},
+
+    {
+      type: "choice",
+      prompt: "How does Rufki treat Angel?",
+      options: [
+        { text: "Trust her—time is short.", effect: fadd("angel_trust", 1), goto: "ch19_start" },
+        { text: "Test her—she must prove it.", effect: add("truth",1), goto: "ch19_start" },
+        { text: "Protect Mia from her—keep distance.", effect: add("mercy",1), goto: "ch19_start" },
+        { text: "Inspire her—if she’s here, she’s fighting with us.", effect: add("hope",1), goto: "ch19_start" }
+      ]
+    },
+
+    // ============================================================
+    // CHAPTER 19 — NEW MECHS
+    // ============================================================
+    { type: "label", id: "ch19_start" },
+    { type: "bg", value: "hangar" },
+    { type: "narr", text: `
+CHAPTER 19 — NEW MECHS
+
+Raul unveils upgraded mechs.
+Better shields. Cleaner thrust. Weapons that hum like a promise.
+
+Angel points to a map.
+
+“Dawn,” she says.
+“That’s when they strike.”
+`},
+    { type: "goto", id: "ch20_start" },
+
+    // ============================================================
+    // CHAPTER 20 — THE DAWN BATTLE
+    // ============================================================
+    { type: "label", id: "ch20_start" },
+    { type: "bg", value: "war" },
+    { type: "narr", text: `
+CHAPTER 20 — DAWN
+
+The swarm stretches like an ocean of claws.
+
+Rufki’s team steps forward anyway.
+Because heroes don’t wait for permission.
+`},
+
+    {
+      type: "choice",
+      prompt: "In the chaos, what do you prioritize?",
+      options: [
+        { text: "Save people.", effect: add("mercy",1), goto: "ch20_end" },
+        { text: "Cut to the leader.", effect: add("resolve",1), goto: "ch20_end" },
+        { text: "Track the signal source.", effect: add("truth",1), goto: "ch20_end" },
+        { text: "Keep the team together.", effect: add("hope",1), goto: "ch20_end" }
+      ]
+    },
+
+    { type: "label", id: "ch20_end" },
+    { type: "narr", text: `
+They win.
+
+But the victory feels… staged.
+Like the enemy is watching from somewhere higher.
+
+Then the “boss” finally appears.
+`},
+    { type: "goto", id: "ch21_start" },
+
+    // ============================================================
+    // CHAPTER 21 — THE FALSE BOSS
+    // ============================================================
+    { type: "label", id: "ch21_start" },
+    { type: "bg", value: "briefing" },
+    { type: "narr", text: `
+CHAPTER 21 — THE FALSE BOSS
+
+A man with white hair and cold eyes.
+He speaks like a god testing ants.
+
+“You impressed me,” he says.
+“But you don’t understand what’s coming.”
+
+He unleashes stronger betas.
+
+The fight begins again.
+`},
+    { type: "goto", id: "ch22_start" },
+
+    // ============================================================
+    // CHAPTER 22 — “VICTORY”
+    // ============================================================
+    { type: "label", id: "ch22_start" },
+    { type: "bg", value: "war" },
+    { type: "narr", text: `
+CHAPTER 22 — “VICTORY”
+
+The team fights like legends.
+The white-haired boss falls.
+
+For a moment, the world believes it’s over.
+
+Then a hologram appears.
+
+A new face.
+
+A real enemy.
+
+And a message:
+
+“Tomorrow. Sunrise. Final test.”
+`},
+    { type: "goto", id: "ch23_start" },
+
+    // ============================================================
+    // CHAPTER 23 — THE BROADCAST
+    // ============================================================
+    { type: "label", id: "ch23_start" },
+    { type: "bg", value: "base" },
+    { type: "narr", text: `
+CHAPTER 23 — THE BROADCAST
+
+The city hears it.
+So does the world.
+
+Fear spreads faster than fire.
+
+Mia grips Rufki’s hand.
+
+“Are we going to die?” she asks.
+
+Rufki answers with the only thing a hero can offer:
+
+“I’m here.”
+`},
+
+    {
+      type: "choice",
+      prompt: "What does Rufki teach Mia right now?",
+      options: [
+        { text: "Truth: fear is real. We move anyway.", effect: add("truth",1), goto: "ch24_start" },
+        { text: "Resolve: heroes stand when others can’t.", effect: add("resolve",1), goto: "ch24_start" },
+        { text: "Mercy: we fight to protect, not to hate.", effect: add("mercy",1), goto: "ch24_start" },
+        { text: "Hope: even in endings, we plant beginnings.", effect: add("hope",1), goto: "ch24_start" }
+      ]
+    },
+
+    // ============================================================
+    // CHAPTER 24 — GEAR UP
+    // ============================================================
+    { type: "label", id: "ch24_start" },
+    { type: "bg", value: "hangar" },
+    { type: "narr", text: `
+CHAPTER 24 — GEAR UP
+
+Final prep.
+Final words.
+Final checks.
+
+Everyone carries their own fear.
+But no one leaves.
+
+Because leaving means the city dies alone.
+`},
+    { type: "goto", id: "ch25_start" },
+
+    // ============================================================
+    // CHAPTER 25 — THE BREAKING
+    // ============================================================
+    { type: "label", id: "ch25_start" },
+    { type: "bg", value: "war" },
+    { type: "narr", text: `
+CHAPTER 25 — THE BREAKING
+
+The final battle erupts.
+
+The enemy isn’t just claws—
+it’s strategy, cruelty, pressure.
+
+Then disaster.
+
+Rufki’s mech is hit.
+
+It explodes.
+
+He’s thrown into the rubble.
+`},
+
+    {
+      type: "choice",
+      prompt: "Rufki rises. Power surges. What does he become?",
+      options: [
+        { text: "A blade of truth—target the real enemy.", effect: add("truth",1), goto: "ch25_rage" },
+        { text: "A fist of resolve—push forward no matter what.", effect: add("resolve",1), goto: "ch25_rage" },
+        { text: "A shield of mercy—protect the weak even here.", effect: add("mercy",1), goto: "ch25_rage" },
+        { text: "A flame of hope—make them believe again.", effect: add("hope",1), goto: "ch25_rage" }
+      ]
+    },
+
+    { type: "label", id: "ch25_rage" },
+    { type: "narr", text: `
+Rufki fights on foot—katana in hand—moving like the world slowed down for him.
+
+Betas fall.
+People survive.
+The team regroups.
+
+And then—
+
+The real boss arrives.
+`},
+    { type: "goto", id: "ch26_start" },
+
+    // ============================================================
+    // CHAPTER 26 — THE HERO’S MEANING (FINAL)
+    // ============================================================
+    { type: "label", id: "ch26_start" },
+    { type: "bg", value: "final" },
+    { type: "narr", text: `
+CHAPTER 26 — WHAT IT MEANS TO BE A HERO
+
+The boss is not just strong.
+He’s *absolute*.
+
+He tries to break them with inevitability.
+
+“You can’t save everyone,” he says.
+
+Rufki hears Mia’s voice in his head.
+He hears the city.
+
+And he chooses.
+`},
+
+    {
+      type: "choice",
+      prompt: "Final decision: what does Rufki do?",
+      options: [
+        { text: "Sacrifice himself to end it for good.", effect: add("resolve",1), goto: "ending_check" },
+        { text: "Try to win without sacrifice—risk the world.", effect: add("fear",1), goto: "ending_check" },
+        { text: "Spare the enemy if possible—end the cycle.", effect: add("mercy",1), goto: "ending_check" },
+        { text: "Expose the truth to the world—break their control.", effect: add("truth",1), goto: "ending_check" }
+      ]
+    },
+
+    // ============================================================
+    // ENDING CHECK — routes to multiple endings
+    // ============================================================
+    { type: "label", id: "ending_check" },
+
+    // TRUE ENDING: high overall score, low fear, and adoption path
+    { type: "if",
+      cond: (S) => {
+        const v = (window.State && State.vars) ? State.vars : {};
+        const flags = v.flags || {};
+        const total =
+          (v.truth||0) + (v.resolve||0) + (v.mercy||0) + (v.hope||0) - (v.fear||0);
+        return (flags.mia_adopted === true) && total >= 6 && (v.resolve||0) >= 2;
+      },
+      then: "ending_true",
+      else: "ending_alt_check"
+    },
+
+    { type: "label", id: "ending_alt_check" },
+
+    // Ending: DESPAIR (fear dominates)
+    { type: "if",
+      cond: (S) => ((State.vars.fear||0) >= 3),
+      then: "ending_despair",
+      else: "ending_alt_check2"
+    },
+
+    { type: "label", id: "ending_alt_check2" },
+
+    // Ending: VENGEANCE (resolve high, mercy low)
+    { type: "if",
+      cond: (S) => ((State.vars.resolve||0) >= 3 && (State.vars.mercy||0) <= 0),
+      then: "ending_vengeance",
+      else: "ending_alt_check3"
+    },
+
+    { type: "label", id: "ending_alt_check3" },
+
+    // Ending: MERCY (mercy high)
+    { type: "if",
+      cond: (S) => ((State.vars.mercy||0) >= 3),
+      then: "ending_mercy",
+      else: "ending_hope"
+    },
+
+    // ============================================================
+    // TRUE ENDING (your canon: sacrifice + legacy)
+    // ============================================================
+    { type: "label", id: "ending_true" },
+    { type: "bg", value: "epilogue" },
+    { type: "narr", text: `
+TRUE ENDING — LEGACY
+
+Rufki knows the cost the moment he sees the opening.
+A final strike that will end the boss…
+and burn out everything inside him.
+
+He takes it anyway.
+
+Not because he wants to die.
+
+Because he refuses to let Mia grow up in a world that never learned what a hero is.
+`},
+
+    { type: "narr", text: `
+The boss falls.
+
+The swarm collapses without its control.
+
+The city lives.
+
+Rufki collapses too—quietly, like a candle refusing to flicker.
+
+The team gathers.
+Even Alban can’t pretend he isn’t breaking.
+`},
+
+    { type: "say", who: "Rufki", text: "I’m sorry… I couldn’t save everyone." },
+    { type: "say", who: "Niko", text: "You saved the world." },
+    { type: "say", who: "Muhammad", text: "That’s what matters." },
+
+    { type: "narr", text: `
+Mia’s hand finds Rufki’s.
+
+Not the hand of a rescued girl anymore.
+
+The hand of family.
+`},
+
+    { type: "narr", text: `
+Rufki gives Mia the last of his strength—not power like a weapon…
+
+but courage like a torch.
+
+“You will protect this world,” he whispers.
+“You will carry what I couldn’t.”
+`},
+
+    { type: "narr", text: `
+Rufki’s eyes close.
+
+But he isn’t gone.
+
+Not truly.
+
+Because later, when Mia sleeps…
+she dreams of him.
+
+Not as a ghost.
 
 As a promise.
 
-Rufki’s eyes lift. For a moment, he looks younger—like the weight shifts into purpose.
-`},
-{ type: "say", who: "Rufki", text: `Then we do this the right way.` },
-{ type: "goto", id: "ch3_hook" },
+A final goodbye.
 
-// -------- Hook into Chapter 4 ----------
-{ type: "label", id: "ch3_hook" },
-{ type: "bg", value: "chaos" },
+And a reminder:
 
-{ type: "narr", text: `
-The meeting ends with action.
+A hero isn’t the one who wins.
 
-Engineers rush to assemble a jammer rig out of whatever still works.
-
-Muhammad recalibrates his focus—because telekinesis isn’t just power, it’s precision.
-
-Alban sharpens his blade, not because he needs to, but because it gives his hands something to do besides shake.
-
-Rufki walks through the hangar, looking at the mechs like they’re not machines.
-
-Like they’re coffins you climb into willingly.
+A hero is the one who chooses others… even when it costs everything.
 `},
 
-{ type: "narr", text: `
-And outside… the betas shift.
-
-Not attacking.
-
-Positioning.
-
-Like they can feel something coming.
-
-Like the hive mind is turning its attention toward the one place the humans are finally trying to think like predators.
+    { type: "narr", text: `
+THE END — TRUE ENDING
 `},
 
-{ type: "say", who: "Rufki", text: `Tomorrow we stop running.` },
+    // ============================================================
+    // ALT ENDINGS
+    // ============================================================
+    { type: "label", id: "ending_despair" },
+    { type: "bg", value: "epilogue" },
+    { type: "narr", text: `
+ENDING — DESPAIR
 
-{ type: "narr", text: `
-Somewhere beyond the crater, the signal spikes again—sharp enough to make teeth ache.
+Fear wins the final moment.
 
-The lights flicker.
+Rufki hesitates.
+The boss exploits it.
+The team survives—but the city pays.
 
-The air tastes like static.
+People remember the day the sky burned…
+and the day hope went quiet.
 
-And for the first time, you wonder:
-
-What if the betas aren’t the invasion…
-
-…what if they’re just the scouts?
+THE END — DESPAIR
 `},
 
-{ type: "narr", text: `
-End of Chapter 3.
+    { type: "label", id: "ending_vengeance" },
+    { type: "bg", value: "epilogue" },
+    { type: "narr", text: `
+ENDING — VENGEANCE
 
-Next: CHAPTER 4 — THE JAMMER
+Resolve becomes obsession.
+
+Rufki wins—but leaves mercy behind.
+The boss falls in rage, not purpose.
+
+The city survives…
+but the hero becomes a warning.
+
+THE END — VENGEANCE
 `},
 
-{ type: "goto", id: "ch4_start" },
+    { type: "label", id: "ending_mercy" },
+    { type: "bg", value: "epilogue" },
+    { type: "narr", text: `
+ENDING — MERCY
+
+Rufki finds a way to end the war without becoming what he hates.
+He spares what can be spared.
+He protects what must be protected.
+
+The world survives…
+and humanity remains human.
+
+THE END — MERCY
+`},
+
+    { type: "label", id: "ending_hope" },
+    { type: "bg", value: "epilogue" },
+    { type: "narr", text: `
+ENDING — HOPE
+
+Rufki inspires the impossible.
+
+The boss falls, not just to strength—
+but to the refusal of the human spirit to kneel.
+
+The city rebuilds.
+The team endures.
+Mia grows up believing in heroes.
+
+THE END — HOPE
+`},
   ];
 })();
