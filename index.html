@@ -16,46 +16,188 @@
   <link rel="stylesheet" href="./style.css">
 </head>
 
-<body class="vn">
-  <!-- TOP BAR -->
-  <header class="vnTop">
-    <div class="vnTitle">WORLD END(S)</div>
-    <div class="vnTopBtns">
-      <button id="btnSave">Save</button>
-      <button id="btnLoad">Load</button>
-      <button id="btnMenu">Menu</button>
-    </div>
-  </header>
+<body class="game">
+  <!-- =========================
+       MAIN MENU (GAME FEEL)
+  ========================== -->
+  <div id="mainMenu" class="menuScreen">
+    <div class="menuBg"></div>
 
-  <!-- MAIN VN STAGE -->
-  <main id="screen" class="vnStage" aria-label="Story screen">
-
-    <!-- ART / BACKGROUND LAYER -->
-    <!-- Later you’ll swap the background image with CSS or JS -->
-    <section id="artLayer" class="vnArt" aria-label="Artwork area">
-      <!-- optional: you can place an <img> here later if you want -->
-      <!-- <img id="sceneArt" src="art/ch1-001.jpg" alt=""> -->
-    </section>
-
-    <!-- TEXT BOX -->
-    <section class="vnBox" aria-label="Text box">
-      <div id="text" class="vnText"></div>
-
-      <div id="choices" class="vnChoices hidden"></div>
-
-      <div class="vnHud">
-        <button id="btnBack">Back</button>
-        <div class="vnHint">Tap the art or text to continue</div>
-        <button id="btnNext" class="primary">Next</button>
+    <div class="menuCenter">
+      <div class="logoBlock">
+        <div class="gameTitle">WORLD END(S)</div>
+        <div class="gameTag">Interactive Novel</div>
       </div>
 
-      <div id="toast" class="toast hidden"></div>
-      <div id="err" class="err hidden"></div>
-    </section>
+      <div class="menuButtons">
+        <button class="menuBtn primary" id="mmContinue">Continue</button>
+        <button class="menuBtn" id="mmNew">New Game</button>
+        <button class="menuBtn" id="mmLoad">Load</button>
+        <button class="menuBtn" id="mmSettings">Settings</button>
+        <button class="menuBtn" id="mmCredits">Credits</button>
+      </div>
 
-  </main>
+      <div class="menuFooter">
+        <span class="smallText">Tip: Add to Home Screen for full-screen play.</span>
+      </div>
+    </div>
+  </div>
 
-  <!-- Scripts (order matters) -->
+  <!-- =========================
+       SETTINGS PANEL
+  ========================== -->
+  <div id="settingsPanel" class="modal hidden">
+    <div class="modalCard">
+      <div class="modalTitle">Settings</div>
+
+      <div class="settingRow">
+        <label>Text size</label>
+        <select id="setTextSize">
+          <option value="sm">Small</option>
+          <option value="md" selected>Medium</option>
+          <option value="lg">Large</option>
+        </select>
+      </div>
+
+      <div class="settingRow">
+        <label>Tap anywhere to advance</label>
+        <input id="setTapAdvance" type="checkbox" checked />
+      </div>
+
+      <div class="settingRow">
+        <label>Reduce motion</label>
+        <input id="setReduceMotion" type="checkbox" />
+      </div>
+
+      <div class="modalActions">
+        <button id="setClose" class="menuBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================
+       CREDITS PANEL
+  ========================== -->
+  <div id="creditsPanel" class="modal hidden">
+    <div class="modalCard">
+      <div class="modalTitle">Credits</div>
+      <div class="creditsText">
+        <p><strong>Story:</strong> Rufki Vila</p>
+        <p><strong>Interactive Novel Engine:</strong> Custom Web VN</p>
+        <p><strong>World:</strong> WORLD END(S)</p>
+        <p class="smallText">More credits can go here later (music, art, voice, etc.).</p>
+      </div>
+      <div class="modalActions">
+        <button id="credClose" class="menuBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================
+       GAME UI (VN SCREEN)
+       Keep these IDs for engine.js
+  ========================== -->
+  <div id="gameUI" class="gameUI hidden">
+    <header class="topBar">
+      <div class="topLeft">
+        <div class="tinyTitle">WORLD END(S)</div>
+      </div>
+      <div class="topRight">
+        <button id="btnSave" class="chip">Save</button>
+        <button id="btnLoad" class="chip">Load</button>
+        <button id="btnMenu" class="chip">Menu</button>
+      </div>
+    </header>
+
+    <main id="screen" class="stage" aria-label="Story screen">
+      <!-- ART/SCENE AREA -->
+      <section id="artLayer" class="artArea" aria-label="Artwork area">
+        <!-- Later: put scene art here or set as background with CSS/JS -->
+      </section>
+
+      <!-- TEXT BOX -->
+      <section class="textBox" aria-label="Text box">
+        <div id="speaker" class="speaker hidden"></div>
+        <div id="text" class="text"></div>
+
+        <div id="choices" class="choices hidden"></div>
+
+        <div class="hud">
+          <button id="btnBack" class="hudBtn">Back</button>
+          <div class="hint">Tap the story area or press Next</div>
+          <button id="btnNext" class="hudBtn primary">Next</button>
+        </div>
+
+        <div id="toast" class="toast hidden"></div>
+        <div id="err" class="err hidden"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- =========================
+       MINI UI SCRIPT (MENU FLOW)
+       This does NOT replace your engine.
+  ========================== -->
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function showMainMenu() {
+      $("mainMenu").classList.remove("hidden");
+      $("gameUI").classList.add("hidden");
+    }
+    function showGame() {
+      $("mainMenu").classList.add("hidden");
+      $("gameUI").classList.remove("hidden");
+    }
+
+    // Buttons
+    $("mmNew").onclick = () => {
+      // clear any saved progress for a fresh run
+      try { localStorage.removeItem("WORLD_ENDS_SAVE"); } catch(e){}
+      showGame();
+      // Engine should start when visible (your engine.js handles start)
+      // If your engine needs a start call, tell me what function name it uses.
+    };
+
+    $("mmContinue").onclick = () => {
+      showGame();
+      // Engine should load last autosave/save if your engine supports it
+      // If it needs a function call, tell me what your save key is and I’ll wire it.
+    };
+
+    $("mmLoad").onclick = () => {
+      showGame();
+      // triggers your engine’s Load UI (btnLoad)
+      setTimeout(() => $("btnLoad")?.click(), 50);
+    };
+
+    $("mmSettings").onclick = () => $("settingsPanel").classList.remove("hidden");
+    $("setClose").onclick = () => $("settingsPanel").classList.add("hidden");
+
+    $("mmCredits").onclick = () => $("creditsPanel").classList.remove("hidden");
+    $("credClose").onclick = () => $("creditsPanel").classList.add("hidden");
+
+    // Menu button in game returns to main menu
+    document.addEventListener("click", (e) => {
+      if (e.target && e.target.id === "btnMenu") {
+        e.preventDefault();
+        showMainMenu();
+      }
+    });
+
+    // Settings (simple)
+    $("setTextSize").onchange = (e) => {
+      document.body.dataset.textsize = e.target.value;
+    };
+    $("setReduceMotion").onchange = (e) => {
+      document.body.dataset.reducemotion = e.target.checked ? "1" : "0";
+    };
+
+    // Default start on main menu
+    showMainMenu();
+  </script>
+
+  <!-- Your engine + story -->
   <script src="./engine.js"></script>
   <script src="./story.js"></script>
 </body>
