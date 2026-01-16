@@ -1,66 +1,76 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>WORLD END(S)</title>
-
-  <!-- Mobile / PWA -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#050510">
-
-  <!-- Icons (you can replace later) -->
-  <link rel="apple-touch-icon" href="icon-180.png">
-  <link rel="icon" href="icon-192.png">
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="./style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#050510" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Worlds End(s) — Play Novel</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-  <div id="app">
+  <div id="app" class="app">
+    <div id="bg" class="bg"></div>
 
-    <!-- ===== HEADER ===== -->
-    <header class="top-bar">
-      <div class="title">WORLD END(S)</div>
-      <div class="top-buttons">
-        <button id="btnSave">Save</button>
-        <button id="btnLoad">Load</button>
-        <button id="btnMenu">Menu</button>
+    <header class="topbar">
+      <div class="title">WORLDS END(S)</div>
+      <div class="topbar-actions">
+        <button id="btnSave" class="mini">Save</button>
+        <button id="btnLoad" class="mini">Load</button>
+        <button id="btnMenu" class="mini">Menu</button>
       </div>
     </header>
 
-    <!-- ===== ART PANEL (THIS IS WHERE ART GOES) ===== -->
-    <section id="art-panel">
-      <!-- 
-        Later you can set artwork here via CSS:
-        #art-panel { background-image: url("art/ch1-01.jpg"); }
-      -->
-    </section>
+    <main class="main">
+      <section id="menu" class="panel hidden">
+        <h1>Worlds End(s)</h1>
+        <p class="sub">A Play Novel</p>
+        <div class="menu-buttons">
+          <button id="btnStart" class="primary">Start</button>
+          <button id="btnContinue" class="secondary">Continue</button>
+          <button id="btnClear" class="secondary">Clear Save</button>
+        </div>
+        <p class="hint">Tip: On iPhone, open in Safari → Share → “Add to Home Screen”.</p>
+      </section>
 
-    <!-- ===== STORY PANEL ===== -->
-    <main id="screen" aria-label="Story screen">
-      <div id="speaker" class="speaker hidden"></div>
+      <section id="novel" class="novel">
+        <div id="nameplate" class="nameplate hidden"></div>
 
-      <div id="text" class="text"></div>
+        <div id="textbox" class="textbox">
+          <div id="text" class="text"></div>
+          <div class="controls">
+            <button id="btnBack" class="secondary">Back</button>
+            <button id="btnNext" class="primary">Next</button>
+          </div>
+        </div>
 
-      <div id="choices" class="choices hidden"></div>
+        <div id="choices" class="choices hidden"></div>
+      </section>
 
-      <div id="toast" class="toast hidden"></div>
-      <div id="err" class="err hidden"></div>
+      <section id="ending" class="panel hidden">
+        <h2 id="endingTitle">The End</h2>
+        <p id="endingBody" class="sub"></p>
+        <div class="menu-buttons">
+          <button id="btnRestart" class="primary">Restart</button>
+          <button id="btnEndingLoad" class="secondary">Load Save</button>
+        </div>
+      </section>
     </main>
 
-    <!-- ===== FOOTER CONTROLS ===== -->
-    <footer class="bottom-bar">
-      <button id="btnBack">Back</button>
-      <div class="hint">Tap the story area or press Next</div>
-      <button id="btnNext" class="primary">Next</button>
-    </footer>
+    <audio id="music" preload="auto" loop></audio>
+    <audio id="sfx" preload="auto"></audio>
 
+    <div id="toast" class="toast hidden"></div>
   </div>
 
-  <!-- Engine -->
-  <script src="./story.js" defer></script>
+  <script src="story.js"></script>
+  <script>
+    // Minimal PWA service worker (safe to ignore if not hosting)
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js").catch(()=>{});
+    }
+  </script>
 </body>
 </html>
