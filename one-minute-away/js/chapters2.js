@@ -610,6 +610,7 @@ export async function FINAL(G) {
   W.add(her.root);
   // she follows a few steps behind
   W.every((dt) => {
+    if (done) return; // the ending cutscene takes over her movement
     const p = her.root.position;
     // run alongside him, a half step behind, on his right
     const tx = P.pos.x - Math.sin(P.yaw) * 0.5 - Math.cos(P.yaw) * 0.9, tz = P.pos.z - Math.cos(P.yaw) * 0.5 + Math.sin(P.yaw) * 0.9;

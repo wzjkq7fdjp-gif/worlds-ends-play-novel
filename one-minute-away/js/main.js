@@ -122,8 +122,13 @@ G.interactOnce = (o) => guard(new Promise((res) => {
 }));
 G.walkTo = (ch, x, z, speed = 1.4, o = {}) => guard(new Promise((res) => {
   ch._walking = true;
+  const p0 = ch.root.position;
+  // safety net: never let a scripted walk hold a cutscene forever
+  let left = Math.hypot(x - p0.x, z - p0.z) / speed + 3;
   const fn = (dt) => {
     const p = ch.root.position;
+    left -= dt;
+    if (left <= 0) { p.x = x; p.z = z; }
     const dx = x - p.x, dz = z - p.z, d = Math.hypot(dx, dz);
     if (d < 0.08) {
       ch.update(dt, 0);
