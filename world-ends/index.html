@@ -59,7 +59,7 @@ body.lbox #objective, body.lbox #bhud { opacity: 0 !important; }
 #hud { position: absolute; inset: 0; pointer-events: none; transition: opacity 0.3s; z-index: 3; }
 body.modal #hud { opacity: 0; }
 #clock { display: none; }
-#objective { position: absolute; top: calc(var(--u) * 10); left: calc(var(--u) * 10); max-width: 64%; font-size: calc(var(--u) * 7.5); line-height: 1.35;
+#objective { position: absolute; top: calc(var(--u) * 8); left: calc(var(--u) * 10); right: calc(var(--u) * 10); max-width: 80%; font-size: calc(var(--u) * 7.5); line-height: 1.35;
   text-shadow: 0 1px 0 #000, 0 0 4px #000; opacity: 0; transform: translateX(calc(var(--u) * -6)); transition: opacity 0.8s, transform 0.8s; }
 #objective .tag { display: block; font-size: 0.75em; color: var(--gold); letter-spacing: 0.25em; }
 #objective.on { opacity: 1; transform: none; }
@@ -73,8 +73,8 @@ body.modal #hud { opacity: 0; }
   opacity: 0; transition: opacity 1.2s; text-shadow: 0 0 6px #000, 0 0 2px #000, 0 0 calc(var(--u) * 8) rgba(160,120,255,0.6); font-style: italic; padding: 0 8%; }
 #whisper.on { opacity: 0.9; animation: shiver 0.12s infinite; }
 @keyframes shiver { 50% { transform: translateX(1px); } }
-#toast { position: absolute; left: 50%; top: calc(var(--u) * 34); transform: translateX(-50%); font-size: calc(var(--u) * 7); color: var(--cyan); opacity: 0; transition: opacity 0.4s;
-  letter-spacing: 0.12em; text-shadow: 0 0 4px #000, 0 1px 0 #000; white-space: nowrap; }
+#toast { position: absolute; left: 8%; right: 8%; top: 52%; text-align: center; font-size: calc(var(--u) * 7); color: var(--cyan); opacity: 0; transition: opacity 0.4s;
+  letter-spacing: 0.1em; line-height: 1.4; text-shadow: 0 0 4px #000, 0 1px 0 #000, 0 0 2px #000; }
 #toast.on { opacity: 1; }
 #fade { position: absolute; inset: 0; background: #000; opacity: 1; pointer-events: none; z-index: 8; }
 .systxt { position: absolute; left: 6%; right: 6%; top: 30%; text-align: center; font-family: var(--digit); font-size: calc(var(--u) * 12); color: var(--red);
@@ -242,7 +242,7 @@ body.lbox .dlg { bottom: calc(12% + var(--u) * 4); }
 .b-abar i { display: block; height: 100%; background: var(--hp); transition: width 0.2s; }
 .b-ally em { font-style: normal; font-size: 0.8em; color: var(--gold); min-width: calc(var(--u) * 20); text-align: right; }
 .b-ally.down { opacity: 0.5; } .b-ally.down em { color: var(--red); }
-.b-target { position: absolute; top: calc(var(--u) * 6); left: 50%; transform: translateX(-50%); width: 50%; text-align: center; opacity: 0; transition: opacity 0.3s; }
+.b-target { position: absolute; top: calc(var(--u) * 30); left: 50%; transform: translateX(-50%); width: 46%; text-align: center; opacity: 0; transition: opacity 0.3s; }
 .b-target.on { opacity: 1; }
 .b-tname { font-size: calc(var(--u) * 6.6); letter-spacing: 0.15em; text-shadow: 0 1px 0 #000, 0 0 4px #000; }
 .b-tbar { margin-top: calc(var(--u) * 2); height: calc(var(--u) * 3); background: rgba(0,0,0,0.6); border: 1px solid #806070; }
@@ -251,10 +251,10 @@ body.lbox .dlg { bottom: calc(12% + var(--u) * 4); }
 .b-nodes { margin-top: calc(var(--u) * 2); display: flex; gap: calc(var(--u) * 3); justify-content: center; }
 .b-nodes i { width: calc(var(--u) * 5); height: calc(var(--u) * 5); transform: rotate(45deg); background: #ff5070; box-shadow: 0 0 calc(var(--u) * 3) #ff5070; }
 .b-nodes i.cut { background: #303040; box-shadow: none; }
-.b-sync { position: absolute; top: calc(var(--u) * 30); left: 50%; transform: translateX(-50%); font-size: calc(var(--u) * 7); color: var(--red); letter-spacing: 0.2em; opacity: 0; text-shadow: 0 0 4px #000; }
+.b-sync { position: absolute; top: calc(var(--u) * 52); left: 50%; transform: translateX(-50%); font-size: calc(var(--u) * 7); color: var(--red); letter-spacing: 0.2em; opacity: 0; text-shadow: 0 0 4px #000; }
 .b-sync.on { opacity: 1; animation: sysblink 0.6s steps(2) infinite; }
 .b-help { position: absolute; left: 50%; bottom: calc(var(--u) * 48); transform: translateX(-50%); font-size: calc(var(--u) * 5.6); color: rgba(255,255,255,0.55); white-space: nowrap; text-shadow: 0 1px 0 #000; }
-.b-civ { position: absolute; top: calc(var(--u) * 10); right: calc(var(--u) * 10); font-size: calc(var(--u) * 6.4); color: var(--cyan); text-shadow: 0 1px 0 #000; }
+.b-civ { position: absolute; bottom: calc(var(--u) * 52); right: calc(var(--u) * 8); font-size: calc(var(--u) * 6.4); color: var(--cyan); text-shadow: 0 1px 0 #000; }
 .b-pops { position: absolute; inset: 0; }
 .b-pop { position: absolute; transform: translate(-50%, -50%); font-family: var(--digit); font-size: calc(var(--u) * 12); font-weight: 700; text-shadow: 0 0 2px #000, 1px 1px 0 #000, -1px -1px 0 #000; }
 .b-pop.word { font-family: var(--body); font-size: calc(var(--u) * 6.6); letter-spacing: 0.15em; }
@@ -264,7 +264,7 @@ body.touch .b-help { display: none; }
 body.cockpit #cockpit { display: block; }
 #cockpit::before { content: ""; position: absolute; inset: 4%; border: 1px solid rgba(110,240,200,0.35);
   clip-path: polygon(0 0, 12% 0, 12% 1px, 0 1px, 0 12%, 1px 12%, 1px 0, 100% 0, 100% 12%, calc(100% - 1px) 12%, calc(100% - 1px) 1px, 88% 1px, 88% 0, 100% 0, 100% 100%, 88% 100%, 88% calc(100% - 1px), 100% calc(100% - 1px), 100% 88%, calc(100% - 1px) 88%, calc(100% - 1px) 100%, 0 100%, 0 88%, 1px 88%, 1px calc(100% - 1px), 12% calc(100% - 1px), 12% 100%, 0 100%); }
-#cockpit .ck { position: absolute; top: 5.5%; right: 6%; font-family: var(--digit); font-size: calc(var(--u) * 7.5); color: rgba(120,255,200,0.75); letter-spacing: 0.1em; text-align: right; }
+#cockpit .ck { position: absolute; bottom: 5.5%; left: 50%; transform: translateX(-50%); text-align: center !important; font-family: var(--digit); font-size: calc(var(--u) * 7.5); color: rgba(120,255,200,0.75); letter-spacing: 0.1em; text-align: right; }
 #cockpit .cr { position: absolute; left: 50%; top: 50%; width: calc(var(--u) * 16); height: calc(var(--u) * 16); margin: calc(var(--u) * -8) 0 0 calc(var(--u) * -8);
   border: 1px solid rgba(120,255,200,0.4); border-radius: 50%; }
 

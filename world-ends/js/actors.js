@@ -31,7 +31,7 @@ export const CAST = {
 };
 // Eidolon frames: same rig, armoured proportions.
 export const FRAMES = {
-  kaien: { mech: true, plate: [64, 74, 104], trim: [180, 40, 46], core: 0x60c0ff, weapon: "katana" },
+  kaien: { mech: true, plate: [70, 82, 118], trim: [150, 36, 44], core: 0x60c0ff, weapon: "katana" },
   renji: { mech: true, plate: [96, 100, 104], trim: [60, 160, 90], core: 0x60ff90, weapon: "katana", broad: 1.25 },
   raizen: { mech: true, plate: [110, 40, 40], trim: [150, 90, 220], core: 0xb060ff, weapon: "katana" },
   shion: { mech: true, plate: [190, 196, 206], trim: [80, 200, 230], core: 0x80f0ff, weapon: "katana" },
@@ -89,7 +89,7 @@ export class Character {
       const core = new THREE.Mesh(boxGeo(0.16, 0.16, 0.06), mat({ color: P.core, unlit: true }));
       core.position.set(0, 0.42, 0.18); torso.add(core); this.core = core;
       const collar = B(0.36 * W, 0.12, 0.3, sleeveM); collar.position.y = 0.62; torso.add(collar);
-      for (const s of [-1, 1]) { const pa = B(0.26, 0.2, 0.36, sleeveM); pa.position.set(s * 0.33 * W, 0.6, 0); torso.add(pa); }
+      for (const s of [-1, 1]) { const pa = B(0.26, 0.2, 0.36, jackM); pa.position.set(s * 0.33 * W, 0.6, 0); torso.add(pa); const st = B(0.27, 0.05, 0.37, sleeveM); st.position.set(s * 0.33 * W, 0.71, 0); torso.add(st); }
       const back = B(0.36, 0.42, 0.14, pantsM); back.position.set(0, 0.36, -0.22); torso.add(back);
     } else if (P.jacket || P.coat) {
       const jk = B(0.43 * W, P.coat ? 0.78 : 0.42, 0.26, jackM); jk.position.y = P.coat ? 0.22 : 0.42; torso.add(jk);
@@ -112,7 +112,7 @@ export class Character {
     const head = (this.head = new THREE.Group());
     head.position.y = M ? 0.7 : 0.66; torso.add(head);
     if (M) {
-      const h = B(0.24, 0.24, 0.26, sleeveM); h.position.y = 0.12; head.add(h);
+      const h = B(0.24, 0.24, 0.26, jackM); h.position.y = 0.12; head.add(h);
       const visor = new THREE.Mesh(boxGeo(0.2, 0.05, 0.04), mat({ color: P.core, unlit: true })); visor.position.set(0, 0.14, 0.13); head.add(visor);
       const crest = B(0.04, 0.12, 0.2, sleeveM); crest.position.set(0, 0.3, 0); head.add(crest);
       for (const s of [-1, 1]) { const ant = B(0.03, 0.18, 0.03, sleeveM); ant.position.set(s * 0.13, 0.28, -0.02); ant.rotation.z = -s * 0.5; head.add(ant); }
@@ -132,7 +132,7 @@ export class Character {
     // arms
     const mkArm = (side) => {
       const sh = new THREE.Group(); sh.position.set(side * (M ? 0.34 : 0.27) * W, 0.56, 0); torso.add(sh);
-      const upM = P.asym && side < 0 ? mat({ map: cloth(P.asym) }) : sleeveM;
+      const upM = P.asym && side < 0 ? mat({ map: cloth(P.asym) }) : M ? jackM : sleeveM;
       const up = B(M ? 0.16 : 0.11, 0.32, M ? 0.17 : 0.12, upM); up.position.y = -0.16; sh.add(up);
       const el = new THREE.Group(); el.position.y = -0.32; sh.add(el);
       const fo = B(M ? 0.17 : 0.1, 0.28, M ? 0.17 : 0.11, P.asym && side < 0 ? upM : sleeveM); fo.position.y = -0.14; el.add(fo);

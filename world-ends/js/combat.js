@@ -690,7 +690,7 @@ export class Battle {
       allies: h.querySelector(".b-allies"), sync: h.querySelector(".b-sync"), pops: h.querySelector(".b-pops"), civ: h.querySelector(".b-civ"), me: h.querySelector(".b-me"),
     };
     document.body.classList.add("inbattle");
-    if (this.o.mech) document.body.classList.add("cockpit");
+
   }
   renderAllies() {
     if (!this.el) return;

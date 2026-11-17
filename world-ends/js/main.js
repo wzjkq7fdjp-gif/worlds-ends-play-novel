@@ -165,7 +165,7 @@ G.setAvatar = (id = "kaien", mech = false) => {
   const P = G.player;
   const old = P.ch.root;
   const pos = P.pos.clone();
-  const ch = mech ? new Character({ mech: true, plate: [64, 74, 104], trim: [180, 40, 46], core: 0x60c0ff, weapon: "katana" }) : new Character(id);
+  const ch = mech ? new Character({ mech: true, plate: [70, 82, 118], trim: [150, 36, 44], core: 0x60c0ff, weapon: "katana" }) : new Character(id);
   P.ch = ch;
   P.pos = ch.root.position;
   P.pos.copy(pos);
