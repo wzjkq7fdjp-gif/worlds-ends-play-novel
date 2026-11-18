@@ -976,6 +976,8 @@ export async function CH15(G) {
         dz = checkpoint - 7;
         await G.fade(0, 0.5);
         await G.say([N("The dark closes over them, and opens again a little further back.")]);
+        // walking is slower than the dark: say how to run, once
+        if (!G._runHint) { G._runHint = true; G.ui.toast(G.input.lastDevice === "touch" ? "PUSH THE STICK TO THE EDGE TO RUN." : "HOLD □ (SHIFT) TO RUN.", 6); }
         caught = false;
       });
     }
