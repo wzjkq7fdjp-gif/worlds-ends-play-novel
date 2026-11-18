@@ -7,7 +7,7 @@ import { isWatched } from "./world.js";
 import { pic } from "./art.js";
 import { propURL } from "./assets.js";
 import * as S from "./scenes.js";
-import { R, A, N, HER, pin, fl, toCam, herPage, grade, addTint, clockBack, reach, zone } from "./story.js";
+import { R, A, N, HER, at, pin, yawAt, herPage, grade, addTint, clockBack, reach, zone } from "./story.js";
 
 export const buildTitle = S.buildTitle;
 const idx = (G, id) => G.CHAPTERS.findIndex((c) => c.id === id);
@@ -119,7 +119,7 @@ function swapPOV(G, npc, name) {
 export async function CH6(G) {
   const P = G.player;
   // the kitchen, around May 9 — kept for her to tell
-  await G.load((W) => { S.paint(W, G, "hallway", { env: { ambient: [0.62, 0.5, 0.38] } }); return { start: [[230, 300], 0, 0] }; });
+  await G.load((W) => S.buildHallway(W, G, { warm: true }));
   let W = G.world;
   G.pov("Argjila");
   G.state.place = "May";
@@ -128,23 +128,23 @@ export async function CH6(G) {
   G.audio.ambience({ wind: 0, drone: 0.1, note: 52, bright: 400 });
   await G.fade(0, 1.2);
   await G.say([N("Around May 9 there is a moment in a kitchen that the two of them call a confession.")]);
-  await G.interactOnce({ pos: pin(W, 250, 230, 1.2), label: "THE KITCHEN DOOR", verb: "REMEMBER", r: 1.8, use: () => herPage(G, "kitchen") });
+  await G.interactOnce({ pos: pin(W, "kitchen", 1.2), label: "THE KITCHEN DOOR", verb: "REMEMBER", r: 1.8, use: () => herPage(G, "kitchen") });
   await G.say([N("Some scenes matter too much to fake.")]);
   await G.fade(1, 1);
 
   // ---- the dance (her side) ----
-  await G.load((W2) => { S.paint(W2, G, "dance"); return { start: [[150, 262], 0, 0] }; });
+  await G.load(S.buildDance);
   W = G.world;
   G.pov("Argjila");
   G.state.place = "the May dance";
   G.ui.clock("MAY 2026");
-  const center = fl(W, 165, 252);
+  const center = at(W, "center");
   const him = G.npc(Character, "rufki", center[0], center[1] + 0.9, Math.PI);
   P.place(center[0], center[1] - 0.1, 0);
   P.ch.pose("dance");
   him.pose("dance");
   // the other couple at the edge, completing her moves a little early
-  const [ox, oz] = fl(W, 270, 222);
+  const [ox, oz] = at(W, "edge");
   const d1 = new SpriteActor("dancer"); d1.setPos(ox, 0, oz).face(0); W.addActor(d1);
   const d2 = new Character("doubleR"); d2.setPos(ox + 0.8, 0, oz + 0.2); d2.pose("dance"); d2.early = 0.6; W.add(d2.root); G.idle(d2);
   W.every(() => { const w = isWatched(P, d1.root.position, 0.5); d1.flicker = w ? 0.35 : 0; });
@@ -167,13 +167,14 @@ export async function CH6(G) {
 
   // ---- his side: let her lead ----
   await G.handoff("Rufki", "The music keeps going");
-  await G.load((W3) => { S.paint(W3, G, "dance"); return { start: [[165, 252], 0, Math.PI] }; });
+  await G.load(S.buildDance);
   W = G.world;
   G.pov("Rufki");
-  const c2 = fl(W, 165, 262);
+  const c2 = at(W, "center");
+  P.place(c2[0], c2[1] + 0.9, Math.PI);
   const real = G.npc(Character, "argjila", c2[0], c2[1], 0);
   real.pose("dance"); P.ch.pose("dance");
-  const dbl = new Character("doubleA"); const [qx, qz] = fl(W, 215, 240); dbl.setPos(qx, 0, qz).faceToward(P.pos.x, P.pos.z); dbl.pose("reach"); dbl.early = 0.8; W.add(dbl.root); G.idle(dbl);
+  const dbl = new Character("doubleA"); const [qx, qz] = at(W, "double"); dbl.setPos(qx, 0, qz).faceToward(P.pos.x, P.pos.z); dbl.pose("reach"); dbl.early = 0.8; W.add(dbl.root); G.idle(dbl);
   await G.fade(0, 0.8);
   await G.say([N("From his side, the music keeps going when Argjila slows."), N("Her double offers him a hand. It never misses a beat.")]);
   let led = false;
@@ -192,9 +193,9 @@ export async function CH6(G) {
     if (res.hits >= 2 && res.stray <= 1) led = true;
     else { await clockBack(G, "MAY 2026"); await G.say([N("He moved on the music, not on her. Again.")]); }
   }
-  G.walkTo(dbl, qx + 3, qz + 4, 1.2);
+  G.walkTo(dbl, ...at(W, "mirror"), 1.2);
   await G.cutscene(async () => {
-    G.zoom(1.5, [165, 200], 0.4);
+    G.zoom(1.5, real);
     await G.say([N("She leads. The other couple keeps dancing, straight through the wall.")]);
     await G.flicker(dbl, 0, 1.2);
     G.zoom(1);
@@ -204,11 +205,12 @@ export async function CH6(G) {
   await G.fade(1, 1);
 
   // ---- her song: alone with a car radio ----
-  await G.load((W4) => { S.paint(W4, G, "car", { env: { ambient: [0.3, 0.3, 0.4] } }); return {}; });
+  await G.load((W4) => S.buildCar(W4, G, { drive: false }));
   W = G.world;
+  G.pov("Argjila");
   P.ch.setVisible(false);
   P.frozen = true;
-  G.pov("Argjila");
+  G.shot([0.42, 1.18, -0.1], [0.25, 1.0, 10], 60);
   G.music.play(null, 1);
   G.audio.ambience({ wind: 0.2, drone: 0.2, note: 44, bright: 240 });
   grade(0.8, 0.85, 1);
@@ -224,10 +226,10 @@ export async function CH6(G) {
   await G.say([N("“About You,” by The 1975. Her favorite. The song that reminds her of Rufki."), N("This is her private listening. The left channel holds the music.")]);
   hum(G, 10);
   G.caption("On the right, somebody in the empty back seat is humming, one beat ahead", 4);
-  G.zoom(2.2, [60, 45], 0.2);
+  G.shot([0.1, 1.45, 0.45], [0, 0.8, -1.6], 64);
   await G.wait(2.4);
   await G.say([N("In the mirror, the back seat is empty.")]);
-  G.zoom(1);
+  G.shot([0.42, 1.18, -0.1], [0.25, 1.0, 10], 60);
   const r = await G.choose("The humming is a beat ahead of the song.", ["Turn off the radio", "Stay for another moment"]);
   if (r === 0) { G.music.play(null, 0.3); G.audio.receiver(true); await G.say([N("Quiet. The memory is still hers.")]); }
   else { hum(G, 6); await G.wait(3); G.music.play(null, 2); await G.say([N("She stays. The memory is still hers.")]); }
@@ -245,26 +247,28 @@ export async function CH6(G) {
 // ============================================================
 export async function CH7(G) {
   const P = G.player;
-  await G.load((W) => { S.paint(W, G, "car"); return {}; });
+  await G.load((W0) => S.buildCar(W0, G, { drive: true }));
   const W = G.world;
+  G.pov("Rufki");
   P.ch.setVisible(false);
   P.frozen = true;
-  G.pov("Rufki");
+  const drive = () => G.shot([-0.4, 1.2, -0.1], [-0.3, 1.05, 10], 60);
+  drive();
+  // the same lone tree, behind them too
+  const behind = G._loneTree.clone();
+  behind.position.set(-2.4, 0, -16);
+  W.add(behind);
+  const lightsOn = (v) => G._cityLights.forEach((g) => (g.visible = v));
   G.state.place = "the drive back";
   G.ui.clock("MAY 2026");
   G.audio.ambience({ wind: 0.4, drone: 0.25, note: 41, traffic: 0, bright: 220 });
   G.music.play("fog", 2);
-  // the city lights strip that only appears when she holds the map
-  const lights = document.createElement("div");
-  lights.className = "citylights";
-  document.getElementById("hud").append(lights);
-  const cleanup = () => lights.remove();
   await G.fade(0, 1.4);
   await G.say([N("They went upstate together and came back to the city for a day in May. The tree line gives way to buildings..."), N("...until Rufki looks in the rearview mirror.")]);
-  G.zoom(2.2, [60, 45], 0.2);
+  G.shot([-0.1, 1.5, 0.5], [-1.8, 2.6, -16], 46);
   G.audio.sting(true);
   await G.say([N("Ahead and behind, the same lone tree bends over the road.")]);
-  G.zoom(1);
+  drive();
   G.audio.staticBurst(0.4, 0.06);
   await G.say([["radio", "...and on the parkway tomorrow morning, expect delays in both directions..."], N("The city station is reading tomorrow's traffic.")]);
   let arrived = false;
@@ -280,16 +284,21 @@ export async function CH7(G) {
     // ---- passenger side ----
     await G.handoff("Argjila", "The passenger seat");
     G.pov("Argjila");
+    P.ch.setVisible(false);
+    G.shot([0.35, 1.2, -0.1], [1.0, 1.22, 0.45], 62);
     await G.item({ title: "THE PAPER MAP", prop: "map", text: "A crease has swallowed the whole day back in the city. On the reverse, somebody has drawn a city block from the passenger window, side mirror in the corner." });
     let aligned = false;
     while (!aligned) aligned = await mapAlign(G);
-    lights.classList.add("on");
+    lightsOn(true);
+    G.shot([0.42, 1.18, -0.1], [0.25, 1.15, 10], 58);
     G.audio.repair();
     G.caption("A strip of city lights", 3);
     await G.say([N("When the drawn mirror and the real one line up, a strip of city lights appears.")]);
     // ---- driver side: follow her directions through the dark stretch ----
     await G.handoff("Rufki", "Follow her directions");
     G.pov("Rufki");
+    P.ch.setVisible(false);
+    drive();
     G.music.play("chase", 1);
     const route = [["left", "Left."], ["right", "Right."], ["up", "Straight. Keep going."], ["left", "Left here."]];
     let ok = true;
@@ -300,7 +309,7 @@ export async function CH7(G) {
     }
     G.music.play("fog", 1);
     if (!ok) {
-      lights.classList.remove("on");
+      lightsOn(false);
       await clockBack(G, "MAY 2026");
       await G.say([N("The dark stretch folds. The same tree, ahead and behind.")]);
       continue;
@@ -321,7 +330,6 @@ export async function CH7(G) {
   await G.say([N("The date on the dashboard finally turns over.")]);
   G.repair("return");
   await herPage(G, "return");
-  cleanup();
   P.ch.setVisible(true);
   grade();
   await G.fade(1, 1);
@@ -333,14 +341,14 @@ export async function CH7(G) {
 // ============================================================
 export async function CH8(G) {
   const P = G.player;
-  const load = async (start) => { await G.load((W) => { S.paint(W, G, "park"); return { start }; }); return G.world; };
-  let W = await load([[284, 304], 0, -0.6]);
+  const load = async (start) => { await G.load(S.buildPark); G.placeAt(...start); return G.world; };
+  let W = await load(["start"]);
   G.pov("Rufki");
   G.state.place = "the park near Target";
   G.ui.clock("2026");
   G.audio.ambience({ wind: 0.3, drone: 0.1, note: 46, traffic: 0.12, bright: 300 });
   G.music.play("sorrow", 2);
-  const [ax, az] = fl(W, 168, 238);
+  const [ax, az] = at(W, "her");
   let her = G.npc(Character, "argjila", ax, az, Math.atan2(P.pos.x - ax, P.pos.z - az));
   await G.fade(0, 1.2);
   await G.say([N("The store sign shows through the trees. Let him walk the last few steps to her.")]);
@@ -352,7 +360,7 @@ export async function CH8(G) {
     P.ch.faceToward(ax, az); P.yaw = P.ch.yaw;
     her.faceToward(P.pos.x, P.pos.z);
     P.ch.pose("cry"); her.pose("embrace");
-    G.zoom(1.7, [175, 205], 0.5);
+    G.zoom(1.7, her);
     await G.say([N("He cries in Argjila's arms by the park near Target. The camera settles while she holds him."), N("There is no timer.")]);
     await G.wait(3);
     G.audio.cartCrack(0.5);
@@ -371,7 +379,7 @@ export async function CH8(G) {
   // the reflections in the dark shop glass separate
   G.zoom(1);
   await G.wait(0.4);
-  const [gx, gz] = fl(W, 292, 214);
+  const [gx, gz] = at(W, "glass");
   const rR = new Character("doubleR"); rR.setPos(gx, 0, gz).face(0); rR.pose("embrace"); W.add(rR.root); G.idle(rR);
   const rA = new Character("doubleA"); rA.setPos(gx + 0.25, 0, gz + 0.35).face(Math.PI); rA.pose("embrace"); W.add(rA.root); G.idle(rA);
   grade(1, 0.85, 0.85);
@@ -382,7 +390,7 @@ export async function CH8(G) {
   await G.say([N("His reflection walks off. Hers keeps holding empty air.")]);
   // back to Rufki: turn back when she calls
   await G.handoff("Rufki", "She calls");
-  W = await load([[220, 300], 0, 0.9]);
+  W = await load([ax + 2.4, az + 1.5, -2.2]);
   G.pov("Rufki");
   her = G.npc(Character, "argjila", ax, az, Math.atan2(P.pos.x - ax, P.pos.z - az));
   const rA2 = new Character("doubleA"); rA2.setPos(gx + 0.25, 0, gz + 0.35).face(Math.PI); rA2.pose("embrace"); W.add(rA2.root); G.idle(rA2);
@@ -408,7 +416,7 @@ export async function CH8(G) {
       G.caption("The shopping cart rolls over the same crack again", 3);
       await clockBack(G, "2026");
       await G.fade(1, 0.4);
-      G.placeAt([220, 300], 0, 0.9);
+      G.placeAt(ax + 2.4, az + 1.5, -2.2);
       await G.fade(0, 0.5);
       await G.say([N("Another chance to hear her."), A("Rufki?")]);
     }
@@ -417,7 +425,7 @@ export async function CH8(G) {
   rA2.setVisible(false);
   await G.cutscene(async () => {
     her.faceToward(P.pos.x, P.pos.z);
-    G.zoom(1.5, [170, 210], 0.4);
+    G.zoom(1.5, her);
     await G.say([N("He turns back. She is still there.")]);
     G.zoom(1);
   });
@@ -441,7 +449,7 @@ export async function CH8(G) {
 // ============================================================
 export async function CH9(G) {
   const P = G.player;
-  await G.load((W) => { S.paint(W, G, "bedroom", { env: { ambient: [0.7, 0.58, 0.5] } }); return { start: [[60, 290], 0, 0] }; });
+  await G.load((W) => S.buildBedroom(W, G, { tone: "warm" }));
   const W = G.world;
   G.pov("Argjila");
   G.state.place = "her room";
@@ -464,7 +472,7 @@ export async function CH9(G) {
   const seen = new Set();
   while (seen.size < keep.length) {
     const left = keep.filter((k) => !seen.has(k.key));
-    const k = await G.interactAny(left.map((k) => ({ key: k.key, pos: pin(W, k.px[0], k.px[1], 0.8), label: k.label, sparkle: true, r: 1.3 })));
+    const k = await G.interactAny(left.map((k) => ({ key: k.key, pos: [k.px[0], 0.8, k.px[1]], label: k.label, sparkle: true, r: 1.3 })));
     const it = keep.find((x) => x.key === k);
     seen.add(k);
     await G.item({ title: it.title, canvas: pic(it.kind), text: it.text });
@@ -505,7 +513,7 @@ export async function CH9(G) {
 // ============================================================
 export async function CH10(G) {
   const P = G.player;
-  await G.load((W) => { S.paint(W, G, "waterfront", { env: { ambient: [0.5, 0.46, 0.6] } }); return { start: [[60, 300], 0, -0.4] }; });
+  await G.load(S.buildWaterfront);
   const W = G.world;
   G.pov("Argjila");
   G.state.place = "the waterfront";
@@ -513,7 +521,7 @@ export async function CH10(G) {
   grade(1.08, 1.0, 0.95);
   G.music.play("memory", 2);
   G.audio.ambience({ wind: 0.3, drone: 0.05, note: 49, water: 0.5, traffic: 0.1, bright: 420 });
-  const [hx, hz] = fl(W, 95, 296);
+  const [hx, hz] = at(W, "him");
   const him = G.npc(Character, "rufki", hx, hz, 0);
   W.every((dt) => { if (!him._walking) him.faceToward(P.pos.x, P.pos.z); });
   await G.fade(0, 1.2);
@@ -528,15 +536,15 @@ export async function CH10(G) {
     G.us();
     if (k === "walk") {
       G.objective("WALK.");
-      const [wx, wz] = fl(W, 160, 212);
+      const [wx, wz] = at(W, "far");
       G.walkTo(him, wx - 0.6, wz, 1.2);
       await reach(G, wx, wz, 1.4);
       await G.say([N("The boards, the railing, the river. Nothing happens. That's the point.")]);
     } else if (k === "sit") {
-      const [sx, sz] = fl(W, 90, 222);
+      const [sx, sz] = at(W, "bench");
       P.place(sx, sz, 0); P.ch.pose("sit");
       him.setPos(sx + 0.6, 0, sz); him.pose("sit");
-      G.zoom(1.4, [100, 190], 0.3);
+      G.zoom(1.5, P.ch, 0.6);
       await G.wait(3);
       await G.say([N("They sit by the water for a while.")]);
       G.zoom(1); P.ch.pose(null); him.pose(null);
@@ -552,14 +560,14 @@ export async function CH10(G) {
   // his question; her answers come from her own words
   await G.cutscene(async () => {
     him.faceToward(P.pos.x, P.pos.z);
-    G.zoom(1.4, [110, 210], 0.3);
+    G.zoom(1.5, him);
     await G.say([R("If you could go back to the beginning, knowing everything you know now, would you still choose me?")]);
   });
   await G.choose("", ["“You were close to me before I knew you.”", "“We choose each other.”", "“There is still more I have not told you yet.”"], { title: "ARGJILA" });
   G.us();
   G.zoom(1);
   // the payphone rings after he has walked past it
-  const [px2, pz2] = fl(W, 196, 268);
+  const [px2, pz2] = at(W, "phone");
   await G.walkTo(him, px2 - 0.5, pz2 + 1.2, 1.2);
   G.walkTo(him, px2 - 2.5, pz2 + 3, 1.2);
   G.audio.bell(0.06);
@@ -584,19 +592,20 @@ export async function CH10(G) {
 // ============================================================
 export async function CH11(G) {
   const P = G.player;
-  await G.load((W) => { S.paint(W, G, "unread"); return { start: [[160, 312], 0, 0] }; });
+  await G.load(S.buildUnread);
   const W = G.world;
   G.pov("Argjila");
   G.state.place = "the Unread Room";
   G.ui.clock("4:04");
   G.music.play("dread", 2);
   G.audio.ambience({ wind: 0, drone: 0.45, note: 39, bright: 160, verb: 0.3 });
-  const [fx, fz] = fl(W, 250, 290);
+  const [fx, fz] = at(W, "chairF");
   const her = new SpriteActor("friend"); her.setPos(fx, 0, fz).face(-Math.PI / 2); W.addActor(her);
   her.frameOverride = ["anim", 0];
   await G.fade(0, 1.2);
   await G.say([N("Two chairs face each other. Both have ARGJILA written on the tape across their backs."), N("The girl opposite is her former best friend. She copied nearly everything Argjila did.")]);
-  const [cx, cz] = fl(W, 70, 290);
+  const [cx, cz] = at(W, "chairA");
+  P.ghost = true;
   P.place(cx, cz, Math.PI / 2);
   P.ch.pose("sit");
   await G.choose("", ["Roll up one sleeve"]);
@@ -627,7 +636,7 @@ export async function CH11(G) {
   await G.flicker(her, 0, 1);
   await G.fade(1, 1);
   // a few steps on the boards
-  await G.load((W2) => { S.paint(W2, G, "waterfront"); return { start: [[60, 300], 0, -0.4] }; });
+  await G.load(S.buildWaterfront);
   G.pov("Argjila");
   await G.fade(0, 1);
   for (let i = 0; i < 6; i++) { G.audio.step("wood"); if (i < 4) G.audio.step("wood"); await G.wait(0.45); }
@@ -644,7 +653,7 @@ export async function CH11(G) {
 export async function CH12(G) {
   const P = G.player;
   // ---- sunset: the wrong Rufki ----
-  await G.load((W) => { S.paint(W, G, "waterfront", { env: { ambient: [0.7, 0.45, 0.38] } }); return { start: [[90, 296], 0, 0] }; });
+  await G.load((W) => S.buildWaterfront(W, G, { sunset: true }));
   let W = G.world;
   G.pov("Argjila");
   G.state.place = "the waterfront at sunset";
@@ -652,7 +661,7 @@ export async function CH12(G) {
   grade(1.15, 0.85, 0.75);
   G.music.play("loop", 2);
   G.audio.ambience({ wind: 0.2, drone: 0.2, note: 44, water: 0.3, bright: 300 });
-  const [wx, wz] = fl(W, 130, 296);
+  const [wx, wz] = at(W, "him");
   const wrong = G.npc(Character, "rufki", wx, wz, -Math.PI / 2);
   wrong.early = 0.5;
   await G.fade(0, 1);
@@ -670,7 +679,7 @@ export async function CH12(G) {
   await G.wait(1.2);
 
   // ---- the corridor of cords ----
-  await G.load((W2) => { S.paint(W2, G, "cords"); return { start: [[168, 310], 0, 0] }; });
+  await G.load(S.buildCords);
   W = G.world;
   G.pov("Rufki");
   G.state.place = "the Unsaid";
@@ -678,16 +687,16 @@ export async function CH12(G) {
   G.music.play("dread", 1);
   G.audio.ambience({ wind: 0, drone: 0.55, note: 36, bright: 140, verb: 0.6 });
   const un = new SpriteActor("unsaid", { emissive: 0.3, sway: 0.05 });
-  const far = fl(W, 172, 182);
+  const far = at(W, "far");
   un.setPos(far[0], 0, far[1]).face(Math.PI);
   W.addActor(un);
   await G.fade(0, 1);
   await G.say([N("Telephone cords pull taut between the doors. Something tall and thin is made of them."), ["unsaid", "What if she stops loving you?"], ["unsaid", "What if you aren't enough?"], ["unsaid", "What if your future disappears?"], N("It has no mouth. It speaks in their voices.")]);
   G.objective("TRACE THE TRUE PHONE LINE. LISTEN FOR THE HUM.");
-  const junctions = [[168, 288], [172, 240], [174, 204]];
+  const junctions = ["j1", "j2", "j3"];
   let wrongs = 0;
-  for (const [i, [jx, jy]] of junctions.entries()) {
-    await reach(G, ...fl(W, jx, jy), 0.9);
+  for (const [i, jn] of junctions.entries()) {
+    await reach(G, ...at(W, jn), 1.2);
     let done = false;
     while (!done) {
       const side = ["LEFT", "RIGHT", "CEILING"][Math.floor(Math.random() * 3)];
@@ -749,7 +758,7 @@ export async function CH12(G) {
 // ============================================================
 export async function CH13(G) {
   const P = G.player;
-  await G.load((W) => { S.paint(W, G, "bedroom"); return { start: [[60, 290], 0, 0] }; });
+  await G.load((W) => S.buildBedroom(W, G, { tone: "dawn", his: true, blank: true }));
   let W = G.world;
   G.pov("Rufki");
   G.state.place = "a world without her";
@@ -762,25 +771,25 @@ export async function CH13(G) {
   G.objective("LOOK FOR HER.");
   const seen = new Set();
   const spots = [
-    { key: "frames", pos: pin(W, 40, 250, 1.2), label: "PHOTO FRAMES", use: () => G.say([N("Empty photograph frames. Not torn out. Never filled.")]) },
-    { key: "phone", pos: pin(W, 90, 300, 1), label: "HIS PHONE", use: async () => { await G.phone({ contact: "SEARCH: ARGJILA", date: "", messages: [{ from: "them", text: "No results.", time: "" }] }); } },
-    { key: "photo", pos: pin(W, 130, 240, 1), label: "A PHOTOGRAPH", use: () => G.item({ title: "A PHOTOGRAPH", canvas: pic("alone"), text: "It should show the two of them. It shows only him." }) },
+    { key: "frames", pos: pin(W, "dresser", 1.2), label: "PHOTO FRAMES", use: () => G.say([N("Empty photograph frames. Not torn out. Never filled.")]) },
+    { key: "phone", pos: pin(W, "desk", 1), label: "HIS PHONE", use: async () => { await G.phone({ contact: "SEARCH: ARGJILA", date: "", messages: [{ from: "them", text: "No results.", time: "" }] }); } },
+    { key: "photo", pos: pin(W, "nightstand", 1), label: "A PHOTOGRAPH", use: () => G.item({ title: "A PHOTOGRAPH", canvas: pic("alone"), text: "It should show the two of them. It shows only him." }) },
   ];
   while (seen.size < 3) seen.add(await G.interactAny(spots.filter((s) => !seen.has(s.key))));
   await G.say([N("People know Rufki. Nobody knows Argjila.")]);
   await G.fade(1, 1);
-  await G.load((W2) => { S.paint(W2, G, "ocean", { env: { ambient: [0.62, 0.45, 0.42] } }); return { start: [[262, 312], 0, 0] }; });
+  await G.load((W2) => S.buildSidewalk(W2, G, { dusk: true }));
   W = G.world;
   G.pov("Rufki");
   grade(1.1, 0.8, 0.7, 0.7);
-  const [ox, oz] = fl(W, 214, 196);
+  const [ox, oz] = at(W, "other");
   const other = new SpriteActor("other", { emissive: 0.08 });
   other.setPos(ox, 0, oz).face(Math.PI);
   W.addActor(other);
   await G.fade(0, 1);
   await reach(G, ox, oz, 2.2);
   await G.cutscene(async () => {
-    G.zoom(1.6, [214, 150], 0.4);
+    G.zoom(1.6, other);
     await G.say([N("At Ocean Parkway, the faceless figure from before explains what it is."), ["other", "I'm you. From a life where you never met her."], ["other", "Do you know what it's like to remember someone you've never met?"], ["other", "I remember her laugh. Her voice. The way she looks at you. But she doesn't know I exist."], ["other", "Stay here. It's empty, but it's safe. She goes on living in the real timeline. Or go back into the nightmare and risk trapping you both."]]);
     G.zoom(1);
   });
@@ -802,12 +811,12 @@ export async function CH13(G) {
 export async function CH14(G) {
   const P = G.player;
   const toTower = async () => {
-    await G.load((W) => { S.paint(W, G, "tower"); return { start: [[236, 236], 0, Math.PI * 1.2] }; });
+    await G.load(S.buildTower);
     const W = G.world;
     G.pov("Rufki");
     G.state.place = "the Clock Tower";
     const k = makeKeeper(5);
-    const [kx, kz] = fl(W, 252, 178);
+    const [kx, kz] = at(W, "keeper");
     k.root.position.set(kx, 0, kz);
     W.actors.push(k);
     W.add(k.root);
@@ -835,7 +844,7 @@ export async function CH14(G) {
   }
   // the Keeper's temptations
   await G.cutscene(async () => {
-    G.zoom(1.5, [260, 120], 0.6);
+    G.shot([0, 2.2, -2], [0, 7, 18], 60);
     await G.say([["keeper", "I can keep your love without doubt, separation or death."], ["keeper", "Live the first meeting forever. A relationship with no conflict. A future already decided: a marriage, a home, children, old age."]]);
     G.zoom(1);
   });
@@ -897,11 +906,11 @@ export async function CH14(G) {
   G.clock("4:04:59");
   await G.handoff("Rufki", "He holds the door");
   G.pov("Rufki");
-  const [ax, az] = fl(G.world, 210, 230);
+  const [ax, az] = at(G.world, "her");
   const her = G.npc(Character, "argjila", ax, az, 0.4);
   await G.cutscene(async () => {
     her.faceToward(P.pos.x, P.pos.z);
-    G.zoom(1.6, [228, 190], 0.4);
+    G.zoom(1.6, her);
     await G.say([A("I waited for you."), A("But I don't know what happens after this."), R("Neither do I."), A("Are you scared?"), R("Yeah."), A("Me too.")]);
     G.zoom(1);
     G.audio.clockStrike();
@@ -921,62 +930,90 @@ export async function CH14(G) {
 // ============================================================
 // CHAPTER 15 — ONE MINUTE AWAY (the escape and the crossing)
 // ============================================================
-const ESCAPE = [
-  { room: "hallway", start: [222, 304], yes: [262, 196], no: [204, 246] },
-  { room: "bathhouse", start: [90, 290], yes: [300, 160], no: [30, 200] },
-  { room: "almost", start: [70, 216], yes: [18, 206], no: [134, 216] },
-  { room: "waterfront", start: [60, 300], yes: [170, 210], no: [205, 300] },
-  { room: "cords", start: [176, 314], yes: [176, 190], no: [140, 252] },
-];
 export async function CH15(G) {
   const P = G.player;
+  await G.load(S.buildEscape);
+  let W = G.world;
+  G.pov("Rufki");
+  G.state.place = "the collapse";
+  G.clock("4:04:59");
   G.music.play("crossing", 1);
-  for (let i = 0; i < ESCAPE.length; i++) {
-    const E = ESCAPE[i];
-    await G.load((W) => { S.paint(W, G, E.room); return { start: [E.start, 0, 0] }; });
-    const W = G.world;
-    G.pov("Rufki");
-    G.state.place = "the collapse";
-    G.clock("4:04:59");
-    const her = G.npc(Character, "argjila", P.pos.x + 0.6, P.pos.z - 0.3, 0);
-    her._walking = true; // the follower below drives her animation
-    W.every((dt) => { const d = Math.hypot(P.pos.x - her.root.position.x, P.pos.z - her.root.position.z); if (d > 1.1) { const k = Math.min(1, dt * 2.2); her.root.position.x += (P.pos.x - her.root.position.x) * k * 0.6; her.root.position.z += (P.pos.z - her.root.position.z) * k * 0.6; her.faceToward(P.pos.x, P.pos.z); her.update(dt, 1.8); } else her.update(dt, 0); });
-    // warm light + two clicks for the true route, cold light + backward tick for the false
-    const [yx, yz] = fl(W, ...E.yes), [nx, nz] = fl(W, ...E.no);
-    W.glow(yx, 1.2, yz, 1.4, 0xffb060);
-    W.glow(nx, 1.2, nz, 1.4, 0x60a0ff);
-    const cue = setInterval(() => { if (G.mode !== "play") return; G.audio.chainClick(); setTimeout(() => G.audio.chainClick(), 380); setTimeout(() => G.audio.reverseTick(), 900); }, 2600);
-    G.rig.shake = 0.03;
-    await G.fade(0, 0.5);
-    G.objective(i === 0 ? "FOLLOW THE WARM LIGHT AND THE CLICKS. NOT THE COLD ONE." : null);
-    const which = await Promise.race([zone(G, yx, yz, 0.9).then(() => "yes"), zone(G, nx, nz, 0.9).then(() => "no")]);
-    clearInterval(cue);
-    if (which === "no") {
-      await clockBack(G, "4:04:58");
-      await G.say([N("A false memory pulls them aside. Back.")]);
-      i--;
+  G.audio.ambience({ wind: 0.5, drone: 0.4, note: 36, bright: 200, verb: 0.5 });
+  // Argjila keeps up, a step behind
+  const her = G.npc(Character, "argjila", 0.8, 2, 0);
+  her._walking = true;
+  W.every((dt) => {
+    const d = Math.hypot(P.pos.x - her.root.position.x, P.pos.z - her.root.position.z);
+    if (d > 1.3) { const k = Math.min(1, dt * 2.6); her.root.position.x += (P.pos.x - her.root.position.x) * k * 0.7; her.root.position.z += (P.pos.z - 0.9 - her.root.position.z) * k * 0.7; her.faceToward(P.pos.x, P.pos.z); her.update(dt, 2.4); } else her.update(dt, 0);
+  });
+  await G.fade(0, 0.6);
+  await G.say([N("The tower comes apart around them. The way out runs through every place they learned."), N("Warm light and two clicks: a true memory. Cold light and a backward tick: a trap.")]);
+  G.objective("RUN. FOLLOW THE WARM LIGHT.");
+  // the darkness eats the corridor behind them
+  let checkpoint = 3, dz = -3, caught = false;
+  const dark = G._dark;
+  W.every((dt) => {
+    if (!G.canMove()) return;
+    dz += dt * 2.3;
+    if (dz < P.pos.z - 14) dz = P.pos.z - 14;
+    dark.position.z = dz;
+    G.audio.staticLevel(Math.max(0, 1 - (P.pos.z - dz) / 8));
+    if (P.pos.z - dz < 0.9 && !caught) {
+      caught = true;
+      G.cutscene(async () => {
+        G.audio.hit();
+        await G.fade(1, 0.3);
+        P.place(0, checkpoint, 0);
+        her.setPos(0.8, 0, checkpoint - 1);
+        dz = checkpoint - 7;
+        await G.fade(0, 0.5);
+        await G.say([N("The dark closes over them, and opens again a little further back.")]);
+        caught = false;
+      });
     }
-    await G.fade(1, 0.4);
+  });
+  // chain clicks lead from the true gate; a backward tick from the false one
+  const cue = setInterval(() => { if (G.mode !== "play") return; G.audio.chainClick(); setTimeout(() => G.audio.chainClick(), 380); setTimeout(() => G.audio.reverseTick(), 900); }, 2600);
+  for (const f of G._forks) {
+    let passed = false;
+    while (!passed) {
+      const which = await Promise.race([zone(G, f.goodX, f.z - 2.5, 1.4).then(() => "yes"), zone(G, f.badX, f.z - 2.5, 1.4).then(() => "no")]);
+      W.zones = [];
+      if (which === "yes") { passed = true; checkpoint = f.z; G.audio.chainClick(); }
+      else {
+        await clockBack(G, "4:04:58");
+        await G.say([N("A false memory pulls them aside. Back.")]);
+        await G.fade(1, 0.3);
+        P.place(0, f.z - 9, 0);
+        her.setPos(0.8, 0, f.z - 10);
+        dz = Math.min(dz, f.z - 17);
+        await G.fade(0, 0.4);
+      }
+    }
   }
+  await reach(G, 0, 147, 2.5);
+  clearInterval(cue);
+  G.audio.staticLevel(0);
+  await G.fade(1, 0.5);
   // the final street crossing
   await G.load(S.buildCrossing);
-  const W = G.world;
+  W = G.world;
   env2(W);
   G.pov("Rufki");
   P.place(-1, 33, 0);
-  const her = G.npc(Character, "argjila", 0, 33, 0);
+  const her2 = G.npc(Character, "argjila", 0, 33, 0);
   G.clock("4:04:59");
   G.music.play("sorrow", 1);
   G.audio.ambience({ wind: 0.4, drone: 0.2, note: 44, traffic: 0, bright: 260 });
   await G.fade(0, 1);
   await G.cutscene(async () => {
     G.shot([2.5, 1.6, 31], [-0.5, 1.4, 34], 46);
-    her.faceToward(-1, 33);
+    her2.faceToward(-1, 33);
     await G.say([N("At the last street crossing, the clock reads 4:04:59. Argjila hesitates."), A("What if we don't remember any of this?"), R("Then we'll make new memories.")]);
-    P.ch.pose("reach"); her.pose("reach");
+    P.ch.pose("reach"); her2.pose("reach");
     await G.wait(0.6);
-    P.ch.pose(null); her.pose(null);
-    G.walkTo(her, 0, 38, 1.1);
+    P.ch.pose(null); her2.pose(null);
+    G.walkTo(her2, 0, 38, 1.1);
     await G.walkTo(P.ch, -1, 38, 1.1);
     G.audio.clockStrike();
     G.clock("4:05");
@@ -1091,9 +1128,10 @@ export const ENDINGS = {
   },
   // 3 · 4:04 FOREVER
   forever: async (G) => {
-    await endScene(G, (W) => { S.paint(W, G, "dance"); return {}; });
+    await endScene(G, S.buildDance);
     const W = G.world;
-    const [x, z] = W.backdrop.floor(165, 252);
+    const [x, z] = at(W, "center");
+    G.shot([2.6, 1.8, -1.5], [x, 1.3, z + 0.4], 50);
     const r = new Character("rufki"); r.setPos(x, 0, z + 0.9).face(Math.PI); r.pose("dance"); W.add(r.root); G.idle(r);
     const a = new Character("argjila"); a.setPos(x, 0, z).face(0); a.pose("dance"); W.add(a.root); G.idle(a);
     G.music.play("dance", 1);
@@ -1109,9 +1147,10 @@ export const ENDINGS = {
   },
   // 4 · THE OTHER ME
   otherme: async (G) => {
-    await endScene(G, (W) => { S.paint(W, G, "waterfront", { env: { ambient: [0.6, 0.5, 0.55] } }); return {}; });
+    await endScene(G, S.buildWaterfront);
     const W = G.world;
-    const [x, z] = W.backdrop.floor(110, 290);
+    const [x, z] = at(W, "bench");
+    G.shot([x + 2.4, 1.7, z - 3.2], [x + 0.3, 1.2, z], 48);
     const r = new Character("rufki"); r.setPos(x + 0.7, 0, z).face(-Math.PI / 2); r.early = 0.6; W.add(r.root); G.idle(r);
     const a = new Character("argjila"); a.setPos(x, 0, z).face(Math.PI / 2); W.add(a.root); G.idle(a);
     G.music.play("loop", 1);

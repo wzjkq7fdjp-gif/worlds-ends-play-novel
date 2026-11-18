@@ -36,11 +36,10 @@ To fill one in, open `js/memories.js`, paste her words into that memory's `text`
 **Looks like a PS1 game:**
 - Rufki and Argjila are sprites drawn in five directions, with front, side and back walk cycles and eight cutscene poses each. The other side is mirrored.
 - The Other Rufki, the Unmet, the Unsaid, the Keeper of Minutes, both children, the winter friend, the former best friend and the faceless dancer have their own turnarounds and animation frames.
-- Twelve painted locations are pre-rendered backgrounds, like the fixed-camera survival horror games of the era. Each has a camera solved from its vanishing point, so the 3D characters walk on the painted floor and pass behind foreground objects.
-- The streets and interiors that connect them are real-time 3D.
+- Every location is a modeled 3D map built from the location art and room blockouts: Ocean Parkway, the hallway of doors, the house, the House of Almost, her room, the Bathhouse pool, the dance studio, the car, the park, the waterfront, the Unread Room, the corridor of cords, the Clock Tower and the collapse. They use follow cameras and fixed corner cameras.
 - Rendering runs at 320×240 with vertex wobble, affine textures, 15-bit colour with dithering, fog and a CRT filter. Each effect can be switched off.
 
-**Voice acting.** Every line of dialogue and narration is spoken. The voices were synthesised offline with the Kokoro-82M neural TTS model and processed per speaker:
+**Voice acting.** Every character line is spoken; narration is read silently. The voices were synthesised offline with the Kokoro-82M neural TTS model and processed per speaker:
 - the radio is band-limited
 - the Keeper is slowed into a giant
 - the Unsaid speaks in three borrowed voices at once
@@ -67,11 +66,10 @@ All the voices are in one file, `assets/vo/voices.mp3`, which streams in after b
 
 | Path | Contents |
 |---|---|
-| `js/backdrop.js` | Painted rooms: camera solve, floor polygons, occluders |
 | `js/actors.js` | Sprite characters (direction, walk cycle, poses), the Keeper |
 | `js/chapters.js`, `js/chapters2.js` | The story |
 | `js/memories.js` | Argjila's pages |
-| `js/scenes.js` | Locations |
+| `js/scenes.js` | The 3D maps and their named spots |
 | `js/ui.js` | Interface |
 | `js/voice.js` | Voice playback |
 | `js/music.js` | Soundtrack |

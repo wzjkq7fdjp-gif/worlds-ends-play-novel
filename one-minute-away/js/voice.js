@@ -17,6 +17,7 @@ export function fnv(s) {
   return h.toString(16).padStart(8, "0");
 }
 export const voKey = (who, text) => fnv(groupOf(who) + "|" + text);
+const SILENT = new Set(["narr", "sys"]);
 
 export class Voice {
   constructor(G) {
@@ -32,7 +33,8 @@ export class Voice {
     // the pack streams in the background; lines play once it has arrived
     this.packP = this.have.size ? fetch("assets/vo/voices.mp3").then((r) => r.arrayBuffer()).then((b) => (this.pack = b)).catch(() => null) : Promise.resolve(null);
   }
-  has(who, text) { return !!this.have && this.have.has(voKey(who, text)); }
+  // narration is read, not spoken: only characters have voices
+  has(who, text) { return !SILENT.has(groupOf(who)) && !!this.have && this.have.has(voKey(who, text)); }
   load(who, text) {
     const k = voKey(who, text);
     if (!this.has(who, text)) return Promise.resolve(null);

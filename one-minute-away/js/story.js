@@ -12,11 +12,29 @@ export const N = (t, o) => ["narr", t, o];
 // Argjila's own written words (from her letter), read in her voice
 export const HER = (t) => ["argjila", t, { slow: true }];
 
-// painted-room position: image px → world point at height y
-export const pin = (W, px, py, y = 1) => { const [x, z] = W.backdrop.floor(px, py); return [x, y, z]; };
-export const fl = (W, px, py) => W.backdrop.floor(px, py);
-// the yaw that faces the painted room's camera
-export const toCam = (W, x, z) => { const c = W.backdrop.cam.position; return Math.atan2(c.x - x, c.z - z); };
+// named spots of the current map
+export const at = (W, name) => { const s = W.spots[name]; if (!s) throw new Error("no spot " + name); return [s[0], s[1]]; };
+export const pin = (W, name, y = 1) => { const [x, z] = at(W, name); return [x, y, z]; };
+export const yawAt = (W, name) => W.spots[name][2] || 0;
+// what you see through a peephole: him, in the parked car, in the fog
+export function peepCanvas(open = false) {
+  const c = document.createElement("canvas");
+  c.width = 128; c.height = 96;
+  const g = c.getContext("2d");
+  const grd = g.createLinearGradient(0, 0, 0, 96);
+  grd.addColorStop(0, "#3a3448"); grd.addColorStop(1, "#1a1822");
+  g.fillStyle = grd; g.fillRect(0, 0, 128, 96);
+  g.fillStyle = "#2a2632"; g.fillRect(0, 62, 128, 34);
+  for (let i = 0; i < 4; i++) { g.fillStyle = "rgba(255,200,120,0.5)"; g.fillRect(16 + i * 30, 22, 3, 3); g.fillStyle = "#121014"; g.fillRect(17 + i * 30, 25, 1, 40); }
+  g.fillStyle = "#46424e"; g.fillRect(30, 50, 66, 16); g.fillRect(40, 40, 42, 12);
+  g.fillStyle = "#1a2028"; g.fillRect(44, 42, 34, 9);
+  g.fillStyle = "#c49474"; g.fillRect(52, 44, 5, 5);
+  g.fillStyle = "#1c1410"; g.fillRect(51, 43, 7, 2);
+  if (open) { g.fillStyle = "#fff0c0"; g.fillRect(60, 43, 16, 7); g.fillStyle = "#46424e"; g.fillRect(96, 44, 12, 18); }
+  g.fillStyle = "#101010"; g.fillRect(36, 64, 9, 6); g.fillRect(82, 64, 9, 6);
+  g.fillStyle = "rgba(200,190,220,0.18)"; for (let y = 30; y < 70; y += 6) g.fillRect(0, y, 128, 3);
+  return c;
+}
 
 // a sealed page for one of Argjila's open memories
 export function herPage(G, id) {

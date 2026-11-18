@@ -10,7 +10,6 @@ import { Voice } from "./voice.js";
 import { Input } from "./input.js";
 import { UI } from "./ui.js";
 import { World, Player, CameraRig, angDiff } from "./world.js";
-import { Backdrop } from "./backdrop.js";
 import { loadAssets, bgURL } from "./assets.js";
 import { CHAPTERS, ENDINGS, buildTitle, decideEnding } from "./chapters.js";
 import { MEMORIES } from "./memories.js";
@@ -159,9 +158,20 @@ G.tween = (dur, fn) => guard(new Promise((res) => {
 }));
 G.shot = (pos, look, fov) => G.rig.shot(pos, look, true, fov);
 G.release = () => G.rig.release(true);
-// close-up inside a painted room: zoom the painting about a point (px) and soften it
-G.zoom = (k, focus, blur = 1.2) => { G.rig.override = k > 1 ? { pos: camera.position.clone(), look: new THREE.Vector3(), bdZoom: k, bdFocus: focus } : null; if (G.world.backdrop) G.world.backdrop.blur = k > 1 ? blur : 0; };
-G.glitch = (v) => { if (G.world.backdrop) G.world.backdrop.glitch = v; };
+// cinematic close-up on a character (or a world point); zoom(1) returns to the room camera
+G.zoom = (k, target, side = 0) => {
+  if (!k || k <= 1 || !target) { G.rig.release(); return; }
+  const t = target.root ? target.root.position.clone().add(new THREE.Vector3(0, (target.height || 1.7) * 0.8, 0)) : new THREE.Vector3(...target);
+  const dir = camera.position.clone().sub(t).setY(0).normalize();
+  if (side) dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), side);
+  const d = 4.4 / k;
+  G.rig.shot([t.x + dir.x * d, t.y + 0.2, t.z + dir.z * d], [t.x, t.y - 0.15, t.z], true, 46);
+};
+const glEl = document.getElementById("gl");
+G.glitch = (v) => glEl.classList.toggle("glitch", v > 0);
+G.steam = (v) => (glEl.style.filter = v > 0 ? `blur(${v}px)` : "");
+G.spot = (name) => G.world.spots?.[name];
+G.spotPos = (name, y = 1) => { const s = G.spot(name); return [s[0], y, s[1]]; };
 // switch the controlled character
 G.pov = (name, preset) => {
   const p = preset || name.toLowerCase();
@@ -208,8 +218,8 @@ G.load = async (builder, o = {}) => {
   U.uTint.value.setRGB(1, 1, 1);
   U.uAdd.value.setRGB(0, 0, 0);
   U.uSat.value = 1;
+  G.glitch(0); G.steam(0);
   const cfg = (await builder(W, G, o)) || {};
-  if (cfg.backdrop) W.backdrop = new Backdrop(W, G, cfg.backdrop);
   W.scene.add(G.player.ch.root);
   if (cfg.start) G.placeAt(...cfg.start);
   if (cfg.cam) G.rig.set(cfg.cam, true);
@@ -221,11 +231,10 @@ G.load = async (builder, o = {}) => {
   G.input.flush();
   return W;
 };
-// place the player; in painted rooms positions may be given in image px ("px:[x,y]")
+// place the player at world coords or at a named spot of the current map
 G.placeAt = (x, z, yaw = 0) => {
-  if (typeof x === "object") { const [a, b] = G.world.backdrop.floor(x[0], x[1]); G.player.place(a, b, yaw); } else G.player.place(x, z, yaw);
+  if (typeof x === "string") { const s = G.spot(x); G.player.place(s[0], s[1], z ?? s[2] ?? 0); } else G.player.place(x, z, yaw);
 };
-G.px = (x, y) => G.world.backdrop.floor(x, y); // painted-room helper: image px → [x, z]
 
 G.checkpoint = (quiet) => {
   const s = G.state;
@@ -291,20 +300,14 @@ function frame(now) {
       } else G.ui.prompt(null);
     }
     if (!G.paused) {
-      if (W.backdrop && !(G.rig.override && !G.rig.override.bdZoom)) W.backdrop.apply(camera, dt, G.player.pos);
-      else {
-        if (W.backdrop) { camera.clearViewOffset(); camera.aspect = 4 / 3; }
-        G.rig.update(dt, G.player, W.camZones);
-      }
+      G.rig.update(dt, G.player, W.camZones);
       camera.getWorldDirection(fwd);
       G.rig.facingYaw = Math.atan2(fwd.x, fwd.z);
       W.update(dt, G.time, camera);
       W.updateLights(G.player.pos, G.time);
     }
-    if (W.backdrop && !(G.rig.override && !G.rig.override.bdZoom)) W.backdrop.render(renderer);
-    else { renderer.autoClear = true; renderer.setClearColor(U.uFogColor.value, 1); }
+    renderer.setClearColor(U.uFogColor.value, 1);
     renderer.render(W.scene, camera);
-    renderer.autoClear = true;
   } else {
     renderer.setClearColor(0x000000, 1);
     renderer.clear();

@@ -3,8 +3,7 @@
 // cameras and floor polygons) and the 3D streets / interiors
 // that connect them.
 // ============================================================
-import { THREE, U, mat, TEX, boxGeo } from "./ps1.js";
-import { Backdrop } from "./backdrop.js";
+import { THREE, U, mat, TEX, boxGeo, planeGeo } from "./ps1.js";
 import { pic, tvScreen } from "./art.js";
 
 export const C = (r, g, b) => new THREE.Color(r, g, b);
@@ -19,112 +18,6 @@ export function canvasTex(kind) {
   t.generateMipmaps = false;
   texCanvas.set(kind, t);
   return t;
-}
-
-// ------------------------------------------------------------
-// Painted rooms. vp = vanishing point (eye level) in the 320px
-// frame, h = camera height; walk / block are floor polygons in px.
-// lights: [x, y (floor px), height, colour, range]
-// ------------------------------------------------------------
-export const PAINTED = {
-  ocean: {
-    vp: [215, 168], h: 1.6, fov: 60, pan: "auto",
-    walk: [[118, 320], [320, 320], [320, 262], [258, 214], [228, 186], [214, 171], [204, 171], [168, 200], [124, 246]],
-    env: { fog: 0x4a4258, near: 9, far: 34, ambient: [0.5, 0.46, 0.58], dir: [0.18, 0.16, 0.24] },
-    lights: [[150, 214, 4, 0xffc890, 9], [262, 230, 3, 0xffd8a0, 6]], surface: "street",
-  },
-  hallway: {
-    vp: [250, 150], h: 1.3, fov: 60, pan: "auto",
-    walk: [[168, 320], [320, 320], [320, 268], [270, 186], [240, 186], [202, 250]],
-    env: { fog: 0x2a1c10, near: 8, far: 40, ambient: [0.5, 0.38, 0.28], dir: [0.1, 0.08, 0.06] },
-    lights: [[252, 240, 2.4, 0xffcf8a, 7], [252, 196, 2.4, 0xffcf8a, 7], [255, 178, 2.4, 0xffcf8a, 7]], surface: "tile",
-  },
-  bathhouse: {
-    vp: [160, 118], h: 1.43, fov: 60, pan: "auto",
-    walk: [[0, 320], [210, 320], [45, 213], [78, 171], [320, 166], [320, 151], [85, 154], [55, 161], [0, 176]],
-    env: { fog: 0x203038, near: 10, far: 40, ambient: [0.48, 0.52, 0.56], dir: [0.12, 0.14, 0.16] },
-    lights: [[150, 168, 3, 0xffe2b0, 9], [40, 260, 3, 0xffd8a0, 6]], surface: "tile",
-  },
-  dance: {
-    vp: [260, 140], h: 1.5, fov: 60, pan: "auto",
-    walk: [[0, 320], [320, 320], [320, 211], [128, 211], [60, 201], [0, 207]],
-    env: { fog: 0x24180e, near: 9, far: 40, ambient: [0.5, 0.4, 0.3], dir: [0.12, 0.1, 0.08] },
-    lights: [[160, 240, 2.6, 0xffcf90, 8], [220, 214, 2.6, 0xffcf90, 6]], surface: "wood",
-  },
-  waterfront: {
-    vp: [160, 152], h: 1.55, fov: 60, pan: "auto",
-    walk: [[0, 320], [222, 320], [205, 262], [178, 204], [100, 212], [0, 228]],
-    env: { fog: 0x1c2240, near: 10, far: 40, ambient: [0.34, 0.37, 0.58], dir: [0.12, 0.13, 0.2] },
-    lights: [[200, 272, 2.2, 0xffd060, 6], [60, 260, 3, 0x8090d0, 6]], surface: "wood",
-  },
-  park: {
-    vp: [160, 158], h: 1.5, fov: 60, pan: "auto",
-    walk: [[0, 320], [320, 320], [320, 222], [238, 200], [185, 185], [150, 182], [120, 198], [60, 230], [0, 236]],
-    block: [[[8, 244], [128, 216], [142, 250], [64, 288], [8, 282]], [[232, 262], [300, 250], [306, 286], [240, 294]]],
-    env: { fog: 0x2a2434, near: 9, far: 38, ambient: [0.4, 0.36, 0.46], dir: [0.12, 0.1, 0.14] },
-    lights: [[118, 222, 3.6, 0xffc070, 8], [300, 214, 1.6, 0xff3020, 6]], surface: "street",
-  },
-  unread: {
-    vp: [160, 150], h: 1.0, fov: 60, pan: "auto",
-    walk: [[25, 268], [295, 268], [320, 320], [0, 320]],
-    block: [[[25, 272], [112, 272], [116, 302], [30, 306]], [[205, 272], [290, 272], [296, 300], [210, 303]], [[130, 264], [196, 264], [196, 290], [130, 290]]],
-    env: { fog: 0x1a140c, near: 6, far: 20, ambient: [0.5, 0.44, 0.34], dir: [0.1, 0.08, 0.06] },
-    lights: [[160, 285, 1.8, 0xffd8a0, 5]], surface: "tile",
-  },
-  cords: {
-    vp: [165, 150], h: 1.4, fov: 60, pan: "auto",
-    walk: [[85, 320], [250, 320], [196, 178], [152, 178]],
-    env: { fog: 0x0c1a10, near: 8, far: 40, ambient: [0.26, 0.44, 0.32], dir: [0.06, 0.1, 0.07] },
-    lights: [[165, 205, 2.4, 0xb0ffc8, 7], [165, 280, 2.4, 0x80d0a0, 6]], surface: "tile",
-  },
-  bedroom: {
-    vp: [160, 145], h: 1.2, fov: 60, pan: "auto",
-    walk: [[0, 248], [100, 226], [160, 232], [125, 320], [0, 320]],
-    env: { fog: 0x281e30, near: 6, far: 20, ambient: [0.45, 0.38, 0.5], dir: [0.12, 0.1, 0.12] },
-    lights: [[110, 236, 1.2, 0xffc890, 4], [230, 210, 1.5, 0xff9a80, 5]], surface: "wood",
-  },
-  almost: {
-    vp: [160, 150], h: 1.25, fov: 60, pan: "auto",
-    walk: [[0, 199], [55, 193], [140, 207], [138, 226], [0, 236]],
-    env: { fog: 0x3a3450, near: 6, far: 30, ambient: [0.45, 0.42, 0.56], dir: [0.1, 0.1, 0.14] },
-    lights: [[45, 205, 2.2, 0xffc890, 5]], surface: "tile",
-  },
-  tower: {
-    vp: [160, 120], h: 6.5, fov: 60, pan: "auto",
-    walk: [[190, 228], [270, 218], [298, 238], [212, 250]],
-    env: { fog: 0x3a3448, near: 8, far: 40, ambient: [0.5, 0.48, 0.56], dir: [0.12, 0.12, 0.14] },
-    lights: [[240, 232, 2.2, 0xffd090, 5]], surface: "street",
-  },
-  car: {
-    vp: [150, 165], h: 1.2, fov: 60, pan: 40, walk: null,
-    env: { fog: 0x1a1a22, near: 6, far: 30, ambient: [0.4, 0.4, 0.45], dir: [0.1, 0.1, 0.12] },
-    lights: [], surface: "street",
-  },
-};
-
-// Build a painted room. Returns the backdrop (also stored on W).
-export function paint(W, G, name, o = {}) {
-  const P = PAINTED[name];
-  const bd = new Backdrop(W, G, { img: name, ...P, ...o });
-  W.backdrop = bd;
-  env(W, { ...P.env, ...(o.env || {}) });
-  W.surface = P.surface;
-  for (const [x, y, h, col, r] of P.lights) {
-    const [a, b] = bd.floor(x, y);
-    W.light(a, h, b, col, r);
-  }
-  return bd;
-}
-// px helpers for scripts working in a painted room
-export const at = (W, x, y) => W.backdrop.floor(x, y);
-
-// ------------------------------------------------------------
-// Title — Ocean Parkway in fog, the sedan, the window.
-// ------------------------------------------------------------
-export function buildTitle(W, G) {
-  const bd = paint(W, G, "ocean", { pan: 30 });
-  G.player.ch.setVisible(false);
-  return {};
 }
 
 // ------------------------------------------------------------
@@ -383,4 +276,536 @@ export function buildCrossing(W, G) {
   W.boulevard(45, 100, { lit: 0.1 });
   W.ground(0, 40, 60, 10, TEX.road(), { scale: 6 });
   return { start: [0, 0, 0] };
+}
+
+// ============================================================
+// 3D MAPS — every location modeled, first-game style.
+// Each builder registers named spots: W.spots[name] = [x, z, yaw]
+// ============================================================
+export const spot = (W, name, x, z, yaw = 0) => ((W.spots ||= {})[name] = [x, z, yaw]);
+const M = (o) => mat(o);
+function lampPost(W, x, z, o = {}) { return W.lamp(x, z, { side: o.side ?? 1, color: o.color ?? 0xffc890, range: o.range ?? 9, flicker: o.flicker || 0, h: o.h }); }
+function pendant(W, x, y, z, color = 0xffd8a0, range = 7, flicker = 0) {
+  W.mesh(boxGeo(0.02, 0.6, 0.02), M({ color: 0x111111 }), x, y + 0.3, z);
+  W.mesh(new THREE.CylinderGeometry(0.08, 0.32, 0.2, 8), M({ color, unlit: true }), x, y, z);
+  W.glow(x, y - 0.05, z, 0.9, color);
+  return W.light(x, y - 0.3, z, color, range, { flicker });
+}
+function cord(W, x0, y0, z0, x1, y1, z1, sag = 0.6, segs = 7, m) {
+  // a hanging telephone cord made of short boxes along a sagging curve
+  const mm = m || M({ color: 0x0c0c0e });
+  let px = x0, py = y0, pz = z0;
+  for (let i = 1; i <= segs; i++) {
+    const t = i / segs;
+    const x = x0 + (x1 - x0) * t, z = z0 + (z1 - z0) * t;
+    const y = y0 + (y1 - y0) * t - Math.sin(t * Math.PI) * sag;
+    const dx = x - px, dy = y - py, dz = z - pz, L = Math.hypot(dx, dy, dz);
+    const seg = new THREE.Mesh(boxGeo(0.035, 0.035, L), mm);
+    seg.position.set((x + px) / 2, (y + py) / 2, (z + pz) / 2);
+    seg.lookAt(x, y, z);
+    W.add(seg);
+    px = x; py = y; pz = z;
+  }
+}
+
+// ---- Ocean Parkway: the sidewalk by the car (title, chapter 1, the dusk scene)
+export function buildSidewalk(W, G, o = {}) {
+  const dusk = o.dusk;
+  env(W, dusk ? { fog: 0x6a4e50, near: 8, far: 44, ambient: [0.5, 0.4, 0.4], dir: [0.4, 0.26, 0.2], sat: 0.7 }
+    : { fog: 0x3a3448, near: 4, far: 32, ambient: [0.32, 0.3, 0.4], dir: [0.12, 0.12, 0.18] });
+  W.boulevard(-20, 70, { lit: dusk ? 0.1 : 0.22, flicker: !dusk });
+  const car = W.car(10, 0, 0, [70, 66, 74], { lights: !dusk });
+  G._car = car;
+  W.car(10, 18, 0, [40, 60, 50]);
+  W.car(-10, 10, Math.PI, [90, 40, 36]);
+  W.hydrant(12.6, 6);
+  W.trash(12.8, 24);
+  // iron fence along the planted mall, like the painting
+  for (let z = -18; z < 68; z += 2) W.mesh(boxGeo(0.05, 0.9, 2), M({ color: 0x141416 }), 7.9, 0.45, z + 1);
+  // stoops on the building side
+  for (let z = 4; z < 60; z += 9) W.stairs(15.6, z, 1.6, 4, 0.2, 0.35, -1, M({ map: TEX.concrete([120, 110, 100], "stoop") }));
+  // the window that breathes
+  G._breathWin = W.glow(16.8, 6.2, 8, 2.2, 0xffb060);
+  W.light(15.2, 5.6, 8, 0xffb060, 8);
+  // the streetlamp with the photograph under it
+  lampPost(W, 12.4, 14, { side: 1, range: 10 });
+  spot(W, "car", 10.4, -0.15, 0);
+  spot(W, "start", 13.4, -3, 0);
+  spot(W, "photo", 13.2, 14.2);
+  spot(W, "exit", 13.5, 40);
+  spot(W, "other", 13.5, 22, Math.PI);
+  W.bounds = { x0: 12.1, z0: -6, x1: 14.9, z1: 66 };
+  return { start: [13.4, -3, 0], cam: { yaw: -0.18, pitch: 0.3, dist: 6.2, height: 1.3 } };
+}
+export function buildTitle(W, G) {
+  const r = buildSidewalk(W, G);
+  G.player.ch.setVisible(false);
+  const t0 = G.time;
+  W.every(() => { const k = (G.time - t0) * 0.05; G.rig.shot([17 - Math.sin(k) * 4, 2.2 + Math.sin(k * 0.7) * 0.3, -8 + k * 0.6 % 20], [10, 1.2, 6 + (k * 0.6) % 20], false, 50); });
+  return r;
+}
+
+// ---- the hallway lined with front doors (Argjila's side of the call)
+export function buildHallway(W, G, o = {}) {
+  const warm = o.warm;
+  env(W, { fog: 0x1a120a, near: 5, far: 22, ambient: warm ? [0.5, 0.4, 0.3] : [0.34, 0.27, 0.2], dir: [0.06, 0.05, 0.04] });
+  W.surface = "tile";
+  const L = 20;
+  W.ground(0, L / 2, 2.8, L, TEX.tile("#b8a890", "#6a5a48", "halltile"), { scale: 1 });
+  W.ground(0, L / 2, 1.1, L, TEX.carpet([60, 40, 34], "runner"), { scale: 1, y: 0.006 });
+  W.ceiling(0, L / 2, 2.8, L, 2.7, TEX.concrete([90, 74, 56], "hallceil"));
+  const wp = TEX.wallpaper([140, 112, 80], "hallwp"), wains = TEX.wood([40, 58, 46], "wainscot");
+  for (const s of [-1, 1]) {
+    W.wall(s * 1.4, L / 2, L, 2.7, s > 0 ? -Math.PI / 2 : Math.PI / 2, wp);
+    W.mesh(boxGeo(0.04, 1.0, L), M({ map: wains }), s * 1.37, 0.5, L / 2);
+  }
+  W.wall(0, 0, 2.8, 2.7, 0, wp);
+  W.wall(0, L, 2.8, 2.7, Math.PI, wp);
+  W.bounds = { x0: -1.3, z0: 0.2, x1: 1.3, z1: L - 0.2 };
+  // doors along both walls, every one with a peephole
+  const doors = [];
+  for (let i = 0; i < 6; i++) {
+    const z = 3 + i * 2.8, s = i % 2 ? 1 : -1;
+    doors.push(W.door(s * 1.37, z, s > 0 ? -Math.PI / 2 : Math.PI / 2, { label: String(1 + i), solid: false }));
+  }
+  W.door(0, L - 0.05, Math.PI, { tint: "#3a2418" });
+  // her own door, with the brass chain
+  W.door(-1.37, 1.2, Math.PI / 2, { tint: "#5a3018", solid: false });
+  const brass = M({ color: 0xd0a040, emissive: 0.2 });
+  W.mesh(boxGeo(0.04, 0.06, 0.12), brass, -1.3, 1.45, 0.9);
+  W.mesh(boxGeo(0.04, 0.06, 0.12), brass, -1.3, 1.45, 1.5);
+  G._chain = W.mesh(boxGeo(0.02, 0.03, 0.55), brass, -1.29, 1.38, 1.2);
+  for (let z = 2; z < L; z += 4) pendant(W, 0, 2.45, z, 0xffcf8a, 7, z === 14 ? 0.3 : 0);
+  spot(W, "start", 0.3, 0.9, 0);
+  spot(W, "chain", -0.8, 1.2, -Math.PI / 2);
+  spot(W, "doorA", -0.8, 3, -Math.PI / 2);
+  spot(W, "doorB", 0.8, 5.8, Math.PI / 2);
+  spot(W, "doorC", -0.8, 14.2, -Math.PI / 2);
+  spot(W, "kitchen", 0.8, 8.6, Math.PI / 2);
+  spot(W, "end", 0, 19, 0);
+  return { start: [0.3, 0.9, 0], cam: { yaw: 0, pitch: 0.26, dist: 3.4, height: 1.45, fov: 60 } };
+}
+
+// ---- the House of Almost: a balcony over impossible Brooklyn
+export function buildBalcony(W, G) {
+  env(W, { fog: 0x4a4462, near: 6, far: 46, ambient: [0.42, 0.4, 0.52], dir: [0.12, 0.12, 0.16] });
+  W.surface = "tile";
+  W.ground(0, 0, 8, 4, TEX.tile("#8a7a6a", "#5a4a40", "balcony"), { scale: 1 });
+  W.mesh(boxGeo(8.2, 0.4, 4.2), M({ map: TEX.concrete([70, 64, 60], "balc") }), 0, -0.21, 0);
+  W.wall(0, -2, 8, 4, 0, TEX.brick([90, 70, 60], "almbrick"));
+  W.door(-2.4, -1.95, 0, { tint: "#3a2418", glow: 0.1 });
+  lampPost(W, -1.2, -1.8, { side: 1, h: 2.6, range: 6 });
+  // railing
+  for (let x = -4; x <= 4; x += 0.5) W.mesh(boxGeo(0.04, 1, 0.04), M({ color: 0x18161a }), x, 0.5, 2);
+  W.mesh(boxGeo(8, 0.06, 0.06), M({ color: 0x18161a }), 0, 1.0, 2);
+  W.collider(-4.2, 1.95, 4.2, 2.2);
+  W.bounds = { x0: -3.8, z0: -1.7, x1: 3.8, z1: 1.9 };
+  // floating apartments, each window a different year
+  const years = ["1996", "2001", "2009", "2013", "2019", "2025"];
+  for (let i = 0; i < 14; i++) {
+    const x = -24 + ((i * 37) % 48), y = -6 + ((i * 13) % 22), z = 10 + ((i * 23) % 30);
+    W.mesh(boxGeo(3 + (i % 3), 3 + (i % 2) * 2, 3), M({ map: TEX.facade([90, 74, 66], 0.5, 60 + i) }), x, y, z).rotation.y = (i % 5) * 0.3;
+    if (i < 6) W.sign(x, y + 0.6, z - 1.55, years[i], 0, { w: 1, h: 0.8, bg: "#d0a060", fg: "#3a2010", tw: 24, th: 20, size: 7, unlit: true });
+  }
+  // stairs to nowhere
+  for (let i = 0; i < 12; i++) W.mesh(boxGeo(1.6, 0.25, 0.6), M({ map: TEX.concrete([80, 76, 70], "almstep") }), 8 + i * 0.5, -3 + i * 0.25, 14 + i * 0.6);
+  spot(W, "start", 1.5, 0.6, Math.PI);
+  spot(W, "door", -2.4, -1.4, Math.PI);
+  return { start: [1.5, 0.6, Math.PI], cam: { yaw: 0.3, height: 1.2 }, camZones: [{ x0: -5, z0: -3, x1: 5, z1: 3, cam: { fixed: [3.4, 2.2, 1.8], height: 1.0 } }] };
+}
+
+// ---- a bedroom (hers, then his in the world without her)
+export function buildBedroom(W, G, o = {}) {
+  const tone = o.tone || "night";
+  const amb = { night: [0.34, 0.3, 0.42], warm: [0.56, 0.46, 0.4], dawn: [0.46, 0.4, 0.46] }[tone];
+  env(W, { fog: 0x1e1a24, near: 4, far: 16, ambient: amb, dir: [0.2, 0.18, 0.22], dirVec: [1, -0.6, 0.2] });
+  W.surface = "wood";
+  W.room(-3, -3, 3, 4, 2.7, { floor: TEX.wood([110, 84, 60], "bedfloor"), wall: TEX.wallpaper(o.his ? [96, 96, 104] : [140, 112, 120], o.his ? "hiswall" : "herwall") });
+  W.bed(1.8, 1.8, 0, { sheet: o.his ? [70, 80, 110] : [150, 120, 140] });
+  // desk + chair + phone
+  W.table(-2.1, 3.1, { w: 1.4, d: 0.7, tint: [90, 66, 46] });
+  W.chair(-2.1, 2.4, 0);
+  W.mesh(boxGeo(0.08, 0.02, 0.16), M({ color: 0x101820 }), -1.8, 0.8, 3.1);
+  // dresser with frames
+  W.box(-2.6, 0, -0.5, 0.7, 1.0, 1.6, M({ map: TEX.wood([80, 56, 40], "dresser") }));
+  const frameTex = o.blank ? null : canvasTex(o.his ? "alone" : "couple");
+  W.frame(-2.6, 1.3, -0.9, Math.PI / 2, frameTex || canvasTex("tv"), 0.35, 0.28, { glow: 0.05 });
+  W.frame(-2.6, 1.3, -0.1, Math.PI / 2, frameTex || canvasTex("tv"), 0.35, 0.28, { glow: 0.05 });
+  // window with blinds, lamp
+  W.sign(2.97, 1.6, -0.6, "", -Math.PI / 2, { w: 1.6, h: 1.1, bg: tone === "dawn" ? "#e8a080" : tone === "warm" ? "#f0d0a0" : "#20283a", tw: 8, th: 8, unlit: true });
+  for (let i = 0; i < 6; i++) W.mesh(boxGeo(0.02, 0.05, 1.6), M({ color: 0x2a2420 }), 2.94, 1.15 + i * 0.18, -0.6);
+  W.light(2.4, 1.6, -0.6, tone === "dawn" ? 0xff9a80 : tone === "warm" ? 0xffd8a0 : 0x6070a0, 6);
+  W.box(2.6, 0, 3.4, 0.5, 0.6, 0.5, M({ map: TEX.wood([80, 56, 40], "night") }));
+  W.glow(2.6, 0.95, 3.4, 0.6, 0xffc890);
+  W.light(2.6, 1.1, 3.4, 0xffc890, 5);
+  // a shelf for the things she kept
+  W.box(0.2, 0, 3.75, 2.2, 1.2, 0.4, M({ map: TEX.wood([96, 70, 50], "shelf") }));
+  W.door(0, -2.95, 0, { tint: "#5a4a3a" });
+  spot(W, "start", 0, -1.6, 0);
+  spot(W, "phone", -1.8, 2.3, 0);
+  spot(W, "dresser", -1.9, -0.5, -Math.PI / 2);
+  spot(W, "window", 2.2, -0.6, Math.PI / 2);
+  spot(W, "bedside", 0.6, 1.2, Math.PI / 2);
+  spot(W, "shelf", 0.2, 3.1, 0);
+  spot(W, "desk", -2.1, 2.3, 0);
+  spot(W, "nightstand", 2.1, 3.0, 0);
+  spot(W, "chair", -0.8, 0.6, Math.PI / 2);
+  return { start: [0, -1.6, 0], cam: { yaw: 0, height: 1.2 }, camZones: [{ x0: -3, z0: -3, x1: 3, z1: 4, cam: { fixed: [2.5, 2.4, -2.6], height: 1.0 } }] };
+}
+
+// ---- Williamsburg Bathhouse (the first game's pool, tiled like the painting)
+export function buildBathhouse(W, G) {
+  env(W, { fog: 0x0e1c26, near: 7, far: 32, ambient: [0.3, 0.36, 0.4], dir: [0.08, 0.1, 0.12] });
+  W.surface = "tile";
+  const deck = TEX.tile("#d8ccb0", "#b0a488", "bdeck"), wallT = TEX.tile("#d8ccb0", "#a89c84", "bwall");
+  const pool = TEX.tile("#5aa8a8", "#3a8890", "pooltile");
+  W.room(-10, -12, 10, 12, 6, { floor: false, wall: wallT, ceil: TEX.concrete([60, 56, 52], "bceil") });
+  // a band of dark teal tiles around the walls
+  for (const [x, z, w, ry] of [[0, -11.97, 20, 0], [0, 11.97, 20, Math.PI], [9.97, 0, 24, -Math.PI / 2], [-9.97, 0, 24, Math.PI / 2]]) W.mesh(new THREE.PlaneGeometry(w, 0.5), M({ map: TEX.tile("#2a5a60", "#1a3a40", "band") }), x, 2.4, z, ry);
+  W.ground(0, -9, 20, 6, deck, { scale: 1 });
+  W.ground(0, 9, 20, 6, deck, { scale: 1 });
+  W.ground(-7.5, 0, 5, 12, deck, { scale: 1 });
+  W.ground(7.5, 0, 5, 12, deck, { scale: 1 });
+  W.floor(-5, -6, 5, 6, -1.8);
+  W.mesh(planeGeo(10, 12, 1), M({ map: pool }), 0, -1.8, 0);
+  for (const [x, z, w, ry] of [[0, 6, 10, Math.PI], [5, 0, 12, -Math.PI / 2], [-5, 0, 12, Math.PI / 2], [0, -6, 10, 0]]) W.mesh(new THREE.PlaneGeometry(w, 1.8, 4, 1), M({ map: pool }), x, -0.9, z, ry);
+  // lane lines
+  for (const x of [-2.5, 0, 2.5]) W.mesh(boxGeo(0.25, 0.01, 11), M({ color: 0x1a3a50 }), x, -1.78, 0);
+  const lip = M({ color: 0xe8e0d0 });
+  W.mesh(boxGeo(10.4, 0.1, 0.25), lip, 0, 0, 6.1); W.mesh(boxGeo(10.4, 0.1, 0.25), lip, 0, 0, -6.1);
+  W.mesh(boxGeo(0.25, 0.1, 12.2), lip, 5.1, 0, 0); W.mesh(boxGeo(0.25, 0.1, 12.2), lip, -5.1, 0, 0);
+  W.collider(-5.2, 5.95, 5.2, 6.15); W.collider(4.95, -6.2, 5.15, 6.2); W.collider(-5.15, -6.2, -4.95, 6.2); W.collider(-5.2, -6.15, 5.2, -5.95);
+  // ladder
+  for (const x of [-3.8, -3.2]) W.mesh(boxGeo(0.06, 1.8, 0.06), M({ color: 0xc8c8c0 }), x, 0.2, -5.9);
+  const water = W.ground(0, 0, 10, 12, TEX.water([60, 150, 160], "bathwater"), { y: -0.25, wave: 1, scroll: [0.02, 0.01], opacity: 0.55 });
+  water.material.uniforms.uEmissive.value = 0.2;
+  water.renderOrder = 2;
+  G._water = water;
+  // arched windows, changing-room doors, pillars, benches, pendant lamps
+  for (let x = -7; x <= 7; x += 3.5) W.sign(x, 4.2, 11.95, "", Math.PI, { w: 2, h: 1.6, bg: "#6a5a8a", tw: 8, th: 8, unlit: true });
+  for (let x = -7.5; x <= 7.5; x += 3) W.door(x, -11.95, 0, { tint: "#4a3a2a", solid: false });
+  for (const x of [-8, 8]) for (const z of [-4, 4]) W.box(x, 0, z, 0.8, 6, 0.8, M({ map: TEX.tile("#d0c8b0", "#b0a890", "coltile") }));
+  W.bench(-8.8, 0, Math.PI / 2); W.bench(8.8, 0, -Math.PI / 2); W.bench(3, 9.6, Math.PI);
+  for (const [x, z] of [[-4, -8], [4, -8], [-4, 8], [4, 8]]) pendant(W, x, 4.5, z, 0xffe2b0, 10);
+  for (const [x, z] of [[-3, -3], [3, -3], [-3, 3], [3, 3]]) W.light(x, -1.4, z, 0x40b0c0, 6);
+  W.sign(0, 4.9, -11.95, "WILLIAMSBURG BATHHOUSE", 0, { w: 4, h: 0.5, bg: "#0a2030", fg: "#9ad8f0", tw: 128, th: 16, size: 9, unlit: true });
+  const door = W.door(0, 11.9, Math.PI, { tint: "#1a1a20", sign: "THE THINGS WE NEVER SAID", solid: false });
+  door.visible = false;
+  G._bathDoor = door;
+  W.water = { y: -0.25 };
+  spot(W, "start", 0, -9.5, 0);
+  spot(W, "her", 2, 8.4, Math.PI);
+  spot(W, "reflection", 2, 4.5, Math.PI);
+  spot(W, "reflectionEnd", -3.5, -4, Math.PI);
+  spot(W, "edgeNear", 0, -6.6, 0);
+  spot(W, "argStart", 3.5, 8.6, Math.PI);
+  spot(W, "rufkiFar", -2, -8.5, 0);
+  spot(W, "towel", -6.8, 9.2);
+  spot(W, "exit", 9.4, 9.6);
+  spot(W, "tileHer", 1.4, 6.7, Math.PI);
+  spot(W, "tileHim", 0.6, 6.7, Math.PI);
+  spot(W, "door", 0, 11.2);
+  for (let i = 0; i < 4; i++) spot(W, "photo" + i, -3 + i * 2, 6.55);
+  spot(W, "bottom", 0, -6.55);
+  return {
+    start: [0, -9.5, 0], cam: { yaw: 0, pitch: 0.5, dist: 5, height: 1.0 },
+    camZones: [
+      { x0: -10, z0: -12, x1: 10, z1: 0, cam: { fixed: [7.2, 5.2, -10.6], height: 0.6 } },
+      { x0: -10, z0: 0, x1: 10, z1: 12, cam: { fixed: [-7.2, 5.2, 10.6], height: 0.6 } },
+    ],
+  };
+}
+
+// ---- the dance studio: parquet, barre, a mirror wall
+export function buildDance(W, G, o = {}) {
+  env(W, { fog: 0x1c120a, near: 7, far: 26, ambient: [0.44, 0.34, 0.26], dir: [0.1, 0.08, 0.06] });
+  W.surface = "wood";
+  W.room(-6, -5, 6, 7, 3.6, { floor: TEX.wood([120, 70, 40], "parquet"), wall: TEX.wallpaper([110, 84, 60], "studio"), ceil: TEX.concrete([60, 50, 44], "sceil") });
+  // tall windows + barre on the left wall
+  for (let z = -3; z <= 5; z += 2.6) W.sign(-5.97, 2, z, "", Math.PI / 2, { w: 1.4, h: 2.6, bg: "#3a3c6a", tw: 8, th: 8, unlit: true });
+  W.mesh(boxGeo(0.06, 0.06, 11), M({ map: TEX.wood([150, 110, 70], "barre") }), -5.6, 1.05, 1);
+  for (let z = -4; z <= 6; z += 2.5) W.mesh(boxGeo(0.04, 1.05, 0.04), M({ color: 0x222222 }), -5.75, 0.52, z);
+  // the mirror wall (far side): the room continues dimly behind the glass
+  W.mesh(new THREE.PlaneGeometry(11, 3.2), M({ color: 0x8a8090, opacity: 0.32 }), 0, 1.6, 6.95, Math.PI);
+  W.room(-6, 7, 6, 15, 3.6, { floor: TEX.wood([90, 52, 30], "parquetM"), wall: TEX.wallpaper([70, 54, 40], "studioM"), skip: ["s"], bounds: false });
+  W.collider(-6, 6.95, 6, 7.05);
+  for (const [x, z] of [[-2, -1], [2, 3]]) pendant(W, x, 3.1, z, 0xffcf90, 9);
+  pendant(W, 0, 3.1, 11, 0xd0a070, 6);
+  W.bounds = { x0: -5.6, z0: -4.6, x1: 5.6, z1: 6.8 };
+  spot(W, "start", 0, -3, 0);
+  spot(W, "center", 0, 1.5, 0);
+  spot(W, "edge", 4, 5, Math.PI);
+  spot(W, "double", 2.4, 3.4, Math.PI);
+  spot(W, "mirror", 3, 10, Math.PI);
+  return { start: [0, -3, 0], cam: { yaw: 0.25, pitch: 0.34, dist: 5.6, height: 1.2, fov: 55 } };
+}
+
+// ---- inside the sedan (the radio scene and the drive back)
+export function buildCar(W, G, o = {}) {
+  const drive = o.drive;
+  env(W, { fog: 0x4a4656, near: 4, far: 34, ambient: [0.5, 0.5, 0.56], dir: [0.2, 0.2, 0.24] });
+  W.surface = "street";
+  const road = W.ground(0, 40, 7, 120, TEX.road(), { scale: 6, scroll: drive ? [0, -0.9] : [0, 0] });
+  W.ground(-8, 40, 9, 120, TEX.grass(), { scale: 3, scroll: drive ? [0, -0.6] : [0, 0] });
+  W.ground(8, 40, 9, 120, TEX.grass(), { scale: 3, scroll: drive ? [0, -0.6] : [0, 0] });
+  // bare trees that pass by
+  const bark = M({ map: TEX.bark() });
+  const trees = [];
+  for (let i = 0; i < 14; i++) {
+    const g = new THREE.Group();
+    const h = 5 + (i % 3);
+    const t = new THREE.Mesh(boxGeo(0.3, h, 0.3), bark); t.position.y = h / 2; g.add(t);
+    for (let b = 0; b < 3; b++) { const br = new THREE.Mesh(boxGeo(0.1, 2, 0.1), bark); br.position.set(0, h - 1 - b * 0.8, 0); br.rotation.z = (b % 2 ? 0.7 : -0.7); g.add(br); }
+    g.position.set((i % 2 ? 1 : -1) * (5 + (i % 4)), 0, i * 8);
+    W.add(g); trees.push(g);
+  }
+  // the one leaning tree that is always ahead (and in the mirror)
+  const lone = new THREE.Group();
+  const lt = new THREE.Mesh(boxGeo(0.5, 8, 0.5), bark); lt.position.y = 4; lt.rotation.z = -0.35; lone.add(lt);
+  for (let b = 0; b < 4; b++) { const br = new THREE.Mesh(boxGeo(0.14, 3, 0.14), bark); br.position.set(-1 - b * 0.4, 6.5 - b * 0.5, 0); br.rotation.z = -1.1 + b * 0.3; lone.add(br); }
+  lone.position.set(2.6, 0, 34);
+  W.add(lone);
+  G._loneTree = lone;
+  if (drive) W.every((dt) => trees.forEach((g) => { g.position.z -= dt * 14; if (g.position.z < -6) g.position.z += 112; }));
+  // the cabin around the driver's eye at (−0.4, 1.15, 0)
+  const dark = M({ color: 0x141418 }), dash = M({ map: TEX.cloth([30, 30, 34], "dash") });
+  W.mesh(boxGeo(1.8, 0.35, 0.6), dash, 0, 0.78, 0.75);
+  W.mesh(new THREE.TorusGeometry(0.19, 0.03, 4, 12), dark, -0.4, 0.92, 0.5).rotation.x = 0.4;
+  for (const x of [-0.95, 0.95]) W.mesh(boxGeo(0.08, 0.9, 0.08), dark, x, 1.35, 0.95).rotation.z = x > 0 ? -0.35 : 0.35;
+  W.mesh(boxGeo(1.9, 0.08, 1.4), dark, 0, 1.78, 0.2);
+  W.mesh(boxGeo(0.3, 0.1, 0.02), M({ color: 0x404850, emissive: 0.1 }), 0, 1.62, 0.85);
+  for (const x of [-1.0, 1.0]) W.mesh(boxGeo(0.06, 0.6, 1.4), dark, x, 1.35, 0.1);
+  W.mesh(boxGeo(1.9, 0.6, 0.1), dark, 0, 0.6, -0.9);
+  // dashboard gauges + radio
+  W.glow(-0.4, 0.92, 0.48, 0.25, 0xffa040);
+  G._radio = W.mesh(boxGeo(0.12, 0.03, 0.01), M({ color: 0x408a74, unlit: true }), 0.12, 0.88, 0.62);
+  // the paper map on the passenger window
+  G._map = W.mesh(new THREE.PlaneGeometry(0.5, 0.36), M({ map: TEX.cloth([200, 190, 160], "papermap") }), 0.96, 1.25, 0.5, -Math.PI / 2);
+  // city lights on the horizon, revealed when the map lines up
+  const lights = [];
+  for (let i = 0; i < 26; i++) { const g = W.glow(-14 + i * 1.1, 1.2 + (i % 3) * 0.4, 60, 0.8, 0xffd080); g.visible = false; lights.push(g); }
+  G._cityLights = lights;
+  spot(W, "eye", -0.4, 0, 0);
+  return { start: [-0.4, 0, 0] };
+}
+
+// ---- the park near Target: sidewalk, fence, bench, the shop glass
+export function buildPark(W, G) {
+  env(W, { fog: 0x2a2434, near: 8, far: 34, ambient: [0.38, 0.34, 0.44], dir: [0.12, 0.1, 0.14] });
+  W.surface = "street";
+  W.ground(0, 9, 8, 32, TEX.sidewalk(), { scale: 1.5 });
+  W.ground(8, 9, 8, 32, TEX.road(), { scale: 5 });
+  W.ground(-8, 9, 8, 32, TEX.grass(), { scale: 3 });
+  W.mesh(boxGeo(0.2, 0.12, 32, 1), M({ map: TEX.concrete() }), 4, 0.06, 9);
+  // iron fence on the park side, trees behind it
+  for (let z = -6; z < 24; z += 1.5) W.mesh(boxGeo(0.05, 1.1, 1.5), M({ color: 0x141416 }), -3.6, 0.55, z + 0.75);
+  W.collider(-3.7, -7, -3.5, 25);
+  for (let z = -4; z < 24; z += 6) W.tree(-6, z, 1.1, TEX.leaves([40, 50, 36], "parkleaves"));
+  W.bench(-2.8, 6, Math.PI / 2);
+  lampPost(W, -3.1, 2, { side: 1, range: 9 });
+  lampPost(W, -3.1, 16, { side: 1, range: 9 });
+  // across the street: a storefront with red glass (fictional lettering)
+  W.building(15, 10, 6, 14, 8, TEX.facade([110, 80, 70], 0.3, 21));
+  W.mesh(new THREE.PlaneGeometry(10, 2.6), M({ color: 0xc02818, opacity: 0.55, emissive: 0.3 }), 11.95, 1.5, 10, -Math.PI / 2);
+  W.sign(11.94, 3.3, 10, "MARKET", -Math.PI / 2, { w: 3.4, h: 0.7, bg: "#b01810", fg: "#fff0e0", tw: 64, th: 14, size: 10, unlit: true });
+  W.light(11, 1.6, 10, 0xff3020, 9);
+  // the cart and the crack it keeps rolling over
+  const cart = new THREE.Group();
+  const wire = M({ color: 0x9a9aa0 });
+  const basket = new THREE.Mesh(boxGeo(0.55, 0.45, 0.8), M({ color: 0x9a9aa0, opacity: 0.6 })); basket.position.y = 0.75; cart.add(basket);
+  for (const sx of [-0.22, 0.22]) for (const sz of [-0.32, 0.32]) { const w = new THREE.Mesh(boxGeo(0.05, 0.5, 0.05), wire); w.position.set(sx, 0.28, sz); cart.add(w); }
+  cart.position.set(2.8, 0, 4);
+  W.add(cart);
+  G._cart = cart;
+  W.mesh(boxGeo(1.6, 0.012, 0.05), M({ color: 0x0a0a0a }), 2.8, 0.006, 6);
+  W.bounds = { x0: -3.4, z0: -5, x1: 4.2, z1: 22 };
+  spot(W, "start", 2.5, -3.5, 0);
+  spot(W, "her", -1.6, 6.4, Math.PI / 2);
+  spot(W, "glass", 11.6, 10, -Math.PI / 2);
+  spot(W, "cart", 2.8, 4);
+  spot(W, "away", 2.5, 18);
+  return { start: [2.5, -3.5, 0], cam: { yaw: -0.25, pitch: 0.3, dist: 5.6, height: 1.35 } };
+}
+
+// ---- the Brooklyn waterfront: promenade, railing, skyline, payphone, kiosk
+export function buildWaterfront(W, G, o = {}) {
+  const sunset = o.sunset;
+  env(W, sunset ? { fog: 0xd09068, near: 18, far: 80, ambient: [0.5, 0.4, 0.36], dir: [0.8, 0.5, 0.3], dirVec: [0.2, -0.35, 1] }
+    : { fog: 0x2a3050, near: 14, far: 70, ambient: [0.36, 0.38, 0.56], dir: [0.18, 0.2, 0.32], dirVec: [0.2, -0.5, 1] });
+  W.add(new THREE.Mesh(new THREE.SphereGeometry(90, 12, 8), M({ map: sunset ? TEX.sky("#3a3a6a", "#e08a5a", "#f8c890", "sunset") : TEX.sky("#141a3a", "#3a4a7a", "#7a7aa0", "bluehour"), unlit: true, noFog: true, side: THREE.BackSide })));
+  if (sunset) { const sun = W.glow(0, 9, 85, 18, 0xffb070); sun.material.uniforms.uNoFog.value = 1; }
+  W.surface = "wood";
+  W.ground(0, 4, 50, 14, TEX.wood([90, 80, 74], "boards"), { scale: 1.2 });
+  W.ground(0, -8, 50, 10, TEX.road(), { scale: 6 });
+  W.ground(0, -15, 50, 4, TEX.sidewalk(), { scale: 1.5 });
+  const water = W.ground(0, 50, 160, 80, TEX.water(sunset ? [60, 70, 100] : [20, 30, 60], "riverwater"), { y: -0.8, wave: 1, scroll: [0, 0.04] });
+  water.material.uniforms.uEmissive.value = 0.15;
+  W.railing(-25, 11, 25);
+  W.bounds = { x0: -24, z0: -2.6, x1: 24, z1: 10.8 };
+  // skyline + a bridge across the river
+  for (let i = 0; i < 26; i++) {
+    const h = 6 + ((i * 37) % 23), w = 3 + (i % 4);
+    W.mesh(boxGeo(w, h, 3, 3, 3), M({ map: TEX.facade([46, 40, 56], 0.5, 90 + i), color: 0x9a8a9a, noFog: true }), -60 + i * 4.8, h / 2 - 0.8, 70 + (i % 3) * 4);
+  }
+  const steel = M({ color: 0x2a2a34, noFog: true });
+  W.mesh(boxGeo(80, 0.6, 1.2), steel, -30, 7, 40);
+  for (const x of [-46, -14]) { W.mesh(boxGeo(1.2, 22, 1.2), steel, x, 10, 40); for (let k = 0; k < 6; k++) W.mesh(boxGeo(0.1, 0.1, 1), M({ color: 0xffd080, unlit: true, noFog: true }), x - 15 + k * 6, 7.5, 40); }
+  for (let x = -22; x <= 22; x += 11) W.lamp(x, 10.2, { side: -1, color: 0xffd8a0, range: 6 });
+  W.bench(-6, 9.4, Math.PI); W.bench(14, 9.4, Math.PI);
+  // the amber payphone beside the shuttered kiosk
+  const pp = W.payphone(4.6, 8.6, Math.PI);
+  W.box(4.6, 1.2, 8.75, 0.7, 1.1, 0.5, M({ color: 0xc89030, emissive: 0.25 }), { solid: false });
+  W.light(4.6, 2.2, 8.2, 0xffc050, 6);
+  W.glow(4.6, 2.0, 8.4, 1.2, 0xffc050);
+  W.box(7.4, 0, 8.2, 3, 2.8, 2.4, M({ map: TEX.metal(), color: 0x8a8070 }));
+  W.mesh(new THREE.PlaneGeometry(2.6, 2.2), M({ map: TEX.metal(), color: 0x6a6460 }), 7.4, 1.2, 6.98, Math.PI);
+  W.mesh(boxGeo(3.4, 0.2, 2.8), M({ map: TEX.cloth([170, 60, 50], "awning") }), 7.4, 2.9, 7.9);
+  // places from ordinary days across the road
+  W.car(-14, -8, Math.PI / 2, [70, 66, 74]);
+  W.building(16, -19, 10, 4, 5, TEX.facade([140, 110, 80], 0.8, 3));
+  W.sign(16, 3.6, -16.9, "DELI · GROCERY", 0, { w: 4, h: 0.6, bg: "#1a4a2a", fg: "#f0f0d0", tw: 96, th: 14, size: 9, unlit: true });
+  W.building(-4, -19, 10, 4, 5, TEX.facade([120, 80, 70], 0.7, 5));
+  W.building(-22, -19, 10, 4, 7, TEX.facade([100, 90, 80], 0.3, 6));
+  spot(W, "start", -16, 6, Math.PI / 2);
+  spot(W, "him", -15.2, 7.2, Math.PI / 2);
+  spot(W, "far", 16, 9, Math.PI / 2);
+  spot(W, "bench", -6, 8.9, Math.PI);
+  spot(W, "phone", 4.6, 7.9, 0);
+  spot(W, "pastPhone", 1, 7.6, Math.PI / 2);
+  spot(W, "kiosk", 8.8, 7.2);
+  return { start: [-16, 6, Math.PI / 2], cam: { yaw: 0.85, pitch: 0.24, dist: 6.4, height: 1.3, fov: 54 } };
+}
+
+// ---- the Unread Room: two chairs, two names, one phone
+export function buildUnread(W, G) {
+  env(W, { fog: 0x14100a, near: 5, far: 16, ambient: [0.44, 0.38, 0.28], dir: [0.06, 0.05, 0.04] });
+  W.surface = "tile";
+  W.room(-2.4, -2.4, 2.4, 2.4, 2.7, { floor: TEX.tile("#5a5a50", "#2a2a26", "checker"), wall: TEX.wallpaper([110, 100, 76], "unreadwp") });
+  W.table(0, 0.6, { w: 0.7, d: 0.6, tint: [80, 56, 40] });
+  W.box(0, 0.79, 0.6, 0.28, 0.12, 0.22, M({ color: 0x141414 }), { solid: false });
+  W.mesh(boxGeo(0.26, 0.05, 0.06), M({ color: 0x0a0a0a }), 0, 0.9, 0.6);
+  for (const [x, ry] of [[-1.3, Math.PI / 2], [1.3, -Math.PI / 2]]) {
+    W.chair(x, 0, ry);
+    W.sign(x + (x < 0 ? -0.22 : 0.22), 1.02, 0, "ARGJILA", ry + Math.PI, { w: 0.42, h: 0.1, bg: "#e8e4d8", fg: "#1a1a1a", tw: 48, th: 10, size: 7 });
+  }
+  pendant(W, 0, 2.3, 0, 0xffd8a0, 6);
+  W.door(0, -2.35, 0, { tint: "#3a2a1a" });
+  spot(W, "start", 0, -1.8, 0);
+  spot(W, "chairA", -1.3, 0, Math.PI / 2);
+  spot(W, "chairF", 1.3, 0, -Math.PI / 2);
+  spot(W, "phone", 0, 0.1, 0);
+  return { start: [0, -1.8, 0], cam: { yaw: 0, height: 1 }, camZones: [{ x0: -3, z0: -3, x1: 3, z1: 3, cam: { fixed: [0.2, 2.2, -2.2], height: 0.6 } }] };
+}
+
+// ---- the corridor of telephone cords (green, fluorescent)
+export function buildCords(W, G) {
+  env(W, { fog: 0x0a160c, near: 6, far: 26, ambient: [0.24, 0.4, 0.28], dir: [0.05, 0.08, 0.06] });
+  W.surface = "tile";
+  const L = 32;
+  W.ground(0, L / 2, 3, L, TEX.tile("#5a7a5a", "#3a5a40", "cordfloor"), { scale: 1 });
+  W.ceiling(0, L / 2, 3, L, 2.8, TEX.concrete([50, 70, 54], "cordceil"));
+  for (const s of [-1, 1]) {
+    W.wall(s * 1.5, L / 2, L, 2.8, s > 0 ? -Math.PI / 2 : Math.PI / 2, TEX.tile("#7a9a7a", "#5a7a5a", "cordwall"));
+    W.mesh(boxGeo(0.03, 1.1, L), M({ map: TEX.tile("#2a4a30", "#1a3a24", "cordlow") }), s * 1.48, 0.55, L / 2);
+  }
+  W.wall(0, 0, 3, 2.8, 0, TEX.tile("#7a9a7a", "#5a7a5a", "cordwall"));
+  W.wall(0, L, 3, 2.8, Math.PI, TEX.tile("#7a9a7a", "#5a7a5a", "cordwall"));
+  W.bounds = { x0: -1.35, z0: 0.3, x1: 1.35, z1: L - 0.3 };
+  for (let i = 0; i < 9; i++) { const s = i % 2 ? 1 : -1; W.door(s * 1.47, 3 + i * 3.3, s > 0 ? -Math.PI / 2 : Math.PI / 2, { tint: "#2a2018", solid: false }); }
+  // fluorescent tubes
+  for (let z = 3; z < L; z += 5) {
+    W.mesh(boxGeo(0.3, 0.06, 1.2), M({ color: 0xc8ffd8, unlit: true }), 0, 2.74, z);
+    W.light(0, 2.4, z, 0xb0ffc8, 7, { flicker: z === 18 ? 0.35 : 0.04 });
+  }
+  // cords everywhere: sagging from the ceiling, wall to wall, coiled on the floor
+  for (let z = 1; z < L; z += 1.3) {
+    cord(W, -1.45, 2.6, z, 1.45, 2.5, z + 0.6, 0.5 + (z % 3) * 0.25, 8);
+    if (z % 2.6 < 1.3) cord(W, -1.45, 2.2, z, -1.45, 0.05, z + 1.2, 0.2, 5);
+    if (z % 3.9 < 1.3) cord(W, 1.45, 2.4, z + 0.4, 0.6, 0.02, z + 1.6, 0.1, 5);
+  }
+  // wall boxes (junctions)
+  for (const z of [6, 13, 20]) for (const s of [-1, 1]) W.box(s * 1.38, 1.2, z, 0.16, 0.5, 0.4, M({ color: 0x2a2a26 }), { solid: false });
+  spot(W, "start", 0, 1.2, 0);
+  spot(W, "j1", 0, 6, 0); spot(W, "j2", 0, 13, 0); spot(W, "j3", 0, 20, 0);
+  spot(W, "far", 0, 29, Math.PI);
+  spot(W, "side", -0.9, 9, 0);
+  return { start: [0, 1.2, 0], cam: { yaw: 0, pitch: 0.24, dist: 3.4, height: 1.45, fov: 62 } };
+}
+
+// ---- the Clock Tower: floating platform before a giant clock face
+export function buildTower(W, G) {
+  env(W, { fog: 0x3a3450, near: 10, far: 60, ambient: [0.42, 0.38, 0.48], dir: [0.2, 0.18, 0.22] });
+  W.surface = "street";
+  const tiles = [TEX.asphalt(), TEX.carpet(), TEX.tile(), TEX.wood(), TEX.sidewalk()];
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) W.ground(-6 + i * 4 + 2, -6 + j * 4 + 2, 4, 4, tiles[(i + j * 2) % tiles.length], { scale: 1.5 });
+  W.mesh(boxGeo(16.2, 3, 16.2), M({ map: TEX.brick([70, 56, 50], "towerbrick") }), 0, -1.52, 0);
+  for (let x = -8; x <= 8; x += 0.6) for (const z of [-8, 8]) W.mesh(boxGeo(0.04, 1, 0.04), M({ color: 0x18161a }), x, 0.5, z);
+  W.bounds = { x0: -7.6, z0: -7.6, x1: 7.6, z1: 7.6 };
+  // the great clock
+  const face = W.mesh(new THREE.CircleGeometry(9, 24), M({ map: TEX.clockFace("4:04"), emissive: 0.25 }), 0, 9, 26, Math.PI);
+  W.mesh(new THREE.TorusGeometry(9.2, 0.5, 4, 24), M({ color: 0x8a6a30 }), 0, 9, 26);
+  G._clockFace = face;
+  // the paired doors: a car door and a front door, standing alone
+  const carDoor = W.mesh(boxGeo(1.1, 1.1, 0.08), M({ map: TEX.cloth([70, 66, 74], "car70,66,74") }), -3, 0.75, 5);
+  W.door(3, 5, 0, { tint: "#5a3018", solid: false });
+  G._towerDoors = carDoor;
+  // fragments of the city floating in the fog
+  W.mesh(boxGeo(5, 0.3, 3), M({ map: TEX.road() }), -14, 6, 10).rotation.z = 0.3;
+  W.mesh(boxGeo(3, 4, 3), M({ map: TEX.facade([90, 70, 60], 0.5, 41) }), 13, 8, 6).rotation.y = 0.6;
+  W.mesh(boxGeo(3, 0.1, 2), M({ map: TEX.carpet() }), -9, 11, -4).rotation.x = 0.5;
+  for (let i = 0; i < 10; i++) W.mesh(boxGeo(1.4, 0.2, 0.5), M({ map: TEX.concrete([80, 76, 70], "towerstep") }), 9 + i * 0.4, -2 + i * 0.6, -8 + i * 1.1);
+  W.box(-7, 0, -1, 1.6, 2.4, 1.4, M({ map: TEX.metal(), color: 0x6a6460 }));
+  W.sign(-6.18, 1.8, -1, "ELEVATOR", Math.PI / 2, { w: 1.2, h: 0.25, bg: "#1a1410", fg: "#e8c890", tw: 48, th: 10, size: 7, unlit: true });
+  for (const [x, z] of [[-6, -6], [6, -6], [-6, 6], [6, 6]]) lampPost(W, x, z, { side: 1, h: 3.2, range: 8 });
+  W.light(0, 8, 18, 0xffc080, 26);
+  spot(W, "start", 0, -5, 0);
+  spot(W, "elevator", -5.9, -1, -Math.PI / 2);
+  spot(W, "her", 1.4, 3.4, Math.PI);
+  spot(W, "keeper", 0, 18, Math.PI);
+  spot(W, "carDoor", -3, 4.2, 0);
+  spot(W, "frontDoor", 3, 4.2, 0);
+  return { start: [0, -5, 0], cam: { yaw: 0, pitch: 0.22, dist: 6.2, height: 1.5, fov: 58 } };
+}
+
+// ---- the collapse: a corridor through the places they learned
+export const ESCAPE_SEGS = [
+  { z0: 0, z1: 24, name: "THE FIRST MEETING", floor: () => TEX.sidewalk(), wall: () => TEX.facade([140, 110, 90], 0.3, 31) },
+  { z0: 24, z1: 48, name: "THE BATHHOUSE", floor: () => TEX.tile("#d8ccb0", "#b0a488", "bdeck"), wall: () => TEX.tile("#d8ccb0", "#a89c84", "bwall") },
+  { z0: 48, z1: 72, name: "THE HOUSE OF ALMOST", floor: () => TEX.wood([80, 56, 40], "hfloor"), wall: () => TEX.wallpaper([90, 70, 70], "hwp") },
+  { z0: 72, z1: 96, name: "THE WATERFRONT", floor: () => TEX.wood([90, 80, 74], "boards"), wall: () => TEX.facade([46, 40, 56], 0.4, 90) },
+  { z0: 96, z1: 120, name: "THE CORDS", floor: () => TEX.tile("#5a7a5a", "#3a5a40", "cordfloor"), wall: () => TEX.tile("#7a9a7a", "#5a7a5a", "cordwall") },
+  { z0: 120, z1: 156, name: "OCEAN PARKWAY", floor: () => TEX.road(), wall: () => TEX.facade([92, 80, 72], 0.25, 11) },
+];
+export const ESCAPE_FORKS = [
+  { z: 36, goodLeft: true }, { z: 60, goodLeft: false }, { z: 84, goodLeft: true }, { z: 108, goodLeft: false },
+];
+export function buildEscape(W, G) {
+  env(W, { fog: 0x0c0a0e, near: 6, far: 30, ambient: [0.3, 0.28, 0.3], dir: [0.12, 0.1, 0.1] });
+  for (const s of ESCAPE_SEGS) {
+    const cz = (s.z0 + s.z1) / 2, d = s.z1 - s.z0;
+    W.ground(0, cz, 10, d, s.floor(), { scale: 2 });
+    W.wall(-5, cz, d, 4, Math.PI / 2, s.wall(), { su: 4, sv: 4 });
+    W.wall(5, cz, d, 4, -Math.PI / 2, s.wall(), { su: 4, sv: 4 });
+    W.sign(-4.95, 3, s.z0 + 3, s.name, Math.PI / 2, { w: 3, h: 0.4, bg: "#101010", fg: "#e8d8b0", tw: 128, th: 16, size: 8, unlit: true });
+    for (let z = s.z0 + 4; z < s.z1; z += 8) W.light(0, 3.5, z, 0xffd8b0, 9, { flicker: 0.12 });
+  }
+  W.collider(-6, 0, -5, 156); W.collider(5, 0, 6, 156);
+  W.wall(0, 0, 10, 4, 0, TEX.concrete());
+  W.bounds = { x0: -5, z0: 0, x1: 5, z1: 156 };
+  // forks: a divider and two gates — warm light for the true one, cold for the false
+  G._forks = ESCAPE_FORKS.map((f) => {
+    W.box(0, 0, f.z - 1, 0.6, 4, 7, M({ map: TEX.concrete([60, 56, 60], "divider") }));
+    const goodX = f.goodLeft ? 2.6 : -2.6, badX = -goodX;
+    W.light(goodX, 2.2, f.z - 3, 0xffb060, 7);
+    W.glow(goodX, 2.4, f.z - 4.4, 1.6, 0xffb060);
+    W.light(badX, 2.2, f.z - 3, 0x5090ff, 7);
+    W.glow(badX, 2.4, f.z - 4.4, 1.6, 0x5090ff);
+    return { ...f, goodX, badX };
+  });
+  for (let x = -4; x <= 4; x += 1.2) W.mesh(boxGeo(0.6, 0.01, 2.2), M({ color: 0xc8c4b8 }), x, 0.02, 150);
+  W.lamp(-4.4, 148, { side: 1, color: 0xfff0d0, range: 12 });
+  W.lamp(4.4, 152, { side: -1, color: 0xfff0d0, range: 12 });
+  const dark = W.mesh(boxGeo(10.4, 8, 0.6), M({ color: 0x000000, noFog: true }), 0, 4, -3);
+  G._dark = dark;
+  return { start: [0, 3, 0], cam: { yaw: 0, pitch: 0.36, dist: 6.2, height: 1.2 } };
 }

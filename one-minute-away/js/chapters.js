@@ -8,9 +8,8 @@ import { THREE, U, mat, TEX, boxGeo } from "./ps1.js";
 import { Character, SpriteActor } from "./actors.js";
 import { isWatched } from "./world.js";
 import { pic } from "./art.js";
-import { bgURL } from "./assets.js";
 import * as S from "./scenes.js";
-import { R, A, N, HER, pin, fl, toCam, herPage, relabel, grade, addTint, clockBack, minuteMap, stalker, reach } from "./story.js";
+import { R, A, N, HER, at, pin, yawAt, peepCanvas, herPage, relabel, grade, addTint, clockBack, minuteMap, stalker, reach } from "./story.js";
 import { CH6, CH7, CH8, CH9, CH10, CH11, CH12, CH13, CH14, CH15, ENDINGS, buildTitle, decideEnding } from "./chapters2.js";
 export { ENDINGS, buildTitle, decideEnding };
 
@@ -83,7 +82,7 @@ async function prologue(G) {
 
   // ---------------- Argjila: the hallway of front doors ----------------
   await G.handoff("Argjila", "A hallway lined with front doors");
-  await G.load((W2) => { S.paint(W2, G, "hallway"); return { start: [[222, 304], 0, 0] }; });
+  await G.load(S.buildHallway);
   const H = G.world;
   G.pov("Argjila");
   G.state.place = "the hallway";
@@ -97,13 +96,13 @@ async function prologue(G) {
   G.objective("LOOK THROUGH THE DOORS. ONE OF THEM IS LISTENING.");
   const peep = async (text) => {
     G.audio.creak(0.6);
-    await G.item({ title: "PEEPHOLE", img: bgURL("ocean"), round: true, text });
+    await G.item({ title: "PEEPHOLE", canvas: peepCanvas(/open/.test(text)), round: true, text });
   };
   let heard = false;
   const doors = [
-    { key: "a", pos: pin(H, 208, 252), label: "THE DOOR", verb: "PEEPHOLE", use: async () => { P.ch.pose("listen"); await peep("Ocean Parkway in fog. The parked car. Him, with the phone still against his ear."); P.ch.pose(null); } },
-    { key: "b", pos: pin(H, 298, 266), label: "THE DOOR", verb: "PEEPHOLE", use: async () => { P.ch.pose("listen"); await peep("The same car. The same fog. The passenger door is open now."); P.ch.pose(null); } },
-    { key: "c", pos: pin(H, 238, 198), label: "THE FAR DOOR", verb: "LISTEN", use: async () => {
+    { key: "a", pos: pin(H, "doorA", 1.4), label: "THE DOOR", verb: "PEEPHOLE", use: async () => { P.ch.pose("listen"); await peep("Ocean Parkway in fog. The parked car. Him, with the phone still against his ear."); P.ch.pose(null); } },
+    { key: "b", pos: pin(H, "doorB", 1.4), label: "THE DOOR", verb: "PEEPHOLE", use: async () => { P.ch.pose("listen"); await peep("The same car. The same fog. The passenger door is open now."); P.ch.pose(null); } },
+    { key: "c", pos: pin(H, "doorC", 1.4), label: "THE FAR DOOR", verb: "LISTEN", use: async () => {
       P.ch.pose("listen");
       G.audio.setMuffle(true);
       G.caption("Someone speaks on the other side");
@@ -122,7 +121,7 @@ async function prologue(G) {
   }
   G.objective("SLIDE THE CHAIN ACROSS. TWICE.");
   for (let i = 0; i < 2; i++) {
-    await G.interactOnce({ pos: pin(H, 176, 312, 1.3), label: "THE CHAIN", verb: "SLIDE", r: 1.6, use: async () => {
+    await G.interactOnce({ pos: pin(H, "chain", 1.3), label: "THE CHAIN", verb: "SLIDE", r: 1.6, use: async () => {
       P.ch.pose("chain");
       G.audio.chainClick();
       G.caption(i === 0 ? "The chain clicks" : "The chain clicks again");
@@ -166,8 +165,8 @@ async function prologue(G) {
 // ============================================================
 async function ch1(G) {
   const P = G.player;
-  // ---- the sidewalk (painted) ----
-  await G.load((W) => { S.paint(W, G, "ocean"); return { start: [[262, 312], 0, 0] }; });
+  // ---- the sidewalk by the car ----
+  await G.load(S.buildSidewalk);
   let W = G.world;
   G.pov("Rufki");
   G.state.place = "Ocean Parkway";
@@ -180,7 +179,7 @@ async function ch1(G) {
   G.caption("A telephone rings, somewhere ahead", 3);
   G.audio.ring(0.03);
   // the childhood photograph under the streetlamp
-  await G.interactOnce({ pos: pin(W, 178, 222, 0.2), label: "SOMETHING UNDER THE LAMP", verb: "PICK UP", sparkle: true, use: async () => {
+  await G.interactOnce({ pos: pin(W, "photo", 0.2), label: "SOMETHING UNDER THE LAMP", verb: "PICK UP", sparkle: true, use: async () => {
     P.ch.pose("crouch");
     await G.wait(0.5);
     await G.item({ title: "A CHILDHOOD PHOTOGRAPH", canvas: pic("childhood"), text: "Him, small, beside a girl whose face has been scratched out. On the back: You passed each other more times than you know." });
@@ -188,7 +187,7 @@ async function ch1(G) {
     P.ch.pose(null);
   } });
   G.objective("FOLLOW THE RINGING.");
-  const [ex, ez] = fl(W, 209, 176);
+  const [ex, ez] = at(W, "exit");
   await reach(G, ex, ez, 1.6);
   await G.fade(1, 1);
 
@@ -480,7 +479,7 @@ async function ch2(G) {
 // ============================================================
 async function ch3(G) {
   const P = G.player;
-  await G.load((W) => { S.paint(W, G, "almost"); return { start: [[110, 214], 0, Math.PI * 1.3] }; });
+  await G.load(S.buildBalcony);
   let W = G.world;
   G.pov("Rufki");
   G.state.place = "the House of Almost";
@@ -490,7 +489,7 @@ async function ch3(G) {
   await G.fade(0, 1.5);
   await G.say([N("He wakes in an immense apartment building over Ocean Parkway. Every window shows a different year."), N("The House of Almost holds every moment they were physically near each other and still strangers.")]);
   G.objective("GO INSIDE.");
-  await G.interactOnce({ pos: pin(W, 40, 204, 1.4), label: "THE DOOR", verb: "OPEN", use: async () => { G.audio.door(); await G.fade(1, 0.8); } });
+  await G.interactOnce({ pos: pin(W, "door", 1.4), label: "THE DOOR", verb: "OPEN", use: async () => { G.audio.door(); await G.fade(1, 0.8); } });
 
   await G.load(S.buildAlmostHall);
   W = G.world;
@@ -576,7 +575,7 @@ async function ch3(G) {
 // ============================================================
 async function ch4(G) {
   const P = G.player;
-  await G.load((W) => { S.paint(W, G, "bedroom", { env: { ambient: [0.62, 0.46, 0.4] } }); return { start: [[60, 290], 0, 0] }; });
+  await G.load((W) => S.buildBedroom(W, G, { tone: "night" }));
   const W = G.world;
   G.pov("Argjila");
   G.state.place = "her room";
@@ -587,20 +586,20 @@ async function ch4(G) {
   await G.fade(0, 1.2);
   await G.say([HER("The beginning was not just big declarations. It was the stupid, sweet little things that somehow stayed with me.")]);
   G.objective("OPEN AN OLD MESSAGE.");
-  await G.interactOnce({ pos: pin(W, 100, 250, 1), label: "YOUR PHONE", verb: "OPEN", use: async () => {
+  await G.interactOnce({ pos: pin(W, "desk", 1), label: "YOUR PHONE", verb: "OPEN", use: async () => {
     P.ch.pose("phone");
     const r = await G.phone({ contact: "RUFKI", date: "NOV 2025", messages: [{ from: "them", text: "[ a photo: he is showing you his biceps ]", time: "Nov" }], replies: ["I blame you for my addiction."] });
     if (r === 0) G.us();
     P.ch.pose(null);
   } });
   await G.say([HER("I love that this is the sort of detail I remember. Not some grand scene. Just you being you and me getting attached to the little things.")]);
-  await G.interactOnce({ pos: pin(W, 60, 300, 1), label: "YOUR PHONE", verb: "TEXT HIM", use: async () => {
+  await G.interactOnce({ pos: pin(W, "bedside", 1), label: "YOUR PHONE", verb: "TEXT HIM", use: async () => {
     P.ch.pose("phone");
     await G.phone({ contact: "RUFKI", date: "LATE 2025", messages: [], replies: ["I just want huggless"], closeLabel: "Put the phone down" });
     P.ch.pose(null);
   } });
   await G.say([HER("You were becoming somebody I looked for, somebody I wanted to tell things to, somebody whose messages could change the feeling of a day.")]);
-  await G.interactOnce({ pos: pin(W, 30, 270, 1), label: "WHEN I KNEW", verb: "REMEMBER", use: () => herPage(G, "realized") });
+  await G.interactOnce({ pos: pin(W, "dresser", 1.2), label: "WHEN I KNEW", verb: "REMEMBER", use: () => herPage(G, "realized") });
   // December: the distance
   await G.fade(1, 1);
   G.ui.clock("DEC 2025");
@@ -609,8 +608,8 @@ async function ch4(G) {
   await G.fade(0, 1);
   await G.say([N("December. He goes away, and he will be gone until around the middle of February.")]);
   // the winter confidante: a quiet listening beat
-  const [fx, fz] = fl(W, 120, 250);
-  const friend = new SpriteActor("confidante", { sitting: true }); friend.setPos(fx, 0, fz).face(Math.PI * 1.1); W.addActor(friend);
+  const [fx, fz] = at(W, "chair");
+  const friend = new SpriteActor("confidante", { sitting: true }); friend.setPos(fx, 0, fz).face(Math.PI / 2); W.addActor(friend);
   await G.cutscene(async () => {
     await G.say([N("That winter she tells one of her best friends how much she likes Rufki."), N("Her friend lets her finish.")]);
     await G.wait(3.5);
@@ -654,37 +653,38 @@ async function ch4(G) {
 // ============================================================
 async function ch5(G) {
   const P = G.player;
-  const enter = async (pov, start) => {
-    await G.load((W) => { S.paint(W, G, "bathhouse"); return { start }; });
+  const enter = async (pov, spot) => {
+    await G.load(S.buildBathhouse);
     G.pov(pov);
+    G.placeAt(spot);
     G.state.place = "the Williamsburg Bathhouse";
     G.ui.clock("APR 4, 2026");
+    return G.world;
   };
-  await enter("Rufki", [[90, 290], 0, 0.6]);
-  let W = G.world;
+  let W = await enter("Rufki", "start");
   G.music.play("memory", 2);
   G.audio.ambience({ wind: 0, drone: 0.15, note: 49, water: 0.5, bright: 500, verb: 0.6 });
   const drips = setInterval(() => G.mode === "play" && G.audio.drip(Math.random() * 2 - 1), 1700);
-  // Argjila sits on the far deck; her reflection is already leaving
-  const [ax, az] = fl(W, 200, 160);
-  const her = G.npc(Character, "argjila", ax, az, toCam(W, ax, az));
+  // Argjila sits on the far deck; in the water, her reflection is already leaving
+  const [ax, az] = at(W, "her");
+  const her = G.npc(Character, "argjila", ax, az, Math.PI);
   her.pose("sit");
+  const [rx0, rz0] = at(W, "reflection");
   const refl = new Character("doubleA");
   refl.root.scale.y = -1;
-  refl.setPos(ax, -0.02, az).face(toCam(W, ax, az));
+  refl.setPos(rx0, -0.5, rz0).face(Math.PI);
   W.add(refl.root);
   G.idle(refl);
-  // steam
-  W.backdrop.blur = 3;
+  G.steam(3);
   await G.fade(0, 1.6);
   await G.say([N("April 4, 2026. Steam clears a circle on the glass."), N("Argjila is sitting beside the pool, on the night they become official."), N("In the reflection, she is already getting up to leave.")]);
-  await G.tween(2.5, (k) => (W.backdrop.blur = 3 * (1 - k)));
-  refl.pose(null);
-  const [dx2, dz2] = fl(W, 300, 157);
-  G.walkTo(refl, dx2, dz2, 0.9);
+  await G.tween(2.5, (k) => G.steam(3 * (1 - k)));
+  G.steam(0);
+  const [re, rze] = at(W, "reflectionEnd");
+  G.walkTo(refl, re, rze, 0.9);
   G.objective("FOLLOW THE REFLECTION?");
   const c = await G.interactAny([
-    { key: "follow", pos: pin(W, 120, 205, 0.3), label: "THE REFLECTION", verb: "FOLLOW", r: 1.8 },
+    { key: "follow", pos: pin(W, "edgeNear", 0.3), label: "THE REFLECTION", verb: "FOLLOW", r: 1.8 },
     { key: "her", pos: [ax, 1, az], label: "ARGJILA", verb: "GO TO HER", r: 2.5 },
   ]);
   if (c === "follow") {
@@ -697,58 +697,58 @@ async function ch5(G) {
     G.caption("Wet footsteps. Nobody here.", 2.4);
     await G.say([N("He splashes into an empty changing room. Her real voice is still coming from behind him."), A("Rufki?", { fx: { vol: 0.6 } })]);
     await G.fade(1, 0.6);
-    await enter("Rufki", [[90, 290], 0, 0.6]);
-    W = G.world;
-    const [bx, bz] = fl(W, 200, 160);
-    const h2 = G.npc(Character, "argjila", bx, bz, toCam(W, bx, bz)); h2.pose("sit");
+    W = await enter("Rufki", "start");
+    const h2 = G.npc(Character, "argjila", ax, az, Math.PI); h2.pose("sit");
     await G.fade(0, 0.6);
   }
   // ---- her side ----
   await G.fade(1, 0.6);
   await G.handoff("Argjila", "The same night, from the other side of the pool");
-  await enter("Argjila", [[210, 162], 0, Math.PI]);
-  W = G.world;
-  const [rx, rz] = fl(W, 80, 280);
-  const him = G.npc(Character, "rufki", rx, rz, Math.PI * 0.3);
+  W = await enter("Argjila", "argStart");
+  const [hx, hz] = at(W, "rufkiFar");
+  const him = G.npc(Character, "rufki", hx, hz, Math.PI);
   await G.fade(0, 0.8);
   await G.say([N("From her side, she sees him turn away."), N("The room has given her a towel with one word stitched into it.")]);
   G.objective("THE TOWEL.");
-  const [tx, tz] = fl(W, 250, 162);
+  const [tx, tz] = at(W, "towel");
   let carried = 0;
   while (true) {
-    const it = await G.interactOnce({ pos: [tx, 0.6, tz], label: "TOWEL", verb: carried ? "PICK IT UP AGAIN" : "PICK UP", r: 1.6, use: async () => {
+    await G.interactOnce({ pos: [tx, 0.6, tz], label: "TOWEL", verb: carried ? "PICK IT UP AGAIN" : "PICK UP", r: 1.6, use: async () => {
       await G.item({ title: "THE TOWEL", prop: "towel", text: "FINE." });
     } });
     carried++;
-    G.glitch(0.6);
+    G.glitch(1);
     G.audio.whoosh();
     G.caption("The exit is farther away", 2.4);
-    W.backdrop.zoom = 1;
-    await G.tween(0.8, (k) => G.zoom(1 + 0.12 * carried * k, [300, 160], 0));
+    // the room stretches: a slow dolly-zoom away from the exit
+    const f0 = G.rig.cfg.fov || 55;
+    await G.tween(0.8, (k) => G.rig.set({ fov: f0 + 9 * k }));
     G.glitch(0);
     const k = await G.choose("The towel says FINE.", ["Keep holding it", "Set it down"]);
     if (k === 1) break;
   }
-  G.zoom(1);
+  G.rig.set({ fov: 55 });
   G.give({ name: "Towel marked FINE", prop: "towel", text: "Set down." });
   await G.cutscene(async () => {
-    G.zoom(1.6, [150, 200], 0.6);
+    G.zoom(1.8, P.ch);
     await G.say([A("I was still talking.")]);
     G.zoom(1);
   });
   // ---- Rufki sits back on the tile and hears the end of her sentence ----
   await G.fade(1, 0.5);
   await G.handoff("Rufki", "Sit back down");
-  await enter("Rufki", [[110, 270], 0, 0.6]);
-  W = G.world;
-  const [ax2, az2] = fl(W, 140, 250);
-  const her2 = G.npc(Character, "argjila", ax2, az2, -Math.PI * 0.6);
+  W = await enter("Rufki", "tileHim");
+  const [ax2, az2] = at(W, "tileHer");
+  const her2 = G.npc(Character, "argjila", ax2, az2, Math.PI);
+  P.place(...at(W, "edgeNear"), 0);
   await G.fade(0, 0.8);
   G.objective("SIT WITH HER.");
-  await G.interactOnce({ pos: [ax2, 0.6, az2], label: "THE TILE BESIDE HER", verb: "SIT", r: 1.8, use: async () => {
+  await G.interactOnce({ pos: [ax2, 0.6, az2], label: "THE TILE BESIDE HER", verb: "SIT", r: 2.2, use: async () => {
+    P.place(...at(W, "tileHim"), Math.PI);
+    P.ghost = true;
     P.ch.pose("sit");
     her2.pose("sit");
-    G.zoom(1.5, [130, 230], 0.8);
+    G.zoom(1.6, her2, 0.5);
     await G.say([N("He sits back on the tile. This time he hears the end of her sentence."), HER("You were not just the guy I liked anymore."), HER("It felt like the natural next step in something we were already building.")]);
     G.zoom(1);
   } });
@@ -758,6 +758,7 @@ async function ch5(G) {
   await G.lines(["MY BOYFRIEND"], { hold: 2.6, cls: "warm" });
   await G.say([HER("Mine includes what it meant to be able to say “my boyfriend” and know I meant you.")]);
   P.ch.pose(null);
+  P.ghost = false;
   // the photographs under the water
   G.objective("LIFT THE PHOTOGRAPHS FROM THE POOL. ONE AT A TIME.");
   const photos = [
@@ -768,18 +769,18 @@ async function ch5(G) {
   ];
   let dark = 1;
   for (const [i, [kind, title, text]] of photos.entries()) {
-    const [px, pz] = fl(W, 70 + i * 22, 222 - i * 13);
+    const [px, pz] = at(W, "photo" + i);
     await G.interactOnce({ pos: [px, 0.2, pz], label: "SOMETHING UNDER THE WATER", verb: "LIFT", r: 1.5, sparkle: true, use: async () => {
       P.ch.pose("crouch");
       G.audio.splash();
       await G.wait(0.4);
       await G.item({ title, canvas: pic(kind), text });
       dark -= 0.12;
-      grade(dark, dark, dark * 1.05);
+      G.U.uTint.value.setRGB(dark, dark, dark * 1.05);
       P.ch.pose(null);
     } });
   }
-  await G.interactOnce({ pos: pin(W, 160, 205, 0.2), label: "THE BOTTOM OF THE POOL", verb: "REACH", r: 1.8, use: async () => {
+  await G.interactOnce({ pos: pin(W, "bottom", 0.2), label: "THE BOTTOM OF THE POOL", verb: "REACH", r: 1.8, sparkle: true, use: async () => {
     P.ch.pose("crouch");
     await G.item({ title: "AT THE BOTTOM", canvas: pic("ring"), text: "A ring, beside a picture of a house that doesn't exist yet. Two small figures stand next to the couple. Their faces are blurred." });
     P.ch.pose(null);
@@ -790,8 +791,13 @@ async function ch5(G) {
     await G.say([N("When he looks up, she is gone. Her voice echoes off the tile."), A("Don't search for a future if you forget how we got here.", { fx: { vol: 0.8 } })]);
     G.audio.rumble(2.5);
     G.caption("The pool drains", 2.5);
-    await G.tween(2.2, (k) => grade(dark * (1 - k * 0.5), dark * (1 - k * 0.4), dark * (1 - k * 0.3), 1 - k * 0.6));
-    await G.say([N("The pool drains completely. At the bottom is a door: THE THINGS WE NEVER SAID.")]);
+    G.shot([7, 4.5, -2], [0, -1, 6], 50);
+    await G.tween(2.6, (k) => { G._water.position.y = -0.25 - k * 1.5; G.U.uTint.value.setRGB(dark * (1 - k * 0.4), dark * (1 - k * 0.35), dark * (1 - k * 0.25)); });
+    G._water.visible = false;
+    G._bathDoor.visible = true;
+    G.audio.door();
+    await G.say([N("The pool drains completely. Across the room, a door that was not there before: THE THINGS WE NEVER SAID.")]);
+    G.release();
   });
   G.flag("receiver");
   await G.item({ title: "AN OPEN LINE", prop: "rotary", text: "From now on he can set the receiver down without hanging up. She chooses when to speak into it." });

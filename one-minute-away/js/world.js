@@ -31,7 +31,6 @@ export class World {
     this.backdrop = null;
   }
   dispose() {
-    if (this.backdrop) this.backdrop.dispose(this.G.camera);
     this.scene.traverse((o) => {
       if (o.geometry) o.geometry.dispose();
       const ms = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
@@ -112,7 +111,6 @@ export class World {
         }
       }
     }
-    if (this.backdrop) this.backdrop.constrain(pos, rad);
     if (this.bounds) {
       const B = this.bounds;
       pos.x = Math.max(B.x0 + rad, Math.min(B.x1 - rad, pos.x));
@@ -356,6 +354,8 @@ export class World {
     }
   }
   chair(x, z, ry, w) {
+    w = w || mat({ map: TEX.wood([100, 70, 46], "chairwood") });
+    this.colliderBox(x, z, 0.5, 0.5);
     const g = new THREE.Group();
     const s = new THREE.Mesh(boxGeo(0.44, 0.05, 0.44), w); s.position.y = 0.45; g.add(s);
     const b = new THREE.Mesh(boxGeo(0.44, 0.5, 0.05), w); b.position.set(0, 0.72, -0.2); g.add(b);
