@@ -44,7 +44,7 @@ const G = {
   signals: {},
   state: null,
   meta: store.get(META_KEY, { unlocked: 0, endings: [], cleared: false }),
-  opts: { tank: false, crt: true, jitter: true, dither: true, volume: 8, music: 7, voice: true, voiceVol: 10, captions: true, autoText: false, ...store.get(OPT_KEY, {}) },
+  opts: { tank: false, crt: true, jitter: true, dither: true, volume: 8, music: 7, voice: false, voiceVol: 10, captions: true, autoText: false, ...store.get(OPT_KEY, {}), ...(store.get(OPT_KEY, {}).optv !== 2 ? { voice: false, optv: 2 } : {}) },
   memories: MEMORIES,
   CHAPTERS,
 };
@@ -80,6 +80,7 @@ G.ui = new UI(G);
 
 function applyOpts() {
   U.uSnap.value = G.opts.jitter ? 1 : 0;
+  U.uAffine.value = G.opts.jitter ? 0.22 : 0;
   U.uDither.value = G.opts.dither ? 1 : 0;
   document.body.classList.toggle("crt", G.opts.crt);
   G.audio.setVolume(G.opts.volume / 10);
@@ -206,6 +207,7 @@ G.load = async (builder, o = {}) => {
   if (G.state) G.state.mood = null;
   const W = new World(G);
   G.world = W;
+  G.rig.world = W;
   if (!G.player) G.player = new Player(G);
   G.player.faceTarget = null;
   G.player.frozen = false;
@@ -329,7 +331,7 @@ async function optionsMenu() {
     title: "OPTIONS",
     cls: "opts",
     items: [
-      { label: "VOICE ACTING", get: () => (o.voice ? "ON" : "OFF"), set: tog("voice"), hint: "Every line of dialogue is spoken." },
+      { label: "VOICE ACTING", get: () => (o.voice ? "ON" : "OFF"), set: tog("voice"), hint: "Synthesised character voices. Off: dialogue is read, like the original PS1 text boxes." },
       { label: "VOICE VOLUME", get: () => bar(o.voiceVol), set: lvl("voiceVol") },
       { label: "MUSIC", get: () => bar(o.music), set: lvl("music") },
       { label: "MASTER VOLUME", get: () => bar(o.volume), set: lvl("volume") },

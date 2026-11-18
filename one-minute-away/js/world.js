@@ -29,6 +29,7 @@ export class World {
     this.camZones = [];
     this.water = null; // {y, x0,z0,x1,z1}
     this.actors = [];
+    this.occluders = [];
     this.backdrop = null;
   }
   dispose() {
@@ -220,6 +221,16 @@ export class World {
     for (const a of this.actors) a.update(dt, cam);
     for (const u of this.updaters) u(dt, t);
   }
+  // thin things between the camera and the player (lamp posts, tree trunks) drop out of view
+  occlude(cam, focus) {
+    const ax = cam.x, az = cam.z, bx = focus.x - ax, bz = focus.z - az, L2 = bx * bx + bz * bz || 1;
+    for (const o of this.occluders) {
+      const t = ((o.x - ax) * bx + (o.z - az) * bz) / L2;
+      const px = ax + bx * t, pz = az + bz * t;
+      const hide = t > -0.05 && t < 0.9 && Math.hypot(o.x - px, o.z - pz) < o.r + 0.3;
+      for (const m of o.meshes) m.visible = !hide;
+    }
+  }
   // register a sprite actor (needs the camera every frame)
   addActor(a) { this.actors.push(a); this.scene.add(a.root); return a; }
 
@@ -277,9 +288,10 @@ export class World {
   lamp(x, z, o = {}) {
     const h = o.h || 4.6;
     const pole = mat({ map: TEX.metal(), color: 0x6a6e76 });
-    this.mesh(boxGeo(0.14, h, 0.14), pole, x, h / 2, z);
+    const pm = this.mesh(boxGeo(0.14, h, 0.14), pole, x, h / 2, z);
     const arm = o.side || 1;
-    this.mesh(boxGeo(0.9, 0.1, 0.1), pole, x + arm * 0.45, h - 0.05, z);
+    const am = this.mesh(boxGeo(0.9, 0.1, 0.1), pole, x + arm * 0.45, h - 0.05, z);
+    this.occluders.push({ meshes: [pm, am], x, z, r: 0.3 });
     const head = this.mesh(boxGeo(0.4, 0.14, 0.26), mat({ color: o.color ?? 0xffe0a0, unlit: true }), x + arm * 0.85, h - 0.12, z);
     this.colliderBox(x, z, 0.3, 0.3);
     const L = this.light(x + arm * 0.85, h - 0.6, z, o.color ?? 0xffcc88, o.range || 10, { flicker: o.flicker });
@@ -289,7 +301,8 @@ export class World {
   }
   tree(x, z, s = 1, leaves) {
     const bark = mat({ map: TEX.bark() });
-    this.mesh(boxGeo(0.28 * s, 3.4 * s, 0.28 * s, 0.5, 1), bark, x, 1.7 * s, z);
+    const trunk = this.mesh(boxGeo(0.28 * s, 3.4 * s, 0.28 * s, 0.5, 1), bark, x, 1.7 * s, z);
+    this.occluders.push({ meshes: [trunk], x, z, r: 0.35 * s, low: true });
     const lm = mat({ map: leaves || TEX.leaves() });
     const c1 = this.mesh(new THREE.IcosahedronGeometry(1.5 * s, 0), lm, x, 4.4 * s, z, Math.random() * 3);
     const c2 = this.mesh(new THREE.IcosahedronGeometry(1.1 * s, 0), lm, x + 0.5 * s, 5.3 * s, z - 0.3 * s, Math.random() * 3);
@@ -677,6 +690,16 @@ export class CameraRig {
         const back = new THREE.Vector3(-Math.sin(this.yaw) * Math.cos(cfg.pitch), Math.sin(cfg.pitch), -Math.cos(this.yaw) * Math.cos(cfg.pitch));
         wantPos = focus.clone().add(back.multiplyScalar(cfg.dist));
         wantLook = focus;
+        const W = this.world;
+        if (W && W.colliders) {
+          // march from the player (not the look-ahead point, which can sit inside a wall)
+          const ox = player.pos.x, oz = player.pos.z;
+          const dx = wantPos.x - ox, dz = wantPos.z - oz;
+          const inside = (x, z) => W.colliders.some((c) => c.on && c.x1 - c.x0 > 1.2 && c.z1 - c.z0 > 1.2 && x > c.x0 - 0.25 && x < c.x1 + 0.25 && z > c.z0 - 0.25 && z < c.z1 + 0.25);
+          if (!inside(ox, oz)) for (let t = 0.1; t <= 1.0001; t += 0.04) {
+            if (inside(ox + dx * t, oz + dz * t)) { const k2 = Math.max(0.35, t - 0.06); wantPos.set(ox + dx * k2, wantPos.y - (wantPos.y - focus.y) * (1 - k2) * 0.5, oz + dz * k2); break; }
+          }
+        }
       }
     }
     if (this.snapNext) { this.pos.copy(wantPos); this.look.copy(wantLook); }
@@ -691,6 +714,7 @@ export class CameraRig {
     c.position.x += Math.sin(this.t * 0.7) * 0.03 + (Math.random() - 0.5) * this.shake;
     c.position.y += Math.sin(this.t * 0.9) * 0.025 + (Math.random() - 0.5) * this.shake;
     c.lookAt(this.look);
+    this.world?.occlude?.(c.position, this.look);
     if (c.fov !== fov) { c.fov += (fov - c.fov) * Math.min(1, dt * 3); c.updateProjectionMatrix(); }
     this.shake = Math.max(0, this.shake - dt * 0.6);
     const f = new THREE.Vector3();

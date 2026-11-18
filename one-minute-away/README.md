@@ -43,9 +43,9 @@ To fill one in, open `js/memories.js`, paste her words into that memory's `text`
 - Parked cars are painted 90s sedans, and the streets carry flyers, shop signs, graffiti and a 4:04 ST sign. The rooftop, the waterfront, the tower and the crossing have painted skylines (night, sunset, storm).
 - Memory items in the inventory have their own icons. The title screen and every chapter's loading screen are painted.
 - Painted cutscene stills play full screen with a slow camera drift at the big moments: the empty car with its door open, the peephole, the rooftop pool, the dancers in the mirrors, the rear-view mirror, the red glass, the payphone, the two chairs, the Unsaid in the cords, the Keeper before the clock and the last crossing. Every ending has its own still.
-- Rendering runs at 320×240 with vertex wobble, affine textures, 15-bit colour with dithering, fog and a CRT filter. Each effect can be switched off.
+- Rendering runs at 320×240 with a light vertex wobble, a touch of affine texture warp (walls are subdivided so they don't bend), 15-bit colour with dithering, fog and a CRT filter. Each effect can be switched off.
 
-**Voice acting.** Every character line is spoken; narration is read silently. The voices were synthesised offline with the Kokoro-82M neural TTS model and processed per speaker:
+**Voice acting (optional).** By default all dialogue is read in text boxes, like the original PS1 games. Synthesised character voices can be switched on in Options; narration is always read silently. The voices were made offline with the Kokoro-82M neural TTS model and processed per speaker:
 - the radio is band-limited
 - the Keeper is slowed into a giant
 - the Unsaid speaks in three borrowed voices at once

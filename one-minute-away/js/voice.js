@@ -31,7 +31,12 @@ export class Voice {
     try { this.index = await (await fetch("assets/vo/index.json")).json(); } catch { this.index = {}; }
     this.have = new Set(Object.keys(this.index));
     // the pack streams in the background; lines play once it has arrived
-    this.packP = this.have.size ? fetch("assets/vo/voices.mp3").then((r) => r.arrayBuffer()).then((b) => (this.pack = b)).catch(() => null) : Promise.resolve(null);
+    this.packP = null;
+    if (this.G.opts.voice) this.ensurePack();
+  }
+  ensurePack() {
+    if (!this.packP) this.packP = this.have.size ? fetch("assets/vo/voices.mp3").then((r) => r.arrayBuffer()).then((b) => (this.pack = b)).catch(() => null) : Promise.resolve(null);
+    return this.packP;
   }
   // narration is read, not spoken: only characters have voices
   has(who, text) { return !SILENT.has(groupOf(who)) && !!this.have && this.have.has(voKey(who, text)); }
@@ -40,7 +45,7 @@ export class Voice {
     if (!this.has(who, text)) return Promise.resolve(null);
     if (!this.cache.has(k)) {
       const ctx = this.G.audio.ctx;
-      const p = this.packP.then(() => {
+      const p = this.ensurePack().then(() => {
         if (!this.pack || !ctx) return null;
         const [o, n] = this.index[k];
         const clip = this.pack.slice(o, o + n);

@@ -14,6 +14,9 @@ THREE.ColorManagement.enabled = false;
 export const U = {
   uRes: { value: new THREE.Vector2(320, 240) },
   uSnap: { value: 1 },
+  // how much PS1 affine texture warp to keep (0 = perspective-correct) and how coarse the vertex grid is
+  uAffine: { value: 0.22 },
+  uSnapRes: { value: new THREE.Vector2(480, 360) },
   uDither: { value: 1 },
   uTime: { value: 0 },
   uAmbient: { value: new THREE.Color(0.25, 0.25, 0.3) },
@@ -33,6 +36,7 @@ export const U = {
 const VERT = /* glsl */ `
 uniform vec2 uRes;
 uniform float uSnap;
+uniform vec2 uSnapRes;
 uniform float uTime;
 uniform vec3 uAmbient;
 uniform vec3 uDirDir;
@@ -50,6 +54,7 @@ uniform float uWave;
 uniform float uEmissive;
 uniform vec2 uUVk;
 varying vec3 vUvw;
+varying vec2 vUvP;
 varying vec3 vLight;
 varying float vFog;
 #ifdef USE_COLOR
@@ -81,12 +86,13 @@ void main(){
   vec4 vp = viewMatrix * wp;
   vec4 cp = projectionMatrix * vp;
   if (uSnap > 0.5 && cp.w > 0.0) {
-    vec2 g = uRes * 0.5;
+    vec2 g = uSnapRes * 0.5;
     cp.xy = floor(cp.xy / cp.w * g + 0.5) / g * cp.w;
   }
   gl_Position = cp;
   vec2 uvv = uv * uUVk + uScroll * uTime;
   vUvw = vec3(uvv * cp.w, cp.w);
+  vUvP = uvv;
   float depth = -vp.z;
   vFog = uNoFog > 0.5 ? 0.0 : clamp((depth - uFogNear) / max(uFogFar - uFogNear, 0.001), 0.0, 1.0);
 }`;
@@ -101,7 +107,9 @@ uniform float uSat;
 uniform vec3 uTint;
 uniform vec3 uAdd;
 uniform float uAdditive;
+uniform float uAffine;
 varying vec3 vUvw;
+varying vec2 vUvP;
 varying vec3 vLight;
 varying float vFog;
 float bayer(vec2 p){
@@ -111,7 +119,7 @@ float bayer(vec2 p){
   return m[x][y] / 16.0;
 }
 void main(){
-  vec2 uv = vUvw.xy / vUvw.z;
+  vec2 uv = mix(vUvP, vUvw.xy / vUvw.z, uAffine);
   vec4 tex = uHasMap > 0.5 ? texture2D(uMap, uv) : vec4(1.0);
   if (tex.a < 0.5) discard;
   vec3 c = tex.rgb * vLight;
@@ -448,17 +456,23 @@ export const TEX = {
 // Geometry helpers — world-scaled UVs so textures tile correctly
 // ---------------------------------------------------------------
 export function boxGeo(w, h, d, su = 1, sv = su) {
-  const geo = new THREE.BoxGeometry(w, h, d);
-  const uv = geo.attributes.uv;
-  // face order: +x, -x, +y, -y, +z, -z (4 verts each)
+  // big faces are cut into ~1.5 m pieces: with affine texturing a single
+  // huge quad makes brick and windows bend and swim as the camera moves
+  const seg = (v) => Math.max(1, Math.min(12, Math.round(v / 1.5)));
+  const geo = new THREE.BoxGeometry(w, h, d, seg(w), seg(h), seg(d));
+  const uv = geo.attributes.uv, idx = geo.index;
+  // face order: +x, -x, +y, -y, +z, -z (one group each)
   const spans = [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]];
-  for (let f = 0; f < 6; f++) {
+  geo.groups.forEach((g, f) => {
     const [a, b] = spans[f];
-    for (let i = 0; i < 4; i++) {
-      const k = f * 4 + i;
-      uv.setXY(k, (uv.getX(k) * a) / su, (uv.getY(k) * b) / sv);
+    const seen = new Set();
+    for (let k = g.start; k < g.start + g.count; k++) {
+      const v = idx.getX(k);
+      if (seen.has(v)) continue;
+      seen.add(v);
+      uv.setXY(v, (uv.getX(v) * a) / su, (uv.getY(v) * b) / sv);
     }
-  }
+  });
   return geo;
 }
 export function planeGeo(w, d, scale = 2, seg = 0) {
