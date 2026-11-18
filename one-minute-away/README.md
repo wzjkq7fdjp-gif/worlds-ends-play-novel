@@ -84,3 +84,5 @@ All the voices are in one file, `assets/vo/voices.mp3`, which streams in after b
 | `assets/` | Character atlases, sprites, texture pages, the painted car, street decals, skylines, items, icons, cutscene stills, loading screens, portraits, voices |
 
 The only dependency is three.js r160, which is included in `vendor/`.
+
+Some surface textures (road asphalt, painted metal, carpet, ceilings, tiles, wood, leather, linen) are CC0 photo textures from [Poly Haven](https://polyhaven.com), cut down to 128 px and 15-bit colour (`assets/tex/ph_*.png`).

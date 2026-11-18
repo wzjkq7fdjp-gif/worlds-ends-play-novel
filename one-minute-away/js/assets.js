@@ -52,6 +52,14 @@ export const TEXMAP = {
   concrete: ["concrete", Q], slab: ["concrete", Q], parapet: ["concrete", Q], planter: ["concrete", Q], divider: ["concrete", Q], balc: ["concrete", Q], stoop: ["concrete", Q], towerstep: ["concrete", Q], almstep: ["concrete", Q],
   galwall: ["plaster", Q], schoolwall: ["plaster", Q],
   grass: ["grass", Q], bark: ["bark", [1, 1]], leaves: ["leaves", [1, 1]], parkleaves: ["leaves", [1, 1]], roofleaf: ["leaves", [1, 1]],
+  // CC0 photo textures from Poly Haven (polyhaven.com), cut down to 128 px / 15-bit
+  road: ["ph_road", [1, 1]], metal: ["ph_lamppaint", [1, 1]],
+  carpet: ["ph_carpet", [1, 1]], bookcarpet: ["ph_carpet", [1, 1]], runner: ["ph_carpet", [1, 1]], hallcarpet: ["ph_carpet", [1, 1]],
+  ceil: ["ph_ceiling", Q], hceil: ["ph_ceiling", Q], rceil: ["ph_ceiling", Q], sceil: ["ph_ceiling", Q], ceil2: ["ph_ceiling", Q], hallceil: ["ph_ceiling", Q], cordceil: ["ph_ceiling", Q],
+  tile: ["ph_tiles", [1, 1]], schooltile: ["ph_tiles", [1, 1]],
+  wood: ["ph_wood", [1, 1]], table: ["ph_wood", [1, 1]], shelf: ["ph_wood", [1, 1]], counter: ["ph_wood", [1, 1]], barre: ["ph_wood", [1, 1]], chairwood: ["ph_wood", [1, 1]],
+  dresser: ["ph_darkwood", [1, 1]], night: ["ph_darkwood", [1, 1]], tvstand: ["ph_darkwood", [1, 1]], bedwood: ["ph_darkwood", [1, 1]],
+  couch: ["ph_leather", [1, 1]], couchA: ["ph_leather", [1, 1]], lounger: ["ph_fabric", [1, 1]],
   door: ["door", [1, 1]], shutter: ["shutter", [1, 1]], redglass: ["redglass", [3, 1]], "@clockface": ["clockface", [1, 1]], dash: ["dashboard", [1, 1]],
 };
 

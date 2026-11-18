@@ -393,7 +393,7 @@ export class World {
     return g;
   }
   table(x, z, o = {}) {
-    const w = mat({ map: TEX.wood(o.tint || [110, 74, 48], "table" + (o.tint || "")) });
+    const w = mat({ map: TEX.wood(o.tint || [110, 74, 48], "table") });
     const cloth = o.cloth ? mat({ color: o.cloth }) : w;
     this.mesh(boxGeo(o.w || 1.0, 0.06, o.d || 1.0), cloth, x, 0.76, z);
     for (const sx of [-1, 1]) for (const sz of [-1, 1]) this.mesh(boxGeo(0.06, 0.74, 0.06), w, x + sx * ((o.w || 1) / 2 - 0.08), 0.37, z + sz * ((o.d || 1) / 2 - 0.08));
