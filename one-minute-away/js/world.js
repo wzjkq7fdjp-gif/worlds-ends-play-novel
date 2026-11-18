@@ -431,7 +431,7 @@ export class World {
     return g;
   }
   sign(x, y, z, text, ry = 0, o = {}) {
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(o.w || 1.4, o.h || 0.35), mat({ map: TEX.text(text, { w: o.tw || 64, h: o.th || 16, bg: o.bg || "#1e5a32", fg: o.fg || "#f0f0e0", size: o.size || 9 }), unlit: o.unlit ?? false, side: THREE.DoubleSide }));
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(o.w || 1.4, o.h || 0.35), mat({ map: TEX.text(text, { w: o.tw || 64, h: o.th || 16, bg: o.bg || "#1e5a32", fg: o.fg || "#f0f0e0", size: o.size || 9, border: o.border ?? (text !== "") }), unlit: o.unlit ?? false, side: THREE.DoubleSide }));
     m.position.set(x, y, z); m.rotation.y = ry; this.scene.add(m);
     return m;
   }

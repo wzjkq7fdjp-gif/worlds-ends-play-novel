@@ -110,13 +110,16 @@ export class UI {
 
   // ---------- overlays ----------
   fade(to, dur = 0.8, color) {
+    // fades to black unless a colour is asked for (a white memory fade must not leak into later ones)
     if (color) this.fadeEl.style.background = color;
+    else if (to > this.fadeV) this.fadeEl.style.background = "#000";
     return new Promise((res) => (this._fade = { from: this.fadeV, to, dur: Math.max(0.01, dur), t: 0, res }));
   }
   setFade(v, color) {
+    if (color) this.fadeEl.style.background = color;
+    else if (v > this.fadeV) this.fadeEl.style.background = "#000";
     this.fadeV = v;
     this.fadeEl.style.opacity = v;
-    if (color) this.fadeEl.style.background = color;
     this._fade = null;
   }
   clock(t, cls = "") {
