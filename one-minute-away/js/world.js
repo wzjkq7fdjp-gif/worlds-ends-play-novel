@@ -243,11 +243,14 @@ export class World {
     if (e.x1 != null) m = Math.min(m, e.x1 - p.x);
     if (e.z0 != null) m = Math.min(m, p.z - e.z0);
     if (e.z1 != null) m = Math.min(m, e.z1 - p.z);
-    const k = Math.max(0, Math.min(1, 1 - m / (e.d || 9)));
+    const k = Math.max(0, Math.min(1, 1 - m / (e.d || 10)));
+    if (m < 0.5 && !this._fogSaid && this.G.canMove()) { this._fogSaid = true; this.G.caption("The fog is too thick to go any further", 3); }
     // a script changed the fog itself: take that as the new base
     if (this._fogSet && (U.uFogNear.value !== this._fogSet[0] || U.uFogFar.value !== this._fogSet[1])) this._fogBase = null;
     if (!this._fogBase) this._fogBase = [U.uFogNear.value, U.uFogFar.value];
-    const n = this._fogBase[0] * (1 - 0.75 * k), f = Math.max(n + 2.5, this._fogBase[1] * (1 - 0.6 * k));
+    const kk = k * k * (3 - 2 * k);
+    // thick just past the player, but never so close that it swallows him (camera sits ~6 m back)
+    const n = Math.max(Math.min(this._fogBase[0], 6), this._fogBase[0] * (1 - 0.9 * kk)), f = Math.max(n + 5, 12, this._fogBase[1] * (1 - 0.82 * kk));
     U.uFogNear.value = n; U.uFogFar.value = f;
     this._fogSet = [n, f];
   }
@@ -586,7 +589,7 @@ export class World {
       for (let z = z0 + 2 + (s > 0 ? 0 : 8); z < z1; z += 16) this.lamp(s * 12.2, z, { side: -s, flicker: o.flicker && Math.random() < 0.3 ? 0.3 : 0, color: o.lampColor });
     }
     // the ends: the boulevard meets a cross street with buildings across it
-    const caps = o.caps ?? { start: true, end: true };
+    const caps = o.caps ?? {};
     if (caps.start) { this.crossRow(z0 - 12, -24, 24, -1, { lit: o.lit }); this.ground(0, z0 - 6, 48, 12, TEX.asphalt(), { scale: 4 }); }
     if (caps.end) { this.crossRow(z1 + 12, -24, 24, 1, { lit: o.lit }); this.ground(0, z1 + 6, 48, 12, TEX.asphalt(), { scale: 4 }); }
     this.bounds = this.bounds || { x0: -15, z0, x1: 15, z1 };

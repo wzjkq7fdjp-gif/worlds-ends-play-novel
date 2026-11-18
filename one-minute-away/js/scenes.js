@@ -62,8 +62,9 @@ export function buildStreet(W, G) {
   W.car(3, 33, 0, [80, 70, 50]);
   W.car(3, 6, 0, [60, 64, 70]); W.car(-3, 40, Math.PI, [70, 50, 46]); W.car(-3, 53, Math.PI, [44, 56, 50]);
   // behind him: the block ends at a closed cross street and a row of buildings
-  W.crossRow(-9, -24, 24, -1, { lit: 0.2 });
-  W.roadBlock(-7, -4.6, 7, { sign: "ROAD CLOSED" });
+  // behind him the block runs on into the fog
+  W.ground(0, -28, 8, 36, TEX.road(), { scale: 5 });
+  for (const s of [-1, 1]) { W.ground(s * 5.5, -28, 3, 36, TEX.sidewalk(), { scale: 1.5 }); W.blockRow(s * 7, -46, -5, s, { lit: 0.12, minH: 8 }); }
   W.trash(-6.4, 22); W.hydrant(6.2, 12);
   W.streetSign(6.2, 26, "OCT 24 2025", "APR 4 2026");
   W.streetSign(-6.2, 46, "4:04 ST", "OCT 24 2026");
@@ -92,7 +93,7 @@ export function buildStreet(W, G) {
   W.sign(9, 1.35, 66.3, "DOWN", 0, { w: 0.9, h: 0.22, bg: "#1a3a1a", tw: 32, th: 8, size: 7 });
   W.light(9, 0.4, 68, 0x6080a0, 3.5);
   W.bounds = { x0: -8, z0: -4, x1: 11, z1: 71.5 };
-  W.edgeFog = { z0: -4, d: 8 };
+  W.edgeFog = { z0: -4, d: 10 };
   // a third door: the authentic one, half-hidden mid-block
   G._trueDoor = W.door(6.98, 50, -Math.PI / 2, { label: "APT 1", tint: "#3a2418" });
   passersby(W, G, [[5.8, 62, 6, 0.3], [-5.6, 10, 60, 0.6]]);
@@ -168,7 +169,6 @@ export function buildHouseOut(W, G) {
   W.ground(-7.5, 20, 1.1, 70, TEX.concrete([110, 104, 96], "stoop"), { scale: 1.5 });
   W.ground(-14, 20, 13, 80, TEX.concrete([110, 104, 96], "stoop"), { scale: 1.5, y: -0.02 });
   W.building(-12, -8, 8, 7.6, 9, TEX.facade([110, 80, 66], 0.25, 44));
-  W.bounds = { x0: -7, z0: -6, x1: -4.2, z1: 46 };
   // a row of identical brownstones with the same number
   const houses = [];
   for (let i = 0; i < 6; i++) {
@@ -191,17 +191,14 @@ export function buildHouseOut(W, G) {
   // across the street: the same houses, mirrored, and cars along both curbs
   W.ground(5.5, 20, 3, 70, TEX.sidewalk(), { scale: 1.5 });
   W.ground(0, 20, 80, 90, TEX.asphalt(), { scale: 4, y: -0.02 });
-  for (let i = -1; i < 7; i++) W.building(12, i * 8, 8, 7.6, 9, TEX.facade([128, 88, 70], 0.2, 50 + (i & 1)));
+  for (let i = -3; i < 9; i++) W.building(12, i * 8, 8, 7.6, 9, TEX.facade([128, 88, 70], 0.2, 50 + (i & 1)));
+  for (const i of [-3, -2, -1, 6, 7, 8]) { W.building(-12, i * 8, 8, 7.6, 9, TEX.facade([128, 88, 70], 0.25, 40 + (i & 1))); W.door(-7.98, i * 8, Math.PI / 2, { label: "11", tint: "#4a2c1c" }); }
+  W.ground(-5.5, 20, 3, 130, TEX.sidewalk(), { scale: 1.5, y: -0.01 }); W.ground(5.5, 20, 3, 130, TEX.sidewalk(), { scale: 1.5, y: -0.01 }); W.ground(0, 20, 8, 130, TEX.road(), { scale: 5, y: -0.01 });
   for (const [x, z, r] of [[-3.1, 3, Math.PI], [-3.1, 19, Math.PI], [-3.1, 35, Math.PI], [3.1, 10, 0], [3.1, 27, 0], [3.1, 41, 0]]) W.car(x, z, r, [[70, 66, 74], [90, 40, 36], [40, 60, 50]][Math.abs(z) % 3]);
-  // tree pits with low iron fences along the curb (why you can't step off it)
-  W.fence(-4.25, -6, -4.25, 46, { h: 0.55 });
   for (let z = 4; z < 46; z += 9) W.tree(-4.7, z, 0.9);
-  // the ends of the block: a fence across the sidewalk and houses across the street
-  W.fence(-8, -6.2, -4.2, -6.2, { h: 1.2 });
-  W.fence(-8, 46.2, -4.2, 46.2, { h: 1.2 });
-  W.crossRow(-12, -24, 24, -1, { lit: 0.15 });
-  W.crossRow(52, -24, 24, 1, { lit: 0.15 });
-  W.edgeFog = { z0: -6, z1: 46, d: 8 };
+  // the block runs on into the fog both ways; you can cross to the other side
+  W.bounds = { x0: -7, z0: -6, x1: 7.6, z1: 46 };
+  W.edgeFog = { z0: -6, z1: 46, d: 10 };
   passersby(W, G, [[-4.7, 46, -4, 0.35]]);
   for (let i = 0; i < 6; i++) decal(W, ["missing", "posters", "noparking", "missing", "concert", "drain"][i], -7.97, i === 5 ? 0.3 : 1.5, i * 8 + 4.6, Math.PI / 2, i === 5 ? 0.6 : 0.8);
   return { start: [-5.5, -4, 0], cam: { yaw: -0.5, pitch: 0.3, dist: 5.5, height: 1.3 } };
@@ -315,8 +312,8 @@ export function buildBook(W, G) {
 }
 export function buildCrossing(W, G) {
   env(W, { fog: 0x8a8a90, near: 10, far: 55, ambient: [0.5, 0.5, 0.54], dir: [0.5, 0.48, 0.44], sat: 0.85 });
-  W.boulevard(-30, 35, { lit: 0.1, caps: { start: true } });
-  W.boulevard(45, 100, { lit: 0.1, caps: { end: true } });
+  W.boulevard(-30, 35, { lit: 0.1 });
+  W.boulevard(45, 100, { lit: 0.1 });
   W.ground(0, 40, 60, 10, TEX.road(), { scale: 6 });
   // the cross street ends at buildings both ways
   for (const s of [-1, 1]) for (const z of [36, 44]) W.building(s * 34, z, 8, 7.8, 10 + (z % 3) * 3, TEX.facade([96, 74, 62], 0.15, 90 + z));
@@ -473,16 +470,10 @@ export function buildSidewalk(W, G, o = {}) {
   spot(W, "photo", 13.2, 14.2);
   spot(W, "exit", 13.5, 40);
   spot(W, "other", 13.5, 22, Math.PI);
-  // a low tree-pit fence along the curb; sidewalk sheds close both ends
-  W.fence(12.02, -6.3, 12.02, 66.3, { h: 0.55 });
-  for (const z of [-6.4, 66.4]) {
-    W.fence(12, z, 15, z, { h: 1.5 });
-    W.sign(13.5, 1.75, z + (z < 0 ? 0.05 : -0.05), "SIDEWALK CLOSED", z < 0 ? 0 : Math.PI, { w: 2.2, h: 0.4, bg: "#e8e0c8", fg: "#901010", tw: 96, th: 16, size: 8 });
-    W.mesh(boxGeo(3.2, 0.12, 2.4), M({ color: 0x2a3a2a }), 13.5, 3.1, z + (z < 0 ? -1.1 : 1.1));
-    for (const x of [12.1, 14.9]) W.mesh(boxGeo(0.1, 3.1, 0.1), M({ color: 0x2a3a2a }), x, 1.55, z);
-  }
-  W.edgeFog = { z0: -6, z1: 66, d: 9 };
-  W.bounds = { x0: 12.1, z0: -6, x1: 14.9, z1: 66 };
+  // you can walk the service lane too; the mall's iron fence (from the painting) is the only rail
+  W.collider(7.8, -20, 8.0, 70);
+  W.edgeFog = { z0: -6, z1: 66, d: 10 };
+  W.bounds = { x0: 8.2, z0: -6, x1: 14.9, z1: 66 };
   return { start: [13.4, -3, 0], cam: { yaw: 0.32, pitch: 0.28, dist: 6.4, height: 1.3 } };
 }
 export function buildTitle(W, G) {
@@ -821,24 +812,20 @@ export function buildPark(W, G) {
   W.add(cart);
   G._cart = cart;
   W.mesh(boxGeo(1.6, 0.012, 0.05), M({ color: 0x0a0a0a }), 2.8, 0.006, 6);
-  W.ground(12.6, 9, 1.4, 32, TEX.sidewalk(), { scale: 1.5 });
-  passersby(W, G, [[12.4, -6, 24, 0.4]]);
+  W.ground(11.2, 9, 1.6, 80, TEX.sidewalk(), { scale: 1.5, y: 0.01 });
+  passersby(W, G, [[11.3, -14, 30, 0.4]]);
   decal(W, "missing", -3.54, 1.15, 3.6, Math.PI / 2, 0.5);
   decal(W, "missing", -3.54, 1.15, 13.2, Math.PI / 2, 0.5);
-  decal(W, "st404", 3.9, 2.6, -2.5, -Math.PI / 2, 0.8);
-  // parked cars and bollards along the curb; fences close both ends of the walk
+  // parked cars along the curb; the street and the storefronts across it run on into the fog
   for (const z of [-2.5, 6.5, 15.5]) W.car(5.4, z, 0, [[70, 66, 74], [44, 56, 50], [90, 40, 36]][Math.abs(Math.round(z)) % 3]);
-  for (let z = -4.5; z <= 21.5; z += 1.5) W.mesh(boxGeo(0.14, 0.7, 0.14), M({ color: 0x2a2a30 }), 4.35, 0.35, z);
-  W.collider(4.25, -6, 4.45, 23);
-  W.fence(-3.6, -5.3, 4.4, -5.3, { h: 1.3 });
-  W.fence(-3.6, 22.3, 4.4, 22.3, { h: 1.3 });
-  W.ground(0, 9, 60, 60, TEX.asphalt(), { scale: 4, y: -0.03 });
+  W.ground(0, 9, 60, 80, TEX.asphalt(), { scale: 4, y: -0.03 });
+  W.ground(0, 9, 8, 80, TEX.sidewalk(), { scale: 1.5, y: -0.02 });
+  W.ground(8, 9, 8, 80, TEX.road(), { scale: 5, y: -0.02 });
+  W.blockRow(12, -34, 3, 1, { lit: 0.25 }); W.blockRow(12, 17, 52, 1, { lit: 0.25 });
   W.ground(-14, 9, 16, 40, TEX.grass(), { scale: 3, y: -0.01 });
   for (let z = -10; z < 30; z += 7) W.tree(-11, z + 2, 1.2, TEX.leaves([40, 50, 36], "parkleaves"));
-  W.crossRow(-18, -20, 28, -1, { lit: 0.2 });
-  W.crossRow(30, -20, 28, 1, { lit: 0.2 });
-  W.edgeFog = { z0: -5, z1: 22, d: 8 };
-  W.bounds = { x0: -3.4, z0: -5, x1: 4.2, z1: 22 };
+  W.edgeFog = { z0: -5, z1: 22, d: 10 };
+  W.bounds = { x0: -3.4, z0: -5, x1: 11.3, z1: 22 };
   spot(W, "start", 2.5, -3.5, 0);
   spot(W, "her", -1.6, 6.4, Math.PI / 2);
   spot(W, "glass", 11.6, 10, -Math.PI / 2);
@@ -859,17 +846,14 @@ export function buildWaterfront(W, G, o = {}) {
   W.ground(0, -8, 110, 10, TEX.road(), { scale: 6 });
   W.ground(0, -15, 110, 4, TEX.sidewalk(), { scale: 1.5 });
   W.ground(0, 4, 110, 14, TEX.wood([90, 80, 74], "boards"), { scale: 1.2, y: -0.01 });
-  // a low wall between the promenade and the road, gates at both ends
-  W.box(0, 0, -2.95, 52, 0.55, 0.35, M({ map: TEX.concrete([86, 80, 74], "parapet") }));
-  W.fence(-26, -2.95, 26, -2.95, { h: 1.0, solid: false });
-  for (const s of [-1, 1]) { W.fence(s * 24.3, -2.8, s * 24.3, 10.9, { h: 1.6 }); W.sign(s * 24.25, 1.9, 4, "PROMENADE CLOSED", s > 0 ? -Math.PI / 2 : Math.PI / 2, { w: 2.2, h: 0.36, bg: "#e8e0c8", fg: "#801010", tw: 96, th: 14, size: 8 }); }
-  W.edgeFog = { x0: -24, x1: 24, d: 8 };
+  // the promenade runs on into the fog both ways
+  W.edgeFog = { x0: -24, x1: 24, d: 10 };
   const water = W.ground(0, 50, 160, 80, TEX.water(sunset ? [60, 70, 100] : [20, 30, 60], "riverwater"), { y: -0.8, wave: 1, scroll: [0, 0.04] });
   water.material.uniforms.uEmissive.value = 0.15;
-  W.railing(-25, 11, 25);
+  W.railing(-55, 11, 55);
   skyline(W, sunset ? "sunset" : "night", { r: 84, y: -1.2, h: 30, rep: 2, arc0: -Math.PI * 0.72, arc: Math.PI * 1.44 });
   W.crossRow(-17.2, -48, 48, -1, { lit: 0.35 });
-  W.bounds = { x0: -24, z0: -2.6, x1: 24, z1: 10.8 };
+  W.bounds = { x0: -24, z0: -16.4, x1: 24, z1: 10.8 };
   // skyline + a bridge across the river
   for (let i = 0; i < 26; i++) {
     const h = 6 + ((i * 37) % 23), w = 3 + (i % 4);
