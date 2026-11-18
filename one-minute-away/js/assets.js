@@ -28,7 +28,7 @@ const SHEETS = ["rufki", "argjila", "other", "unmet", "unsaid", "keeper", "kidR"
 const CAR = ["side_low", "side_up", "front_low", "front_up", "back_low", "back_up", "roof", "hood", "wheel"];
 const SKY = ["night", "sunset", "storm"];
 export const DECALS = ["posters", "missing", "fogmart", "emberdeli", "linden", "st404", "graffiti", "concert", "busstop", "newsbox", "ladder", "boarded", "puddle", "drain", "noparking", "floating"];
-export const PROPS = ["sedan", "payphone", "flipphone", "door", "clock", "photo", "towel", "map", "cart", "chair", "rotary", "book"];
+export const PROPS = ["sedan", "payphone", "flipphone", "smartphone", "door", "clock", "photo", "towel", "map", "cart", "chair", "rotary", "book"];
 export const PORTRAITS = ["rufki", "argjila", "rufki_big", "argjila_big", "other", "unmet", "unsaid", "keeper", "kid_rufki", "kid_argjila", "confidante", "friend", "dancer"];
 
 // painted texture pages: procedural key -> [file, uv scale (x, y)]

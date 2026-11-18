@@ -3,7 +3,7 @@
 // lower dialogue panel (portrait left, name + two lines right),
 // POV tag top-left (teal), clock top-right (amber), captions for
 // every audio cue, choice / inventory / route map in the same
-// border, flip-phone messages, sealed memory pages.
+// border, phone messages, sealed memory pages.
 // ============================================================
 import { portraitURL, propURL, iconURL } from "./assets.js";
 
@@ -50,6 +50,9 @@ export function moodOf(text = "", base) {
   if (SMILE.test(text)) return "smile";
   return base || "neutral";
 }
+
+// the time shown in the phone's status bar: the game clock if it reads like a time
+const G0clock = (G) => { const t = (G.state && G.state.clock) || "4:04"; return /^\d{1,2}:\d{2}/.test(t) ? t.slice(0, 5) : "4:04"; };
 
 export class UI {
   constructor(G) {
@@ -402,18 +405,22 @@ export class UI {
     });
   }
 
-  // ---------- flip phone ----------
+  // ---------- the phone (a smartphone: it's 2025-2026) ----------
   // messages: [{ from: "me"|"them", text, time }]; replies: optional choices shown under the thread
-  phone({ contact = "", date = "", messages = [], replies = null, closeLabel = "Close the phone" }) {
+  phone({ contact = "", date = "", messages = [], replies = null, closeLabel = "Put the phone away" }) {
     return new Promise((res) => {
       const c = el("div", "phone");
+      const wrap = el("div", "pwrap");
+      const shell = el("img", "pshell");
+      shell.src = propURL("smartphone");
       const scr = el("div", "pscreen");
-      const head = el("div", "phead", `<span>${esc(contact)}</span><span>${esc(date)}</span>`);
+      const stat = el("div", "pstat", `<span>${esc(G0clock(this.G))}</span><span>▮▮▮ ▭</span>`);
+      const head = el("div", "phead", `<b>${esc(contact)}</b><span>${esc(date)}</span>`);
       const body = el("div", "pbody");
-      scr.append(head, body);
+      scr.append(stat, head, body);
+      wrap.append(shell, scr);
       const opts = el("div", "popts");
-      c.append(el("img", "pshell"), scr, opts);
-      c.querySelector(".pshell").src = propURL("flipphone");
+      c.append(wrap, opts);
       const G = this.G;
       let shown = 0, t = 0, sel = 0, done = false;
       const addMsg = (mm) => {

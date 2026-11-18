@@ -633,7 +633,7 @@ async function ch4(G) {
   });
   let waited = 0;
   while (waited < 2) {
-    const c = await G.choose("The phone is in her hand.", ["Revisit a message", "Close the phone and wait"]);
+    const c = await G.choose("The phone is in her hand.", ["Revisit a message", "Put the phone down and wait"]);
     if (c === 0) {
       await G.phone({ contact: "RUFKI", date: "JAN 2026", messages: [{ from: "them", text: "▒▒▒ ▒▒▒▒ ▒▒▒▒ ▒▒▒", time: "" }, { from: "me", text: "▒▒▒▒ ▒▒▒ ▒▒", time: "" }, { from: "them", text: "▒▒▒▒▒ ▒▒ ▒▒▒", time: "" }] });
       await G.say([HER("We said we missed each other. We talked about wishing the other person were there and about seeing each other again.")]);

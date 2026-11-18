@@ -151,8 +151,8 @@ export class Character {
         const n = L.length;
         let u = ((this.phase + this.early) / (Math.PI * 2)) % 1; if (u < 0) u += 1;
         let i = Math.floor(u * n) % n;
-        // side-on, the passing frames (3 and 7) lift the knee: hold contact and weight frames longer
-        if (n === 8 && grp !== "walkF" && grp !== "walkB" && grp !== "runS") {
+        // the diagonal cycles' passing frames (3 and 7) lift the knee: hold contact and weight frames longer
+        if (n === 8 && (grp === "walkFQ" || grp === "walkBQ")) {
           const W8 = [1.2, 1.15, 0.6, 1.05, 1.2, 1.15, 0.6, 1.05], tot = 8;
           let acc = 0, t = u * tot; i = 7;
           for (let k = 0; k < 8; k++) { acc += W8[k]; if (t < acc) { i = k; break; } }
