@@ -30,7 +30,7 @@ export class Voice {
     try { this.index = await (await fetch("assets/vo/index.json")).json(); } catch { this.index = {}; }
     this.have = new Set(Object.keys(this.index));
     // the pack streams in the background; lines play once it has arrived
-    this.packP = this.have.size ? fetch("assets/vo/voices.pack").then((r) => r.arrayBuffer()).then((b) => (this.pack = b)).catch(() => null) : Promise.resolve(null);
+    this.packP = this.have.size ? fetch("assets/vo/voices.mp3").then((r) => r.arrayBuffer()).then((b) => (this.pack = b)).catch(() => null) : Promise.resolve(null);
   }
   has(who, text) { return !!this.have && this.have.has(voKey(who, text)); }
   load(who, text) {

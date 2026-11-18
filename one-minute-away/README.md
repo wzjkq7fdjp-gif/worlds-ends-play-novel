@@ -47,7 +47,7 @@ To fill one in, open `js/memories.js`, paste her words into that memory's `text`
 - the thing at the door sounds almost like Rufki
 - the copy of Argjila is just slightly too perfect
 
-All the voices are in one file, `assets/vo/voices.pack`, which streams in after boot.
+All the voices are in one file, `assets/vo/voices.mp3`, which streams in after boot.
 
 **Horror:**
 - The Unmet moves only when you aren't looking at it.

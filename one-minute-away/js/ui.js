@@ -60,6 +60,7 @@ export class UI {
   syncModal() {
     const full = this.stack.some((m) => /\b(menu|item|card|phone|page)\b/.test(m.el.className));
     document.body.classList.toggle("modal", full);
+    document.body.classList.toggle("submenu", this.stack.some((m) => /\b(menu|item|page|card)\b/.test(m.el.className) && !m.el.classList.contains("title")));
   }
   push(m) {
     this.stack.push(m);
