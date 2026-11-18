@@ -165,7 +165,13 @@ export function buildHouseOut(W, G) {
     const d = W.door(-7.98, z, Math.PI / 2, { label: "11", tint: "#4a2c1c" });
     houses.push({ z, d });
     // kitchen window beside each door
-    W.sign(-7.95, 2.0, z + 2.4, "", Math.PI / 2, { w: 1.4, h: 1.0, bg: i === 3 ? "#e8c890" : "#2a2a30", tw: 8, th: 8, size: 6, unlit: true });
+    // the one kitchen window with a light on (where she is)
+    if (i === 3) {
+      W.mesh(boxGeo(0.06, 1.16, 1.56), M({ color: 0x2a1c14 }), -7.99, 2.0, z + 2.4);
+      W.mesh(new THREE.PlaneGeometry(1.4, 1.0), M({ color: 0xf0c888, unlit: true }), -7.94, 2.0, z + 2.4, Math.PI / 2);
+      W.mesh(boxGeo(0.04, 1.0, 0.06), M({ color: 0x2a1c14 }), -7.92, 2.0, z + 2.4);
+      W.light(-7.0, 2.2, z + 2.4, 0xffc880, 5);
+    }
   }
   W.lamp(-4.4, 12, { side: -1 }); W.lamp(-4.4, 30, { side: -1 });
   G._houses = houses;
