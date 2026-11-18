@@ -335,7 +335,7 @@ export function buildSidewalk(W, G, o = {}) {
   spot(W, "exit", 13.5, 40);
   spot(W, "other", 13.5, 22, Math.PI);
   W.bounds = { x0: 12.1, z0: -6, x1: 14.9, z1: 66 };
-  return { start: [13.4, -3, 0], cam: { yaw: -0.18, pitch: 0.3, dist: 6.2, height: 1.3 } };
+  return { start: [13.4, -3, 0], cam: { yaw: 0.32, pitch: 0.28, dist: 6.4, height: 1.3 } };
 }
 export function buildTitle(W, G) {
   const r = buildSidewalk(W, G);
@@ -411,7 +411,7 @@ export function buildBalcony(W, G) {
   for (let i = 0; i < 12; i++) W.mesh(boxGeo(1.6, 0.25, 0.6), M({ map: TEX.concrete([80, 76, 70], "almstep") }), 8 + i * 0.5, -3 + i * 0.25, 14 + i * 0.6);
   spot(W, "start", 1.5, 0.6, Math.PI);
   spot(W, "door", -2.4, -1.4, Math.PI);
-  return { start: [1.5, 0.6, Math.PI], cam: { yaw: 0.3, height: 1.2 }, camZones: [{ x0: -5, z0: -3, x1: 5, z1: 3, cam: { fixed: [3.4, 2.2, 1.8], height: 1.0 } }] };
+  return { start: [1.5, 0.6, Math.PI], cam: { yaw: 0.3, height: 1.2 }, camZones: [{ x0: -5, z0: -3, x1: 5, z1: 3, cam: { fixed: [-3.5, 2.5, -1.5], height: 0.9 } }] };
 }
 
 // ---- a bedroom (hers, then his in the world without her)
@@ -453,65 +453,116 @@ export function buildBedroom(W, G, o = {}) {
   return { start: [0, -1.6, 0], cam: { yaw: 0, height: 1.2 }, camZones: [{ x0: -3, z0: -3, x1: 3, z1: 4, cam: { fixed: [2.5, 2.4, -2.6], height: 1.0 } }] };
 }
 
-// ---- Williamsburg Bathhouse (the first game's pool, tiled like the painting)
+// ---- Williamsburg Bathhouse — the rooftop pool at night, the city all around
+function nightCity(W, o = {}) {
+  // a ring of buildings below and around a rooftop, windows lit
+  const R0 = o.r0 || 24, n = o.n || 40, baseY = o.y ?? -26;
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + (i % 3) * 0.05;
+    const r = R0 + ((i * 37) % 40);
+    const h = 8 + ((i * 53) % 24) + (i % 7 === 0 ? 26 : 0);
+    const w = 6 + (i % 4) * 2;
+    const b = W.mesh(boxGeo(w, h, w, 2, 4), M({ map: TEX.facade([60 + (i % 3) * 14, 52, 60], 0.55, 200 + i), emissive: 0.05 }), Math.sin(a) * r, baseY + h / 2, Math.cos(a) * r);
+    b.rotation.y = a;
+    if (i % 5 === 0) W.mesh(boxGeo(0.2, 0.2, 0.2), M({ color: 0xff2020, unlit: true }), Math.sin(a) * r, baseY + h + 0.4, Math.cos(a) * r);
+  }
+}
+function starSky(W, top, mid, bot, key) {
+  W.add(new THREE.Mesh(new THREE.SphereGeometry(120, 12, 8), M({ map: TEX.sky(top, mid, bot, key), unlit: true, noFog: true, side: THREE.BackSide })));
+  const sm = M({ color: 0xe8e8ff, unlit: true, noFog: true });
+  for (let i = 0; i < 90; i++) {
+    const a = Math.random() * Math.PI * 2, e = 0.25 + Math.random() * 1.1, r = 110;
+    W.mesh(boxGeo(0.35, 0.35, 0.35), sm, Math.cos(e) * Math.sin(a) * r, Math.sin(e) * r, Math.cos(e) * Math.cos(a) * r);
+  }
+}
 export function buildBathhouse(W, G) {
-  env(W, { fog: 0x0e1c26, near: 7, far: 32, ambient: [0.3, 0.36, 0.4], dir: [0.08, 0.1, 0.12] });
+  env(W, { fog: 0x10162a, near: 18, far: 110, ambient: [0.3, 0.32, 0.42], dir: [0.12, 0.14, 0.22], dirVec: [0.3, -1, 0.4] });
   W.surface = "tile";
-  const deck = TEX.tile("#d8ccb0", "#b0a488", "bdeck"), wallT = TEX.tile("#d8ccb0", "#a89c84", "bwall");
-  const pool = TEX.tile("#5aa8a8", "#3a8890", "pooltile");
-  W.room(-10, -12, 10, 12, 6, { floor: false, wall: wallT, ceil: TEX.concrete([60, 56, 52], "bceil") });
-  // a band of dark teal tiles around the walls
-  for (const [x, z, w, ry] of [[0, -11.97, 20, 0], [0, 11.97, 20, Math.PI], [9.97, 0, 24, -Math.PI / 2], [-9.97, 0, 24, Math.PI / 2]]) W.mesh(new THREE.PlaneGeometry(w, 0.5), M({ map: TEX.tile("#2a5a60", "#1a3a40", "band") }), x, 2.4, z, ry);
+  starSky(W, "#05060f", "#141a34", "#3a2a3a", "rooftopsky");
+  const deck = TEX.tile("#8a8478", "#6a645a", "roofdeck"), pool = TEX.tile("#3a8a9a", "#2a6a78", "pooltile");
+  // the building under the roof (so the edges read solid) + the deck
+  W.mesh(boxGeo(22, 28, 26, 4, 6), M({ map: TEX.facade([70, 60, 56], 0.5, 77) }), 0, -15.9, 0);
+  // the slab between the deck and the building, open where the pool is
+  const slab = M({ map: TEX.concrete([60, 56, 52], "slab") });
+  for (const [x, z, w, d] of [[0, -9, 22, 6], [0, 9, 22, 6], [-7.75, 0, 6.5, 12], [7.75, 0, 6.5, 12]]) W.mesh(boxGeo(w, 1.8, d), slab, x, -0.95, z);
   W.ground(0, -9, 20, 6, deck, { scale: 1 });
   W.ground(0, 9, 20, 6, deck, { scale: 1 });
   W.ground(-7.5, 0, 5, 12, deck, { scale: 1 });
   W.ground(7.5, 0, 5, 12, deck, { scale: 1 });
+  // parapet
+  const par = M({ map: TEX.concrete([86, 80, 74], "parapet") });
+  for (const [x, z, w, d] of [[0, -12, 20.4, 0.4], [0, 12, 20.4, 0.4], [-10, 0, 0.4, 24], [10, 0, 0.4, 24]]) W.mesh(boxGeo(w, 1.0, d), par, x, 0.5, z);
+  W.collider(-10.2, -12.2, 10.2, -11.8); W.collider(-10.2, 11.8, 10.2, 12.2); W.collider(-10.2, -12.2, -9.8, 12.2); W.collider(9.8, -12.2, 10.2, 12.2);
+  // the pool, lit from below
   W.floor(-5, -6, 5, 6, -1.8);
-  W.mesh(planeGeo(10, 12, 1), M({ map: pool }), 0, -1.8, 0);
-  for (const [x, z, w, ry] of [[0, 6, 10, Math.PI], [5, 0, 12, -Math.PI / 2], [-5, 0, 12, Math.PI / 2], [0, -6, 10, 0]]) W.mesh(new THREE.PlaneGeometry(w, 1.8, 4, 1), M({ map: pool }), x, -0.9, z, ry);
-  // lane lines
-  for (const x of [-2.5, 0, 2.5]) W.mesh(boxGeo(0.25, 0.01, 11), M({ color: 0x1a3a50 }), x, -1.78, 0);
-  const lip = M({ color: 0xe8e0d0 });
+  W.mesh(planeGeo(10, 12, 1), M({ map: pool, emissive: 0.4 }), 0, -1.8, 0);
+  for (const [x, z, w, ry] of [[0, 6, 10, Math.PI], [5, 0, 12, -Math.PI / 2], [-5, 0, 12, Math.PI / 2], [0, -6, 10, 0]]) W.mesh(new THREE.PlaneGeometry(w, 1.8, 4, 1), M({ map: pool, emissive: 0.4 }), x, -0.9, z, ry);
+  for (const x of [-2.5, 0, 2.5]) W.mesh(boxGeo(0.25, 0.01, 11), M({ color: 0x103040 }), x, -1.78, 0);
+  const lip = M({ color: 0xd8d2c4 });
   W.mesh(boxGeo(10.4, 0.1, 0.25), lip, 0, 0, 6.1); W.mesh(boxGeo(10.4, 0.1, 0.25), lip, 0, 0, -6.1);
   W.mesh(boxGeo(0.25, 0.1, 12.2), lip, 5.1, 0, 0); W.mesh(boxGeo(0.25, 0.1, 12.2), lip, -5.1, 0, 0);
   W.collider(-5.2, 5.95, 5.2, 6.15); W.collider(4.95, -6.2, 5.15, 6.2); W.collider(-5.15, -6.2, -4.95, 6.2); W.collider(-5.2, -6.15, 5.2, -5.95);
-  // ladder
   for (const x of [-3.8, -3.2]) W.mesh(boxGeo(0.06, 1.8, 0.06), M({ color: 0xc8c8c0 }), x, 0.2, -5.9);
-  const water = W.ground(0, 0, 10, 12, TEX.water([60, 150, 160], "bathwater"), { y: -0.25, wave: 1, scroll: [0.02, 0.01], opacity: 0.55 });
-  water.material.uniforms.uEmissive.value = 0.2;
+  for (const [x, z] of [[-3, -3], [3, -3], [-3, 3], [3, 3]]) { W.light(x, -1.4, z, 0x30c0d0, 7); W.glow(x, -1.7, z, 1.2, 0x40d0e0); }
+  const water = W.ground(0, 0, 10, 12, TEX.water([70, 190, 210], "roofwater"), { y: -0.25, wave: 1, scroll: [0.02, 0.01], opacity: 0.5 });
+  water.material.uniforms.uEmissive.value = 0.55;
   water.renderOrder = 2;
   G._water = water;
-  // arched windows, changing-room doors, pillars, benches, pendant lamps
-  for (let x = -7; x <= 7; x += 3.5) W.sign(x, 4.2, 11.95, "", Math.PI, { w: 2, h: 1.6, bg: "#6a5a8a", tw: 8, th: 8, unlit: true });
-  for (let x = -7.5; x <= 7.5; x += 3) W.door(x, -11.95, 0, { tint: "#4a3a2a", solid: false });
-  for (const x of [-8, 8]) for (const z of [-4, 4]) W.box(x, 0, z, 0.8, 6, 0.8, M({ map: TEX.tile("#d0c8b0", "#b0a890", "coltile") }));
-  W.bench(-8.8, 0, Math.PI / 2); W.bench(8.8, 0, -Math.PI / 2); W.bench(3, 9.6, Math.PI);
-  for (const [x, z] of [[-4, -8], [4, -8], [-4, 8], [4, 8]]) pendant(W, x, 4.5, z, 0xffe2b0, 10);
-  for (const [x, z] of [[-3, -3], [3, -3], [-3, 3], [3, 3]]) W.light(x, -1.4, z, 0x40b0c0, 6);
-  W.sign(0, 4.9, -11.95, "WILLIAMSBURG BATHHOUSE", 0, { w: 4, h: 0.5, bg: "#0a2030", fg: "#9ad8f0", tw: 128, th: 16, size: 9, unlit: true });
-  const door = W.door(0, 11.9, Math.PI, { tint: "#1a1a20", sign: "THE THINGS WE NEVER SAID", solid: false });
+  // steam rising off the warm water
+  const steam = [];
+  for (let i = 0; i < 10; i++) { const s = W.glow((Math.random() - 0.5) * 8, 0.3, (Math.random() - 0.5) * 10, 2.4, 0x6a7a8a); steam.push(s); }
+  W.every((dt, t) => steam.forEach((s, i) => { s.position.y = 0.2 + ((t * 0.25 + i * 0.37) % 2.2); s.material.uniforms.uOpacity && (s.material.uniforms.uColor.value.setScalar(0.35 * (1 - (s.position.y - 0.2) / 2.2))); }));
+  // stair bulkhead with the changing-room doors and a neon sign
+  W.box(0, 0, -10.6, 8, 3.2, 2.4, M({ map: TEX.brick([90, 64, 54], "bulk") }));
+  for (const x of [-2.4, 0, 2.4]) W.door(x, -9.38, 0, { tint: "#3a2a20", solid: false });
+  W.sign(0, 2.75, -9.37, "WILLIAMSBURG BATHHOUSE", 0, { w: 4.6, h: 0.45, bg: "#08202a", fg: "#7ff0ff", tw: 128, th: 14, size: 9, unlit: true });
+  W.light(0, 2.6, -8.8, 0x60e0ff, 8);
+  // water tank, vents, lounge chairs, planters
+  for (const [lx, lz] of [[-3.4, -11.1], [-2.2, -11.1], [-3.4, -10.1], [-2.2, -10.1]]) W.mesh(boxGeo(0.12, 1.2, 0.12), M({ color: 0x3a3028 }), lx, 3.8, lz);
+  W.mesh(new THREE.CylinderGeometry(1.0, 1.0, 1.9, 10), M({ map: TEX.wood([90, 66, 44], "tank") }), -2.8, 5.35, -10.6);
+  W.mesh(new THREE.ConeGeometry(1.15, 0.7, 10), M({ color: 0x2a2420 }), -2.8, 6.65, -10.6);
+  W.box(-8, 0, -9.6, 1.4, 1.0, 1.4, M({ map: TEX.metal(), color: 0x6a6a70 }));
+  const cushion = M({ map: TEX.cloth([200, 196, 184], "lounger") });
+  for (const [x, z, ry] of [[-8, -3, Math.PI / 2], [-8, 3, Math.PI / 2], [8, -3, -Math.PI / 2], [6.5, 9.4, Math.PI]]) { const l = W.mesh(boxGeo(0.7, 0.3, 1.8), cushion, x, 0.25, z, ry); W.colliderBox(x, z, 0.8, 1.9, ry); }
+  for (const [x, z] of [[-9.2, -7], [-9.2, 7], [9.2, 7]]) { W.box(x, 0, z, 0.8, 0.7, 0.8, M({ map: TEX.concrete([70, 66, 60], "planter") })); W.mesh(new THREE.IcosahedronGeometry(0.6, 0), M({ map: TEX.leaves([40, 60, 40], "roofleaf") }), x, 1.1, z); }
+  // string lights over the water
+  const bulb = M({ color: 0xffd890, unlit: true });
+  for (const z of [-4, 0, 4]) {
+    for (const x of [-9.6, 9.6]) W.mesh(boxGeo(0.08, 3.2, 0.08), M({ color: 0x1a1a1a }), x, 1.6, z);
+    cord(W, -9.6, 3.1, z, 9.6, 3.1, z, 0.7, 12, M({ color: 0x1a1a1a }));
+    for (let k = 1; k < 12; k++) { const t = k / 12; const x = -9.6 + 19.2 * t, y = 3.1 - Math.sin(t * Math.PI) * 0.7 - 0.08; W.mesh(boxGeo(0.1, 0.12, 0.1), bulb, x, y, z); }
+    W.light(0, 2.4, z, 0xffd890, 9);
+  }
+  // the city, the bridge, the river glint
+  nightCity(W, { r0: 34, n: 52, y: -30 });
+  const steel = M({ color: 0x1a1a24, noFog: true });
+  W.mesh(boxGeo(120, 1.2, 2), steel, 20, -6, 70).rotation.y = -0.3;
+  for (const x of [-10, 40]) W.mesh(boxGeo(2, 34, 2), steel, x, 6, 70 + (x - 20) * 0.31);
+  for (let k = 0; k < 24; k++) W.mesh(boxGeo(0.3, 0.3, 0.3), M({ color: 0xffd080, unlit: true, noFog: true }), -38 + k * 5, -5, 70 + (-38 + k * 5 - 20) * 0.31);
+  const door = W.door(0, 11.4, Math.PI, { tint: "#101014", sign: "THE THINGS WE NEVER SAID", solid: false, glow: 0.15 });
   door.visible = false;
   G._bathDoor = door;
   W.water = { y: -0.25 };
-  spot(W, "start", 0, -9.5, 0);
+  W.bounds = { x0: -9.7, z0: -9.2, x1: 9.7, z1: 11.7 };
+  spot(W, "start", 0, -8.2, 0);
   spot(W, "her", 2, 8.4, Math.PI);
   spot(W, "reflection", 2, 4.5, Math.PI);
   spot(W, "reflectionEnd", -3.5, -4, Math.PI);
   spot(W, "edgeNear", 0, -6.6, 0);
   spot(W, "argStart", 3.5, 8.6, Math.PI);
-  spot(W, "rufkiFar", -2, -8.5, 0);
-  spot(W, "towel", -6.8, 9.2);
-  spot(W, "exit", 9.4, 9.6);
+  spot(W, "rufkiFar", -2, -8, 0);
+  spot(W, "towel", -7.2, 9.6);
+  spot(W, "exit", 9.0, 10.4);
   spot(W, "tileHer", 1.4, 6.7, Math.PI);
   spot(W, "tileHim", 0.6, 6.7, Math.PI);
-  spot(W, "door", 0, 11.2);
+  spot(W, "door", 0, 10.8);
   for (let i = 0; i < 4; i++) spot(W, "photo" + i, -3 + i * 2, 6.55);
   spot(W, "bottom", 0, -6.55);
   return {
-    start: [0, -9.5, 0], cam: { yaw: 0, pitch: 0.5, dist: 5, height: 1.0 },
+    start: [0, -8.2, 0], cam: { yaw: 0, pitch: 0.5, dist: 5, height: 1.0 },
     camZones: [
-      { x0: -10, z0: -12, x1: 10, z1: 0, cam: { fixed: [7.2, 5.2, -10.6], height: 0.6 } },
-      { x0: -10, z0: 0, x1: 10, z1: 12, cam: { fixed: [-7.2, 5.2, 10.6], height: 0.6 } },
+      { x0: -10, z0: -12, x1: 10, z1: 0, cam: { fixed: [9.2, 5.2, -1.5], height: 0.6 } },
+      { x0: -10, z0: 0, x1: 10, z1: 12, cam: { fixed: [-9.2, 5.2, 1.5], height: 0.6 } },
     ],
   };
 }
@@ -694,7 +745,7 @@ export function buildUnread(W, G) {
   spot(W, "chairA", -1.3, 0, Math.PI / 2);
   spot(W, "chairF", 1.3, 0, -Math.PI / 2);
   spot(W, "phone", 0, 0.1, 0);
-  return { start: [0, -1.8, 0], cam: { yaw: 0, height: 1 }, camZones: [{ x0: -3, z0: -3, x1: 3, z1: 3, cam: { fixed: [0.2, 2.2, -2.2], height: 0.6 } }] };
+  return { start: [0, -1.8, 0], cam: { yaw: 0, height: 1 }, camZones: [{ x0: -3, z0: -3, x1: 3, z1: 3, cam: { fixed: [-2.1, 2.4, 2.1], height: 0.7 } }] };
 }
 
 // ---- the corridor of telephone cords (green, fluorescent)

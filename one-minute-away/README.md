@@ -36,7 +36,7 @@ To fill one in, open `js/memories.js`, paste her words into that memory's `text`
 **Looks like a PS1 game:**
 - Rufki and Argjila are sprites drawn in five directions, with front, side and back walk cycles and eight cutscene poses each. The other side is mirrored.
 - The Other Rufki, the Unmet, the Unsaid, the Keeper of Minutes, both children, the winter friend, the former best friend and the faceless dancer have their own turnarounds and animation frames.
-- Every location is a modeled 3D map built from the location art and room blockouts: Ocean Parkway, the hallway of doors, the house, the House of Almost, her room, the Bathhouse pool, the dance studio, the car, the park, the waterfront, the Unread Room, the corridor of cords, the Clock Tower and the collapse. They use follow cameras and fixed corner cameras.
+- Every location is a modeled 3D map built from the location art and room blockouts: Ocean Parkway, the hallway of doors, the house, the House of Almost, her room, the rooftop Bathhouse pool at night, the dance studio, the car, the park, the waterfront, the Unread Room, the corridor of cords, the Clock Tower and the collapse. They use follow cameras and fixed corner cameras.
 - Rendering runs at 320×240 with vertex wobble, affine textures, 15-bit colour with dithering, fog and a CRT filter. Each effect can be switched off.
 
 **Voice acting.** Every character line is spoken; narration is read silently. The voices were synthesised offline with the Kokoro-82M neural TTS model and processed per speaker:

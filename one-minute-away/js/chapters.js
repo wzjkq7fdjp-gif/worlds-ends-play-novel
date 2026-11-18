@@ -677,7 +677,7 @@ async function ch5(G) {
   G.idle(refl);
   G.steam(3);
   await G.fade(0, 1.6);
-  await G.say([N("April 4, 2026. Steam clears a circle on the glass."), N("Argjila is sitting beside the pool, on the night they become official."), N("In the reflection, she is already getting up to leave.")]);
+  await G.say([N("April 4, 2026. Up on the roof, steam rises off the water into the cold."), N("Argjila is sitting beside the pool, on the night they become official."), N("In the reflection, she is already getting up to leave.")]);
   await G.tween(2.5, (k) => G.steam(3 * (1 - k)));
   G.steam(0);
   const [re, rze] = at(W, "reflectionEnd");
@@ -788,7 +788,7 @@ async function ch5(G) {
   await G.cutscene(async () => {
     await G.flicker(her2, 0, 1.2);
     clearInterval(drips);
-    await G.say([N("When he looks up, she is gone. Her voice echoes off the tile."), A("Don't search for a future if you forget how we got here.", { fx: { vol: 0.8 } })]);
+    await G.say([N("When he looks up, she is gone. Her voice carries across the roof."), A("Don't search for a future if you forget how we got here.", { fx: { vol: 0.8 } })]);
     G.audio.rumble(2.5);
     G.caption("The pool drains", 2.5);
     G.shot([7, 4.5, -2], [0, -1, 6], 50);
@@ -796,7 +796,7 @@ async function ch5(G) {
     G._water.visible = false;
     G._bathDoor.visible = true;
     G.audio.door();
-    await G.say([N("The pool drains completely. Across the room, a door that was not there before: THE THINGS WE NEVER SAID.")]);
+    await G.say([N("The pool drains completely. At the edge of the roof stands a door that was not there before: THE THINGS WE NEVER SAID.")]);
     G.release();
   });
   G.flag("receiver");
