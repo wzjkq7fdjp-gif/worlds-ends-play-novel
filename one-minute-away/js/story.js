@@ -39,7 +39,7 @@ export function peepCanvas(open = false) {
 // a sealed page for one of Argjila's open memories
 export function herPage(G, id) {
   const m = memory(id);
-  return G.page({ title: m.title, date: m.date, anchor: m.anchor, text: m.text, sealed: !m.text });
+  return G.page({ title: m.title, date: m.date, anchor: m.anchor, text: m.text, sealed: !m.text, by: m.by });
 }
 
 // change a door's number plate

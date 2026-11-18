@@ -458,12 +458,13 @@ export class UI {
   }
 
   // ---------- sealed memory page (Argjila's open memories) ----------
-  page({ title, date = "", anchor = "", text = "", sealed = false }) {
+  page({ title, date = "", anchor = "", text = "", sealed = false, by = "" }) {
     return new Promise((res) => {
       const c = el("div", "page frame" + (sealed ? " sealed" : ""));
       c.append(el("div", "ftitle", esc(title)), el("div", "pdate", esc(date)));
       if (anchor) c.append(el("div", "panchor", esc(anchor)));
       c.append(el("div", "ptext", sealed ? "This memory is Argjila's to write.<br><span>The page stays blank until she tells it herself.</span>" : esc(text).replace(/\n/g, "<br>")));
+      if (!sealed && by) c.append(el("div", "pby", esc(by)));
       c.append(el("div", "fhint", "<span>✕ Close</span>"));
       const G = this.G;
       G.audio.page?.();

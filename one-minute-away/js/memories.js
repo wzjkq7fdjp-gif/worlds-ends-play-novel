@@ -6,7 +6,9 @@
 // write, and the game will not invent them. When she writes one,
 // paste her words into `text` (use \n for a new line) and the
 // page opens in the game, in the Her Pages menu and in the scene
-// where the memory appears.
+// where the memory appears. Pages she told Rufki (rather than wrote
+// herself) carry a `by` line saying so; she can replace any of them
+// with her own sentences.
 // ============================================================
 export const MEMORIES = [
   {
@@ -49,35 +51,40 @@ export const MEMORIES = [
     title: "The kitchen",
     date: "Around May 9, 2026",
     anchor: "The moment in the kitchen that we have called a confession.",
-    text: "",
+    text: "You told me how you loved me.\nI shed tears, and I felt even closer to you.",
+    by: "Told by Argjila · written down by Rufki",
   },
   {
     id: "dance",
     title: "Our dance",
     date: "May 2026",
     anchor: "Our dance in May.",
-    text: "",
+    text: "Our slow dance.\nI felt at peace.",
+    by: "Told by Argjila · written down by Rufki",
   },
   {
     id: "return",
     title: "Coming back to the city",
     date: "May 2026",
     anchor: "Coming back to New York City from upstate. What I was looking at, and what we talked about.",
-    text: "",
+    text: "I had a lot of fun. We listened to music, and everything was great.\nI was with you, and I comforted you before we got home.",
+    by: "Told by Argjila · written down by Rufki",
   },
   {
     id: "park",
     title: "The park near Target",
     date: "2026",
     anchor: "It might sound like a small location to somebody else. To me, it is part of the map of us.",
-    text: "",
+    text: "I got to see a new side of you, a version of you.\nI'm happy I could be there for you in your moment.",
+    by: "Told by Argjila · written down by Rufki",
   },
   {
     id: "song",
     title: "“About You”",
     date: "The 1975",
     anchor: "I chose “About You” by The 1975 for a reason, and I made you a card for it.",
-    text: "",
+    text: "It reminds me of us.\nIt's the song from the beginning, when we met. I listened to it.",
+    by: "Told by Argjila · written down by Rufki",
   },
 ];
 export const memory = (id) => MEMORIES.find((m) => m.id === id);

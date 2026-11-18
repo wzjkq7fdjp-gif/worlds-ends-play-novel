@@ -554,7 +554,7 @@ async function herPages() {
     });
     if (v == null) return;
     const m = MEMORIES[v];
-    await G.ui.page({ title: m.title, date: m.date, anchor: m.anchor, text: m.text, sealed: !m.text });
+    await G.ui.page({ title: m.title, date: m.date, anchor: m.anchor, text: m.text, sealed: !m.text, by: m.by });
   }
 }
 
