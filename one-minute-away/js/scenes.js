@@ -6,6 +6,7 @@
 import { THREE, U, mat, TEX, boxGeo, planeGeo } from "./ps1.js";
 import { pic, tvScreen } from "./art.js";
 import { SpriteActor } from "./actors.js";
+import { A as ART } from "./assets.js";
 
 export const C = (r, g, b) => new THREE.Color(r, g, b);
 export const env = (W, o) => W.env({ ...o, ambient: o.ambient && C(...o.ambient), dir: o.dir && C(...o.dir) });
@@ -82,6 +83,8 @@ export function buildStreet(W, G) {
   // a third door: the authentic one, half-hidden mid-block
   G._trueDoor = W.door(6.98, 50, -Math.PI / 2, { label: "APT 1", tint: "#3a2418" });
   passersby(W, G, [[5.8, 62, 6, 0.3], [-5.6, 10, 60, 0.6]]);
+  streetDecals(W, 1, 7, [0, 56]);
+  streetDecals(W, -1, 7, [0, 56], 3);
   W.light(6.2, 2.5, 50, 0xffcf90, 4);
   return { start: [0, 2, 0], cam: { yaw: 0, pitch: 0.36, dist: 6, height: 1.3 } };
 }
@@ -150,6 +153,8 @@ export function buildHouseOut(W, G) {
   W.ground(0, 20, 8, 70, TEX.road(), { scale: 5 });
   W.ground(-5.5, 20, 3, 70, TEX.sidewalk(), { scale: 1.5 });
   W.ground(-7.5, 20, 1.1, 70, TEX.concrete([110, 104, 96], "stoop"), { scale: 1.5 });
+  W.ground(-14, 20, 13, 80, TEX.concrete([110, 104, 96], "stoop"), { scale: 1.5, y: -0.02 });
+  W.building(-12, -8, 8, 7.6, 9, TEX.facade([110, 80, 66], 0.25, 44));
   W.bounds = { x0: -7, z0: -6, x1: -4.2, z1: 46 };
   // a row of identical brownstones with the same number
   const houses = [];
@@ -165,6 +170,7 @@ export function buildHouseOut(W, G) {
   W.lamp(-4.4, 12, { side: -1 }); W.lamp(-4.4, 30, { side: -1 });
   G._houses = houses;
   passersby(W, G, [[-4.7, 46, -4, 0.35]]);
+  for (let i = 0; i < 6; i++) decal(W, ["missing", "posters", "noparking", "missing", "concert", "drain"][i], -7.97, i === 5 ? 0.3 : 1.5, i * 8 + 4.6, Math.PI / 2, i === 5 ? 0.6 : 0.8);
   return { start: [-5.5, -4, 0], cam: { yaw: -0.5, pitch: 0.3, dist: 5.5, height: 1.3 } };
 }
 
@@ -279,6 +285,9 @@ export function buildCrossing(W, G) {
   W.boulevard(-30, 35, { lit: 0.1 });
   W.boulevard(45, 100, { lit: 0.1 });
   W.ground(0, 40, 60, 10, TEX.road(), { scale: 6 });
+  skyline(W, "storm", { r: 110, y: -4, h: 48, rep: 3, color: 0xc8c4d0 });
+  streetDecals(W, 1, 15, [-28, 34]);
+  streetDecals(W, -1, 15, [-28, 34], 5);
   return { start: [0, 0, 0] };
 }
 
@@ -287,11 +296,48 @@ export function buildCrossing(W, G) {
 // Each builder registers named spots: W.spots[name] = [x, z, yaw]
 // ============================================================
 export const spot = (W, name, x, z, yaw = 0) => ((W.spots ||= {})[name] = [x, z, yaw]);
+// a painted skyline panorama on an open ring around the map
+export function skyline(W, name, o = {}) {
+  const t = ART.tex["sky_" + name];
+  if (!t) return null;
+  const r = o.r ?? 70, h = o.h ?? r * 0.42, y = o.y ?? -2;
+  const t2 = t.clone(); t2.wrapS = THREE.RepeatWrapping; t2.needsUpdate = true; t2.userData = { uvk: [-(o.rep ?? 3), 1] };
+  const geo = new THREE.CylinderGeometry(r, r, h, 48, 1, true);
+  const m = new THREE.Mesh(geo, mat({ map: t2, unlit: true, noFog: true, side: THREE.BackSide, color: o.color ?? 0xffffff }));
+  m.position.set(o.x ?? 0, y + h / 2, o.z ?? 0);
+  m.rotation.y = o.rot ?? 0;
+  m.renderOrder = -1;
+  W.add(m);
+  return m;
+}
+// a row of posters, flyers and shop signs along a facade line (side +1: wall at +x facing -x)
+const WALL = [["missing", 1.5, 0.8], ["posters", 1.6, 1.1], ["fogmart", 3.4, 1.6], ["graffiti", 1.2, 1.6], ["concert", 1.6, 1.0], ["emberdeli", 3.4, 1.6], ["noparking", 1.7, 0.7], ["boarded", 2.0, 1.3], ["linden", 3.3, 1.4], ["floating", 1.6, 1.0], ["missing", 1.5, 0.8], ["newsbox", 0.65, 1.3]];
+export function streetDecals(W, side, x, [z0, z1], off = 0) {
+  const ry = side > 0 ? -Math.PI / 2 : Math.PI / 2;
+  let i = off;
+  for (let z = z0; z < z1; z += 5.5 + (i % 3)) {
+    const [n, y, s] = WALL[i % WALL.length];
+    decal(W, n, x - side * 0.03, y, z, ry, s, s);
+    i++;
+  }
+}
+// a painted poster / sign / flyer flat on a wall
+export function decal(W, name, x, y, z, ry, w = 1, h = w) {
+  const t = ART.tex["decal_" + name];
+  if (!t) return null;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat({ map: t }));
+  m.position.set(x, y, z);
+  m.rotation.y = ry;
+  W.add(m);
+  return m;
+}
 // faceless passers-by: they walk out of the fog along a line, stop and
 // turn to watch you when you come near, and are gone when you reach them
 export function passersby(W, G, lines) {
-  for (const [x, z0, z1, ph = 0, along = "z"] of lines) {
-    const a = new SpriteActor("passerby", { color: 0xb8b4bc });
+  const KINDS = [["passerby", 1.05], ["passerbyW", 0.95], ["passerbyO", 0.65], ["passerbyK", 1.25]];
+  for (const [n, [x, z0, z1, ph = 0, along = "z"]] of lines.entries()) {
+    const [kind, speed] = KINDS[(n + Math.round(Math.abs(x * 7 + z0))) % KINDS.length];
+    const a = new SpriteActor(kind, { color: 0xb8b4bc });
     const len = Math.abs(z1 - z0), dir = Math.sign(z1 - z0) || 1;
     let u = len * ph, gone = 0;
     const put = () => { const z = z0 + dir * u; along === "z" ? a.setPos(x, 0, z) : a.setPos(z, 0, x); a.last = null; };
@@ -312,7 +358,7 @@ export function passersby(W, G, lines) {
       if (first) { first = false; if (d < 9) { a.setVisible(false); gone = 3 + Math.random() * 3; return; } }
       if (d < 1.4) { a.setVisible(false); gone = 7 + Math.random() * 5; G.audio?.noise?.(0.12, 2600, 1.5, 0.05); return; }
       if (d < 3.4) { a.faceToward(P.pos.x, P.pos.z); a.last = null; return; }
-      u += 1.05 * dt;
+      u += speed * dt;
       if (u > len) { a.setVisible(false); gone = 2 + Math.random() * 4; return; }
       const z = z0 + dir * u;
       along === "z" ? (p.z = z) : (p.x = z);
@@ -366,6 +412,7 @@ export function buildSidewalk(W, G, o = {}) {
   // the streetlamp with the photograph under it
   lampPost(W, 12.4, 14, { side: 1, range: 10 });
   passersby(W, G, [[14.4, 64, 4, 0.55], [12.7, 66, 8, 0.15]]);
+  streetDecals(W, 1, 15, [-4, 60]);
   spot(W, "car", 10.4, -0.15, 0);
   spot(W, "start", 13.4, -3, 0);
   spot(W, "photo", 13.2, 14.2);
@@ -572,6 +619,7 @@ export function buildBathhouse(W, G) {
   }
   // the city, the bridge, the river glint
   nightCity(W, { r0: 34, n: 52, y: -30 });
+  skyline(W, "night", { r: 105, y: -34, h: 50, rep: 3 });
   const steel = M({ color: 0x1a1a24, noFog: true });
   W.mesh(boxGeo(120, 1.2, 2), steel, 20, -6, 70).rotation.y = -0.3;
   for (const x of [-10, 40]) W.mesh(boxGeo(2, 34, 2), steel, x, 6, 70 + (x - 20) * 0.31);
@@ -708,6 +756,9 @@ export function buildPark(W, G) {
   W.mesh(boxGeo(1.6, 0.012, 0.05), M({ color: 0x0a0a0a }), 2.8, 0.006, 6);
   W.ground(12.6, 9, 1.4, 32, TEX.sidewalk(), { scale: 1.5 });
   passersby(W, G, [[12.4, -6, 24, 0.4]]);
+  decal(W, "missing", -3.54, 1.15, 3.6, Math.PI / 2, 0.5);
+  decal(W, "missing", -3.54, 1.15, 13.2, Math.PI / 2, 0.5);
+  decal(W, "st404", 3.9, 2.6, -2.5, -Math.PI / 2, 0.8);
   W.bounds = { x0: -3.4, z0: -5, x1: 4.2, z1: 22 };
   spot(W, "start", 2.5, -3.5, 0);
   spot(W, "her", -1.6, 6.4, Math.PI / 2);
@@ -731,6 +782,7 @@ export function buildWaterfront(W, G, o = {}) {
   const water = W.ground(0, 50, 160, 80, TEX.water(sunset ? [60, 70, 100] : [20, 30, 60], "riverwater"), { y: -0.8, wave: 1, scroll: [0, 0.04] });
   water.material.uniforms.uEmissive.value = 0.15;
   W.railing(-25, 11, 25);
+  skyline(W, sunset ? "sunset" : "night", { r: 84, y: -1.2, h: 30, rep: 3 });
   W.bounds = { x0: -24, z0: -2.6, x1: 24, z1: 10.8 };
   // skyline + a bridge across the river
   for (let i = 0; i < 26; i++) {
@@ -832,6 +884,7 @@ export function buildTower(W, G) {
   W.mesh(boxGeo(16.2, 3, 16.2), M({ map: TEX.brick([70, 56, 50], "towerbrick") }), 0, -1.52, 0);
   for (let x = -8; x <= 8; x += 0.6) for (const z of [-8, 8]) W.mesh(boxGeo(0.04, 1, 0.04), M({ color: 0x18161a }), x, 0.5, z);
   W.bounds = { x0: -7.6, z0: -7.6, x1: 7.6, z1: 7.6 };
+  skyline(W, "storm", { r: 80, y: -26, h: 64, rep: 3 });
   // the great clock
   const face = W.mesh(new THREE.CircleGeometry(9, 24), M({ map: TEX.clockFace("4:04"), emissive: 0.25 }), 0, 9, 26, Math.PI);
   W.mesh(new THREE.TorusGeometry(9.2, 0.5, 4, 24), M({ color: 0x8a6a30 }), 0, 9, 26);

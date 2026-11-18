@@ -39,8 +39,10 @@ To fill one in, open `js/memories.js`, paste her words into that memory's `text`
 - Every location is a modeled 3D map built from the location art and room blockouts: Ocean Parkway, the hallway of doors, the house, the House of Almost, her room, the rooftop Bathhouse pool at night, the dance studio, the car, the park, the waterfront, the Unread Room, the corridor of cords, the Clock Tower and the collapse. They use follow cameras and fixed corner cameras.
 - Walls, floors, streets, doors, trees, the pool, the cord wall and the tower clock use painted texture pages (`assets/tex`). Brick facades, damask wallpaper, mosaic hall tile, pool tile and the worn sidewalks all repeat like PS1 VRAM tiles.
 - Keepsakes and photographs you pick up are painted items: the scratched childhood photo, the rooftop Polaroid, the dinner, the ring beside the drawn house, the flowers, the promise ring, the 22-reasons deck, the tin of kisses and the "About You" card.
-- Rufki's and Argjila's dialogue portraits change expression (neutral, sad, scared, smiling) to match each line.
-- Three painted cutscene stills play full screen with a slow camera drift: the empty car with its door open, the rooftop pool at night, and the Keeper before the clock.
+- Dialogue portraits change expression (neutral, sad, scared, smiling) to match each line, for Rufki, Argjila, the Other Rufki, the Best Friend, the Keeper and the Unsaid.
+- Parked cars are painted 90s sedans, and the streets carry flyers, shop signs, graffiti and a 4:04 ST sign. The rooftop, the waterfront, the tower and the crossing have painted skylines (night, sunset, storm).
+- Memory items in the inventory have their own icons. The title screen and every chapter's loading screen are painted.
+- Painted cutscene stills play full screen with a slow camera drift at the big moments: the empty car with its door open, the peephole, the rooftop pool, the dancers in the mirrors, the rear-view mirror, the red glass, the payphone, the two chairs, the Unsaid in the cords, the Keeper before the clock and the last crossing. Every ending has its own still.
 - Rendering runs at 320×240 with vertex wobble, affine textures, 15-bit colour with dithering, fog and a CRT filter. Each effect can be switched off.
 
 **Voice acting.** Every character line is spoken; narration is read silently. The voices were synthesised offline with the Kokoro-82M neural TTS model and processed per speaker:
@@ -53,8 +55,8 @@ To fill one in, open `js/memories.js`, paste her words into that memory's `text`
 All the voices are in one file, `assets/vo/voices.mp3`, which streams in after boot.
 
 **Horror:**
-- The Unmet moves only when you aren't looking at it.
-- Faceless passers-by walk out of the fog on the streets, the park and the waterfront. They stop and turn to watch you when you come near, and are gone when you reach them.
+- The Unmet moves only when you aren't looking at it, and its face fills the screen when it reaches you.
+- Faceless passers-by (a man in a coat, a woman with an umbrella, an old man, a child in a raincoat) walk out of the fog on the streets, the park and the waterfront. They stop and turn to watch you when you come near, and are gone when you reach them.
 - Clocks run backward at every wrong turn.
 - A kitchen clock ticks only when she moves, and someone upstairs keeps walking when she stands still.
 - A knock arrives while both of his hands are in view.
@@ -78,6 +80,6 @@ All the voices are in one file, `assets/vo/voices.mp3`, which streams in after b
 | `js/ui.js` | Interface |
 | `js/voice.js` | Voice playback |
 | `js/music.js` | Soundtrack |
-| `assets/` | Character atlases, sprites, texture pages, items, cutscene stills, backgrounds, portraits, voices |
+| `assets/` | Character atlases, sprites, texture pages, the painted car, street decals, skylines, items, icons, cutscene stills, loading screens, portraits, voices |
 
 The only dependency is three.js r160, which is included in `vendor/`.

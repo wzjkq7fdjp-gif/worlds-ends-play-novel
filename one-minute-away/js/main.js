@@ -10,7 +10,7 @@ import { Voice } from "./voice.js";
 import { Input } from "./input.js";
 import { UI } from "./ui.js";
 import { World, Player, CameraRig, angDiff } from "./world.js";
-import { loadAssets, bgURL, cgURL } from "./assets.js";
+import { loadAssets, bgURL, cgURL, loadURL } from "./assets.js";
 import { CHAPTERS, ENDINGS, buildTitle, decideEnding } from "./chapters.js";
 import { MEMORIES } from "./memories.js";
 
@@ -253,7 +253,7 @@ G.saveMeta = () => store.set(META_KEY, G.meta);
 // ------------------------------------------------------------
 const loadEl = document.getElementById("loading");
 G.loading = async (ch) => {
-  loadEl.querySelector(".lbg").style.backgroundImage = ch.bg ? `url(${bgURL(ch.bg)})` : "none";
+  loadEl.querySelector(".lbg").style.backgroundImage = ch.load ? `url(${loadURL(ch.load)})` : ch.bg ? `url(${bgURL(ch.bg)})` : "none";
   loadEl.querySelector(".lnm").textContent = (ch.date || "").toUpperCase();
   loadEl.querySelector(".ltip").textContent = ch.tip || "";
   loadEl.querySelector(".lcl").textContent = ch.clock || "4:04";

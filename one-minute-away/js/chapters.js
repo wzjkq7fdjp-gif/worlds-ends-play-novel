@@ -8,7 +8,7 @@ import { THREE, U, mat, TEX, boxGeo } from "./ps1.js";
 import { Character, SpriteActor } from "./actors.js";
 import { isWatched } from "./world.js";
 import { pic } from "./art.js";
-import { itemURL } from "./assets.js";
+import { itemURL, cgURL } from "./assets.js";
 import * as S from "./scenes.js";
 import { R, A, N, HER, at, pin, yawAt, peepCanvas, herPage, relabel, grade, addTint, clockBack, minuteMap, stalker, reach } from "./story.js";
 import { CH6, CH7, CH8, CH9, CH10, CH11, CH12, CH13, CH14, CH15, ENDINGS, buildTitle, decideEnding } from "./chapters2.js";
@@ -98,7 +98,7 @@ async function prologue(G) {
   G.objective("LOOK THROUGH THE DOORS. ONE OF THEM IS LISTENING.");
   const peep = async (text) => {
     G.audio.creak(0.6);
-    await G.item({ title: "PEEPHOLE", canvas: peepCanvas(/open/.test(text)), round: true, text });
+    await G.item({ title: "PEEPHOLE", img: cgURL("peephole"), round: true, text });
   };
   let heard = false;
   const doors = [
@@ -185,7 +185,7 @@ async function ch1(G) {
     P.ch.pose("crouch");
     await G.wait(0.5);
     await G.item({ title: "A CHILDHOOD PHOTOGRAPH", img: itemURL("childhood"), text: "Him, small, beside a girl whose face has been scratched out. On the back: You passed each other more times than you know." });
-    G.give({ name: "Childhood photograph", prop: "photo", text: "You passed each other more times than you know." });
+    G.give({ name: "Childhood photograph", img: itemURL("childhood"), icon: "photo", text: "You passed each other more times than you know." });
     P.ch.pose(null);
   } });
   G.objective("FOLLOW THE RINGING.");
@@ -424,8 +424,8 @@ async function ch2(G) {
   await G.say([N("The memory plays correctly. In the background, a second Rufki stands very still. He follows him into a room full of photographs.")]);
   G.objective("LOOK AT THE PHOTOGRAPHS.");
   const ph = [[1.6, 12, "pass", "THEY PASS WITHOUT SPEAKING"], [-1.6, 20, "never", "ARGJILA NEVER ARRIVES"], [1.6, 28, "alone", "RUFKI STANDS ALONE"]];
-  ph.forEach(([x, z, k, t]) => W.interact({ pos: [x, 1.6, z], label: t, verb: "LOOK", r: 1.5, use: () => G.item({ title: "A DIFFERENT FIRST ENCOUNTER", canvas: pic(k), text: t.charAt(0) + t.slice(1).toLowerCase() + "." }) }));
-  W.interact({ pos: [-1.6, 1.6, 2.2], label: "THE REAL ONE", verb: "LOOK", r: 1.5, use: () => G.item({ title: "OCTOBER 24, 2025", canvas: pic("meeting"), text: "The real one." }) });
+  ph.forEach(([x, z, k, t]) => W.interact({ pos: [x, 1.6, z], label: t, verb: "LOOK", r: 1.5, use: () => G.item({ title: "A DIFFERENT FIRST ENCOUNTER", img: itemURL(k === "pass" ? "pass" : k === "never" ? "never" : "alone"), text: t.charAt(0) + t.slice(1).toLowerCase() + "." }) }));
+  W.interact({ pos: [-1.6, 1.6, 2.2], label: "THE REAL ONE", verb: "LOOK", r: 1.5, use: () => G.item({ title: "OCTOBER 24, 2025", img: itemURL("frontdoor"), text: "The real one." }) });
   const dbl = new SpriteActor("other", { emissive: 0.1 });
   dbl.setPos(0, 0, 35).face(Math.PI);
   W.addActor(dbl);
@@ -453,6 +453,7 @@ async function ch2(G) {
     await G.cutscene(async () => {
       G.audio.hit();
       addTint(0.5, 0.5, 0.5); await G.wait(0.1); addTint();
+      await G.still("unmet", { hold: 1.1, flash: true });
       await G.fade(1, 0.3);
       await G.say([N("It reaches him. For a moment he cannot remember her name.")]);
       P.place(0, 27, 0);
@@ -568,7 +569,7 @@ async function ch3(G) {
   G.music.play("memory", 2);
   await G.item({ title: "OCEAN PARKWAY", canvas: minuteMap(), text: "Two dots on the same boulevard." });
   await G.say([HER("We once lived about a minute away from each other on Ocean Parkway, and for all that time we were just two people living our separate lives."), HER("One minute. That is literally nothing."), HER("The part that gets me isn't that we were a minute apart. It's that we could have kept being a minute apart forever and never become us.")]);
-  G.give({ name: "The minute map", img: null, text: "About a minute apart on Ocean Parkway." });
+  G.give({ name: "The minute map", img: null, icon: "map", text: "About a minute apart on Ocean Parkway." });
 }
 
 // ============================================================
@@ -731,7 +732,7 @@ async function ch5(G) {
     if (k === 1) break;
   }
   G.rig.set({ fov: 55 });
-  G.give({ name: "Towel marked FINE", prop: "towel", text: "Set down." });
+  G.give({ name: "Towel marked FINE", prop: "towel", icon: "towel", text: "Set down." });
   await G.cutscene(async () => {
     G.zoom(1.8, P.ch);
     await G.say([A("I was still talking.")]);
@@ -766,9 +767,9 @@ async function ch5(G) {
   G.objective("LIFT THE PHOTOGRAPHS FROM THE POOL. ONE AT A TIME.");
   const photos = [
     ["couple", "APRIL 4, 2026", "Official.", "rooftop"],
-    ["iloveyou", "“I LOVE YOU”", "Said out loud."],
+    ["iloveyou", "“I LOVE YOU”", "Said out loud.", "stoop"],
     ["families", "APRIL 15, 2026", "Dinner with his parents. It went well.", "dinner"],
-    ["ordinary", "THE ORDINARY DAYS", "All the days in between."],
+    ["ordinary", "THE ORDINARY DAYS", "All the days in between.", "ordinary"],
   ];
   let dark = 1;
   for (const [i, [kind, title, text, img]] of photos.entries()) {
@@ -804,7 +805,7 @@ async function ch5(G) {
   });
   G.flag("receiver");
   await G.item({ title: "AN OPEN LINE", prop: "rotary", text: "From now on he can set the receiver down without hanging up. She chooses when to speak into it." });
-  G.give({ name: "Open receiver", prop: "rotary", text: "Leave the line open. Let her choose when to speak." });
+  G.give({ name: "Open receiver", prop: "rotary", icon: "receiver", text: "Leave the line open. Let her choose when to speak." });
   grade();
   await G.fade(1, 1.2);
 }
@@ -813,20 +814,20 @@ async function ch5(G) {
 // Chapter registry (one shared save; ids match game_data.json)
 // ============================================================
 export const CHAPTERS = [
-  { id: "ocean", name: "4:04", date: "October 24, 2026", pov: "RUFKI + ARGJILA", bg: "ocean", clock: "4:04", tip: "Every audio cue has a caption. Two clicks mean somebody on the other side heard you.", run: prologue },
-  { id: "street", name: "The Street That Remembers", date: "October 24, 2026", pov: "RUFKI", bg: "ocean", tip: "At a wrong turn the clocks run backward. A familiar sound shows the way back.", run: ch1 },
-  { id: "house", name: "The Girl at the House", date: "October 24, 2025", pov: "ARGJILA + RUFKI", bg: "hallway", clock: "OCT 24", tip: "The Unmet only moves when you are not looking at it. Walk backward. Don't run.", run: ch2 },
-  { id: "almost", name: "The House of Almost", date: "Before 2025", pov: "RUFKI", bg: "almost", tip: "Some near misses are how two people become the ones who find each other.", run: ch3 },
-  { id: "away", name: "When You Were Away", date: "November 2025 – February 2026", pov: "ARGJILA", bg: "bedroom", clock: "NOV 2025", tip: "Some pages stay blank until the person who lived them writes them.", run: ch4 },
-  { id: "bathhouse", name: "Water Under the Door", date: "April 4, 2026", pov: "RUFKI + ARGJILA", bg: "bathhouse", clock: "APR 4", tip: "Listen to the end of the sentence before you answer.", run: ch5 },
-  { id: "dance", name: "One More Turn", date: "May 2026", pov: "ARGJILA + RUFKI", bg: "dance", clock: "MAY", tip: "The double never misses a beat. That is how you know.", run: CH6 },
-  { id: "return", name: "The Day We Came Back", date: "May 2026", pov: "RUFKI + ARGJILA", bg: "car", clock: "MAY", tip: "If the odometer doesn't move, neither are you.", run: CH7 },
-  { id: "park", name: "The Park Near Target", date: "2026", pov: "RUFKI + ARGJILA", bg: "park", tip: "There is no timer. Hold on as long as you want.", run: CH8 },
-  { id: "keepsakes", name: "Room to Be Me", date: "Summer – October 2026", pov: "ARGJILA", bg: "bedroom", clock: "OCT 4", tip: "Quiet doesn't mean small.", run: CH9 },
-  { id: "waterfront", name: "The Quiet Days", date: "Summer 2026", pov: "ARGJILA + RUFKI", bg: "waterfront", clock: "SUMMER", tip: "A payphone that rings after you pass it is optional. So is everything it shows you.", run: CH10 },
-  { id: "unread", name: "The Unread Room", date: "Secret", pov: "ARGJILA", bg: "unread", optional: true, tip: "Match her pose. Then hang up and leave.", run: CH11 },
-  { id: "unsaid", name: "The Unsaid", date: "Nowhere", pov: "RUFKI + ARGJILA", bg: "cords", tip: "The true line hums. Let her choose the words that go down it.", run: CH12 },
-  { id: "empty", name: "The World Without Her", date: "October 2026", pov: "RUFKI", bg: "bedroom", tip: "Everyone knows Rufki. Nobody knows her.", run: CH13 },
-  { id: "tower", name: "The Clock Tower", date: "4:04:56", pov: "RUFKI + ARGJILA", bg: "tower", clock: "4:04:56", tip: "The elevator returns you to unfinished memories.", run: CH14 },
-  { id: "crossing", name: "One Minute Away", date: "4:04:59", pov: "RUFKI + ARGJILA", bg: "ocean", clock: "4:04:59", tip: "Warm light and two clicks: the real way. Blue light and a backward tick: the trap.", run: CH15 },
+  { id: "ocean", load: "ocean", name: "4:04", date: "October 24, 2026", pov: "RUFKI + ARGJILA", bg: "ocean", clock: "4:04", tip: "Every audio cue has a caption. Two clicks mean somebody on the other side heard you.", run: prologue },
+  { id: "street", load: "crossing", name: "The Street That Remembers", date: "October 24, 2026", pov: "RUFKI", bg: "ocean", tip: "At a wrong turn the clocks run backward. A familiar sound shows the way back.", run: ch1 },
+  { id: "house", load: "hallway", name: "The Girl at the House", date: "October 24, 2025", pov: "ARGJILA + RUFKI", bg: "hallway", clock: "OCT 24", tip: "The Unmet only moves when you are not looking at it. Walk backward. Don't run.", run: ch2 },
+  { id: "almost", load: "almost", name: "The House of Almost", date: "Before 2025", pov: "RUFKI", bg: "almost", tip: "Some near misses are how two people become the ones who find each other.", run: ch3 },
+  { id: "away", load: "away", name: "When You Were Away", date: "November 2025 – February 2026", pov: "ARGJILA", bg: "bedroom", clock: "NOV 2025", tip: "Some pages stay blank until the person who lived them writes them.", run: ch4 },
+  { id: "bathhouse", load: "bathhouse", name: "Water Under the Door", date: "April 4, 2026", pov: "RUFKI + ARGJILA", bg: "bathhouse", clock: "APR 4", tip: "Listen to the end of the sentence before you answer.", run: ch5 },
+  { id: "dance", load: "dance", name: "One More Turn", date: "May 2026", pov: "ARGJILA + RUFKI", bg: "dance", clock: "MAY", tip: "The double never misses a beat. That is how you know.", run: CH6 },
+  { id: "return", load: "car", name: "The Day We Came Back", date: "May 2026", pov: "RUFKI + ARGJILA", bg: "car", clock: "MAY", tip: "If the odometer doesn't move, neither are you.", run: CH7 },
+  { id: "park", load: "park", name: "The Park Near Target", date: "2026", pov: "RUFKI + ARGJILA", bg: "park", tip: "There is no timer. Hold on as long as you want.", run: CH8 },
+  { id: "keepsakes", load: "keepsakes", name: "Room to Be Me", date: "Summer – October 2026", pov: "ARGJILA", bg: "bedroom", clock: "OCT 4", tip: "Quiet doesn't mean small.", run: CH9 },
+  { id: "waterfront", load: "waterfront", name: "The Quiet Days", date: "Summer 2026", pov: "ARGJILA + RUFKI", bg: "waterfront", clock: "SUMMER", tip: "A payphone that rings after you pass it is optional. So is everything it shows you.", run: CH10 },
+  { id: "unread", load: "unread", name: "The Unread Room", date: "Secret", pov: "ARGJILA", bg: "unread", optional: true, tip: "Match her pose. Then hang up and leave.", run: CH11 },
+  { id: "unsaid", load: "cords", name: "The Unsaid", date: "Nowhere", pov: "RUFKI + ARGJILA", bg: "cords", tip: "The true line hums. Let her choose the words that go down it.", run: CH12 },
+  { id: "empty", load: "empty", name: "The World Without Her", date: "October 2026", pov: "RUFKI", bg: "bedroom", tip: "Everyone knows Rufki. Nobody knows her.", run: CH13 },
+  { id: "tower", load: "tower", name: "The Clock Tower", date: "4:04:56", pov: "RUFKI + ARGJILA", bg: "tower", clock: "4:04:56", tip: "The elevator returns you to unfinished memories.", run: CH14 },
+  { id: "crossing", load: "sunrise", name: "One Minute Away", date: "4:04:59", pov: "RUFKI + ARGJILA", bg: "ocean", clock: "4:04:59", tip: "Warm light and two clicks: the real way. Blue light and a backward tick: the trap.", run: CH15 },
 ];

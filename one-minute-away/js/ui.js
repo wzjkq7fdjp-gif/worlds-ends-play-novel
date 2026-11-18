@@ -5,7 +5,7 @@
 // every audio cue, choice / inventory / route map in the same
 // border, flip-phone messages, sealed memory pages.
 // ============================================================
-import { portraitURL, propURL } from "./assets.js";
+import { portraitURL, propURL, iconURL } from "./assets.js";
 
 const el = (tag, cls, html) => {
   const e = document.createElement(tag);
@@ -375,9 +375,9 @@ export class UI {
   }
 
   // ---------- cutscene still: a painted frame with a slow camera drift ----------
-  still({ src, text, hold = 7, rev = false }) {
+  still({ src, text, hold = 7, rev = false, flash = false }) {
     return new Promise((res) => {
-      const c = el("div", "cg" + (rev ? " r" : ""));
+      const c = el("div", "cg" + (rev ? " r" : "") + (flash ? " flash" : ""));
       c.style.setProperty("--kb", hold + 3 + "s");
       const im = el("img");
       im.src = src;
@@ -389,11 +389,13 @@ export class UI {
         if (done) return;
         done = true;
         c.classList.add("out");
-        setTimeout(() => { G.ui.pop(m); res(); }, 850);
+        setTimeout(() => { G.ui.pop(m); res(); }, flash ? 120 : 850);
       };
       c.addEventListener("click", (e) => { e.stopPropagation(); if (t > 0.8) close(); });
       const m = { el: c, update(dt, input) { t += dt; if (t > hold) close(); else if (t > 0.8 && (input.pressed("x") || input.pressed("o"))) close(); } };
       this.push(m);
+      // above the fade layer, so a still can rise out of black
+      document.getElementById("screen").appendChild(c);
     });
   }
 
@@ -492,7 +494,7 @@ export class UI {
       const render = () => {
         rows.forEach((r, i) => {
           const it = items[i];
-          r.innerHTML = `<span class="lbl">${esc(it.label)}</span>` + (it.get ? `<span class="val">◀ ${esc(it.get())} ▶</span>` : it.right ? `<span class="val">${esc(it.right)}</span>` : "");
+          r.innerHTML = (it.icon ? `<img class="mico" src="${it.icon}">` : "") + `<span class="lbl">${esc(it.label)}</span>` + (it.get ? `<span class="val">◀ ${esc(it.get())} ▶</span>` : it.right ? `<span class="val">${esc(it.right)}</span>` : "");
           r.classList.toggle("sel", i === sel);
         });
         hint.textContent = items[sel]?.hint || "";
@@ -526,7 +528,7 @@ export class UI {
     const inv = state.items || [];
     if (!inv.length) return this.menu({ title: "MEMORY ITEMS", items: [{ label: "Nothing yet.", disabled: true }], cls: "inv" });
     while (true) {
-      const v = await this.menu({ title: "MEMORY ITEMS", cls: "inv", items: inv.map((it, i) => ({ label: it.name, value: i, hint: it.hint || "" })) });
+      const v = await this.menu({ title: "MEMORY ITEMS", cls: "inv", items: inv.map((it, i) => ({ label: it.name, value: i, hint: it.hint || "", icon: iconURL(it.icon || "photo") })) });
       if (v == null) return;
       const it = inv[v];
       await this.item({ title: it.name, prop: it.prop, img: it.img, text: it.text });

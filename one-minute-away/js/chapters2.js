@@ -176,7 +176,9 @@ export async function CH6(G) {
   real.pose("dance"); P.ch.pose("dance");
   const dbl = new Character("doubleA"); const [qx, qz] = at(W, "double"); dbl.setPos(qx, 0, qz).faceToward(P.pos.x, P.pos.z); dbl.pose("reach"); dbl.early = 0.8; W.add(dbl.root); G.idle(dbl);
   await G.fade(0, 0.8);
-  await G.say([N("From his side, the music keeps going when Argjila slows."), N("Her double offers him a hand. It never misses a beat.")]);
+  await G.say([N("From his side, the music keeps going when Argjila slows.")]);
+  await G.still("mirrors", { hold: 5, text: "In the mirrors, the dancers are already a beat ahead." });
+  await G.say([N("Her double offers him a hand. It never misses a beat.")]);
   let led = false;
   while (!led) {
     const c = await G.choose("The double's hand is already out.", ["Take the offered hand", "Look down"]);
@@ -228,6 +230,7 @@ export async function CH6(G) {
   G.caption("On the right, somebody in the empty back seat is humming, one beat ahead", 4);
   G.shot([0.1, 1.45, 0.45], [0, 0.8, -1.6], 64);
   await G.wait(2.4);
+  await G.still("rearview", { hold: 4.5 });
   await G.say([N("In the mirror, the back seat is empty.")]);
   G.shot([0.42, 1.18, -0.1], [0.25, 1.0, 10], 60);
   const r = await G.choose("The humming is a beat ahead of the song.", ["Turn off the radio", "Stay for another moment"]);
@@ -351,6 +354,7 @@ export async function CH8(G) {
   const [ax, az] = at(W, "her");
   let her = G.npc(Character, "argjila", ax, az, Math.atan2(P.pos.x - ax, P.pos.z - az));
   await G.fade(0, 1.2);
+  await G.still("redglass", { hold: 5 });
   await G.say([N("The store sign shows through the trees. Let him walk the last few steps to her.")]);
   G.objective("GO TO HER.");
   P.noRun = true;
@@ -462,12 +466,12 @@ export async function CH9(G) {
   G.objective("THE THINGS YOU KEPT. ONE AT A TIME.");
   const keep = [
     { key: "flowers", at: "dresser", img: "flowers", label: "FLOWERS", title: "FLOWERS", prop: null, kind: "ordinary", text: "You have brought me flowers again and again, sometimes only a few weeks apart." },
-    { key: "ring", at: "nightstand", img: "promisering", label: "THE PROMISE RING", title: "A PROMISE RING", kind: "ring", text: "You gave me a promise ring." },
-    { key: "birthday", at: "window", label: "DECORATIONS", title: "THE BIRTHDAY SURPRISE", kind: "couple", text: "You planned a birthday surprise with flowers and decorations." },
+    { key: "ring", at: "nightstand", img: "promisering", icon: "ringbox", label: "THE PROMISE RING", title: "A PROMISE RING", kind: "ring", text: "You gave me a promise ring." },
+    { key: "birthday", at: "window", img: "birthday", icon: "flowers", label: "DECORATIONS", title: "THE BIRTHDAY SURPRISE", kind: "couple", text: "You planned a birthday surprise with flowers and decorations." },
     { key: "deck", at: "desk", img: "deck", label: "A DECK OF CARDS", title: "22 REASONS", kind: "message", text: "I made a “22 reasons why I love you” deck." },
     { key: "tin", at: [-0.5, 3.1], img: "tin", label: "A LITTLE TIN", title: "A TIN OF KISSES", kind: "iloveyou", text: "A little tin of kisses for when I was not around." },
-    { key: "card", at: [0.9, 3.1], img: "songcard", label: "A SONG CARD", title: "“ABOUT YOU”", kind: "one", text: "An “About You” song card." },
-    { key: "letters", at: "chair", label: "LETTERS", title: "LETTERS AND PAGES", kind: "book", text: "I have made letters and small pages trying to capture what is hard for me to say all at once." },
+    { key: "card", at: [0.9, 3.1], img: "songcard", icon: "songcard", label: "A SONG CARD", title: "“ABOUT YOU”", kind: "one", text: "An “About You” song card." },
+    { key: "letters", at: "chair", img: "letters", label: "LETTERS", title: "LETTERS AND PAGES", kind: "book", text: "I have made letters and small pages trying to capture what is hard for me to say all at once." },
   ];
   const seen = new Set();
   while (seen.size < keep.length) {
@@ -476,7 +480,7 @@ export async function CH9(G) {
     const it = keep.find((x) => x.key === k);
     seen.add(k);
     await G.item({ title: it.title, ...(it.img ? { img: itemURL(it.img) } : { canvas: pic(it.kind) }), text: it.text });
-    G.give({ name: it.title.charAt(0) + it.title.slice(1).toLowerCase(), text: it.text });
+    G.give({ name: it.title.charAt(0) + it.title.slice(1).toLowerCase(), img: it.img ? itemURL(it.img) : null, icon: it.icon || it.img, text: it.text });
     G.us();
   }
   await G.say([HER("I remember these things because the point was never just what you bought. It was the feeling that you had me in mind before I even walked into the room."), HER("I remember simple moments too, like being together in the backyard with fruit and grapes, or spending time at Barnes & Noble."), HER("Your affection is often easy to see. Mine is sometimes quieter. But quiet does not mean small.")]);
@@ -573,6 +577,7 @@ export async function CH10(G) {
   G.audio.bell(0.06);
   G.caption("The payphone rings. He has already walked past it.", 3.5);
   const ringing = setInterval(() => G.mode === "play" && G.audio.bell(0.05), 2600);
+  await G.still("payphone", { hold: 4.5, rev: true });
   const pick = await G.choose("The payphone keeps ringing.", ["Lift the receiver", "Let it ring"]);
   clearInterval(ringing);
   if (pick === 0) {
@@ -599,6 +604,7 @@ export async function CH11(G) {
   G.ui.clock("4:04");
   G.music.play("dread", 2);
   G.audio.ambience({ wind: 0, drone: 0.45, note: 39, bright: 160, verb: 0.3 });
+  await G.still("chairs", { hold: 5, text: "Two chairs. One phone. One unread message." });
   const [fx, fz] = at(W, "chairF");
   const her = new SpriteActor("friend"); her.setPos(fx, 0, fz).face(-Math.PI / 2); W.addActor(her);
   her.frameOverride = ["anim", 0];
@@ -690,6 +696,7 @@ export async function CH12(G) {
   const far = at(W, "far");
   un.setPos(far[0], 0, far[1]).face(Math.PI);
   W.addActor(un);
+  await G.still("cords", { hold: 5 });
   await G.fade(0, 1);
   await G.say([N("Telephone cords pull taut between the doors. Something tall and thin is made of them."), ["unsaid", "What if she stops loving you?"], ["unsaid", "What if you aren't enough?"], ["unsaid", "What if your future disappears?"], N("It has no mouth. It speaks in their voices.")]);
   G.objective("TRACE THE TRUE PHONE LINE. LISTEN FOR THE HUM.");
@@ -773,7 +780,7 @@ export async function CH13(G) {
   const spots = [
     { key: "frames", pos: pin(W, "dresser", 1.2), label: "PHOTO FRAMES", use: () => G.say([N("Empty photograph frames. Not torn out. Never filled.")]) },
     { key: "phone", pos: pin(W, "desk", 1), label: "HIS PHONE", use: async () => { await G.phone({ contact: "SEARCH: ARGJILA", date: "", messages: [{ from: "them", text: "No results.", time: "" }] }); } },
-    { key: "photo", pos: pin(W, "nightstand", 1), label: "A PHOTOGRAPH", use: () => G.item({ title: "A PHOTOGRAPH", canvas: pic("alone"), text: "It should show the two of them. It shows only him." }) },
+    { key: "photo", pos: pin(W, "nightstand", 1), label: "A PHOTOGRAPH", use: () => G.item({ title: "A PHOTOGRAPH", img: itemURL("alone"), text: "It should show the two of them. It shows only him." }) },
   ];
   while (seen.size < 3) seen.add(await G.interactAny(spots.filter((s) => !seen.has(s.key))));
   await G.say([N("People know Rufki. Nobody knows Argjila.")]);
@@ -1008,6 +1015,7 @@ export async function CH15(G) {
   G.audio.ambience({ wind: 0.4, drone: 0.2, note: 44, traffic: 0, bright: 260 });
   await G.fade(0, 1);
   await G.cutscene(async () => {
+    await G.still("crossing", { hold: 6, text: "4:04:59." });
     G.shot([2.5, 1.6, 31], [-0.5, 1.4, 34], 46);
     her2.faceToward(-1, 33);
     await G.say([N("At the last street crossing, the clock reads 4:04:59. Argjila hesitates."), A("What if we don't remember any of this?"), R("Then we'll make new memories.")]);
@@ -1100,6 +1108,7 @@ export const ENDINGS = {
     await G.fade(0, 2.2);
     G.clock("4:05");
     await G.say([N("They wake together in the parked car at sunrise. Both of them remember."), N("The traffic light changes twice before either of them moves the car.")]);
+    await G.still("end_always", { hold: 6 });
     await G.say([A("I've got something to tell you."), N("He turns the radio down, and waits.")]);
     await G.wait(1.5);
     await G.lines(["ALWAYS"], { hold: 3.2 });
@@ -1123,6 +1132,7 @@ export const ENDINGS = {
     r.face(Math.PI); a.face(0);
     await G.wait(1);
     await G.say([N("They stop. They look back at each other, struck by a familiarity they can't explain.")]);
+    await G.still("end_waited", { hold: 6, rev: true });
     await G.wait(2);
     await G.lines(["THE ONE WHO WAITED", "Some memories are still missing."], { hold: 4 });
     await credits(G);
@@ -1140,6 +1150,7 @@ export const ENDINGS = {
     await G.fade(0, 1.4);
     for (let i = 0; i < 2; i++) {
       await G.say([N("The same beautiful day. The same turn. The same four seconds.")]);
+      await G.still("end_forever", { hold: 6 });
       G.glitch(0.8); G.audio.reverseTick(); await G.wait(0.4); G.glitch(0);
     }
     await G.say([A("You know what I wanted to..."), N("He mouths every word before she says it."), N("The clock never moves.")]);
@@ -1156,7 +1167,8 @@ export const ENDINGS = {
     const a = new Character("argjila"); a.setPos(x, 0, z).face(Math.PI / 2); W.add(a.root); G.idle(a);
     G.music.play("loop", 1);
     await G.fade(0, 1.4);
-    await G.say([N("Someone came back wearing his face, carrying borrowed memories."), N("She senses that something is wrong."), A("What's in the little tin I gave you?"), ["other", "Candy?"], N("It is almost right.")]);
+    await G.still("end_otherme", { hold: 6, text: "Someone came back wearing his face, carrying borrowed memories." });
+    await G.say([N("She senses that something is wrong."), A("What's in the little tin I gave you?"), ["other", "Candy?"], N("It is almost right.")]);
     G.music.play(null, 0.1);
     await G.fade(1, 0.15);
     await G.lines(["THE OTHER ME"], { hold: 4 });
@@ -1172,7 +1184,8 @@ export const ENDINGS = {
     G.shot([0, 1.8, -2.6], [0, 0.8, 0], 46);
     await G.fade(0, 1.4);
     await G.say([N("Years later, two children find an old book called One Minute Away."), N("Inside is a photograph of two people beside a clock that reads 4:05.")]);
-    await G.item({ title: "ONE MINUTE AWAY", canvas: pic("book"), text: "Their parents call them from another room. On the next page is a map of a town neither parent remembers." });
+    await G.still("end_before", { hold: 7, rev: true });
+    await G.item({ title: "ONE MINUTE AWAY", img: itemURL("book"), text: "Their parents call them from another room. On the next page is a map of a town neither parent remembers." });
     await G.lines(["BEFORE WE KNEW"], { hold: 4 });
   },
 };

@@ -21,7 +21,7 @@ const PRESET = {
   other: ["other", 1.81], doubleR: ["other", 1.81], doubleA: ["argjila", 1.65], fakeA: ["argjila", 1.65],
   unmet: ["unmet", 2.05], unsaid: ["unsaid", 2.5], keeper: ["keeper", 3.0],
   kidR: ["kidR", 1.25], kidA: ["kidA", 1.2], confidante: ["confidante", 1.62], friend: ["friend", 1.7], dancer: ["dancer", 1.74],
-  passerby: ["passerby", 1.82],
+  passerby: ["passerby", 1.82], passerbyW: ["passerbyW", 2.0], passerbyO: ["passerbyO", 1.7], passerbyK: ["passerbyK", 1.2],
 };
 // drawn poses (sheet order): phone, sit, crouch, ear-to-door, arms open, hug, slow dance, knock
 const POSE = {
@@ -155,7 +155,7 @@ const _v = new THREE.Vector3();
 // ------------------------------------------------------------
 // Entities / memory cast: same sheets, ticked with the camera
 // ------------------------------------------------------------
-const KIND = { other: "other", unmet: "unmet", unsaid: "unsaid", keeper: "keeper", kidR: "kidR", kidA: "kidA", confidante: "confidante", friend: "friend", dancer: "dancer", passerby: "passerby" };
+const KIND = { other: "other", unmet: "unmet", unsaid: "unsaid", keeper: "keeper", kidR: "kidR", kidA: "kidA", confidante: "confidante", friend: "friend", dancer: "dancer", passerby: "passerby", passerbyW: "passerbyW", passerbyO: "passerbyO", passerbyK: "passerbyK" };
 export class SpriteActor extends Character {
   constructor(kind, o = {}) {
     super(KIND[kind] || kind, { scale: o.scale, emissive: o.emissive, color: o.color, shadow: o.shadow });

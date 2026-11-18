@@ -23,7 +23,11 @@ function tex(url) {
 
 export const BACKDROPS = ["ocean", "hallway", "bathhouse", "dance", "waterfront", "tower", "almost", "car", "park", "unread", "cords", "bedroom"];
 // sprite sheets (turnarounds, walk cycles, poses) cut from the green-screen boards
-const SHEETS = ["rufki", "argjila", "other", "unmet", "unsaid", "keeper", "kidR", "kidA", "confidante", "friend", "dancer", "passerby"];
+const SHEETS = ["rufki", "argjila", "other", "unmet", "unsaid", "keeper", "kidR", "kidA", "confidante", "friend", "dancer", "passerby", "passerbyW", "passerbyO", "passerbyK"];
+// the painted sedan (box-face panels), skyline panoramas, street decals
+const CAR = ["side_low", "side_up", "front_low", "front_up", "back_low", "back_up", "roof", "hood", "wheel"];
+const SKY = ["night", "sunset", "storm"];
+export const DECALS = ["posters", "missing", "fogmart", "emberdeli", "linden", "st404", "graffiti", "concert", "busstop", "newsbox", "ladder", "boarded", "puddle", "drain", "noparking", "floating"];
 export const PROPS = ["sedan", "payphone", "flipphone", "door", "clock", "photo", "towel", "map", "cart", "chair", "rotary", "book"];
 export const PORTRAITS = ["rufki", "argjila", "rufki_big", "argjila_big", "other", "unmet", "unsaid", "keeper", "kid_rufki", "kid_argjila", "confidante", "friend", "dancer"];
 
@@ -54,12 +58,15 @@ export const TEXMAP = {
 export async function loadAssets(onProgress) {
   const jobs = [];
   let done = 0;
-  const total = SHEETS.length + PROPS.length + BACKDROPS.length + 1;
+  const total = SHEETS.length + PROPS.length + BACKDROPS.length + 1 + 9 + 3 + 16;
   const tick = () => onProgress && onProgress(++done / total);
   const add = (key, url) => jobs.push(tex(url).then((t) => { A.tex[key] = t; tick(); }));
   SHEETS.forEach((s) => add("sh_" + s, BASE + "sheets/" + s + ".png"));
   PROPS.forEach((p) => add("prop_" + p, BASE + "spr/prop_" + p + ".png"));
   BACKDROPS.forEach((b) => add("bg_" + b, BASE + "bg/" + b + ".png"));
+  CAR.forEach((c) => add("car_" + c, BASE + "car/" + c + ".png"));
+  SKY.forEach((c) => add("sky_" + c, BASE + "sky/" + c + ".png"));
+  DECALS.forEach((c) => add("decal_" + c, BASE + "decal/" + c + ".png"));
   jobs.push(fetch(BASE + "sheets/sheets.json").then((r) => r.json()).then((j) => { A.sheets = j; tick(); }));
   // texture pages: one image each, one texture per uv scale
   const pages = {};
@@ -79,11 +86,14 @@ export async function loadAssets(onProgress) {
 
 // expression portraits for the two leads: rufki_sad, argjila_smile...
 const MOODS = ["neutral", "sad", "scared", "smile"];
+const MOODY = ["rufki", "argjila", "other", "confidante", "keeper", "unsaid"];
 export const portraitURL = (who, mood) => {
-  if (mood && MOODS.includes(mood) && (who === "rufki" || who === "argjila")) return `${BASE}por/${who}_${mood}.png`;
+  if (mood && MOODS.includes(mood) && MOODY.includes(who)) return `${BASE}por/${who}_${mood}.png`;
   return PORTRAITS.includes(who) ? `${BASE}por/${who}.png` : null;
 };
 export const itemURL = (n) => `${BASE}items/${n}.png`;
 export const cgURL = (n) => `${BASE}cg/${n}.png`;
+export const loadURL = (n) => `${BASE}load/${n}.png`;
+export const iconURL = (n) => `${BASE}icons/${n}.png`;
 export const propURL = (p) => `${BASE}spr/prop_${p}.png`;
 export const bgURL = (b) => `${BASE}bg/${b}.png`;

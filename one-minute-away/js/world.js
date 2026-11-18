@@ -4,6 +4,7 @@
 // ============================================================
 import { THREE, U, mat, TEX, boxGeo, planeGeo, wallGeo } from "./ps1.js";
 import { Character } from "./actors.js";
+import { A as ART } from "./assets.js";
 
 const tmpV = new THREE.Vector3();
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -300,12 +301,27 @@ export class World {
     const body = mat({ map: TEX.cloth(color, "car" + color) });
     const glass = mat({ color: o.lit ? 0x6a5a40 : 0x1a2028 });
     const tire = mat({ color: 0x111111 });
+    const P = ART.tex;
+    if (P.car_side_low) {
+      // the painted sedan: each box face carries its own panel, tinted toward the car's colour
+      const tint = new THREE.Color(Math.min(1.6, color[0] / 70), Math.min(1.6, color[1] / 74), Math.min(1.6, color[2] / 88));
+      const tm = (k, extra = {}) => mat({ map: P["car_" + k], color: tint, ...extra });
+      const side = tm("side_low"), top = tm("hood");
+      const b1 = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.9, 4.4), [side, side, top, tire, tm("front_low"), tm("back_low")]);
+      b1.position.y = 0.47; g.add(b1);
+      const up = tm("side_up", { emissive: o.lit ? 0.15 : 0 });
+      const b2 = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.56, 2.2), [up, up, tm("roof"), tire, tm("front_up"), tm("back_up")]);
+      b2.position.set(0, 1.22, -0.2); g.add(b2);
+      const roof = new THREE.Mesh(boxGeo(1.5, 0.04, 2.0), tm("roof")); roof.position.set(0, 1.51, -0.2); g.add(roof);
+      // the wheels are painted on the side panels
+    } else {
     const b1 = new THREE.Mesh(boxGeo(1.8, 0.7, 4.4), body); b1.position.y = 0.6; g.add(b1);
     const b2 = new THREE.Mesh(boxGeo(1.6, 0.55, 2.2), glass); b2.position.set(0, 1.22, -0.2); g.add(b2);
     const roof = new THREE.Mesh(boxGeo(1.5, 0.08, 2.0), body); roof.position.set(0, 1.52, -0.2); g.add(roof);
     for (const sx of [-0.85, 0.85]) for (const sz of [-1.4, 1.4]) {
       const w = new THREE.Mesh(new THREE.CylinderGeometry(0.33, 0.33, 0.24, 8), tire);
       w.rotation.z = Math.PI / 2; w.position.set(sx, 0.33, sz); g.add(w);
+    }
     }
     const hl = mat({ color: o.lights ? 0xfff4d0 : 0x888870, unlit: !!o.lights });
     for (const sx of [-0.6, 0.6]) { const h = new THREE.Mesh(boxGeo(0.3, 0.14, 0.05), hl); h.position.set(sx, 0.75, 2.21); g.add(h); }
