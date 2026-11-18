@@ -610,7 +610,7 @@ async function ch4(G) {
   await G.say([N("December. He goes away, and he will be gone until around the middle of February.")]);
   // the winter confidante: a quiet listening beat
   const [fx, fz] = fl(W, 120, 250);
-  const friend = new SpriteActor("confidante"); friend.setPos(fx, 0, fz).face(Math.PI * 1.1); W.addActor(friend);
+  const friend = new SpriteActor("confidante", { sitting: true }); friend.setPos(fx, 0, fz).face(Math.PI * 1.1); W.addActor(friend);
   await G.cutscene(async () => {
     await G.say([N("That winter she tells one of her best friends how much she likes Rufki."), N("Her friend lets her finish.")]);
     await G.wait(3.5);

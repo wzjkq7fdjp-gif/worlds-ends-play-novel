@@ -175,8 +175,8 @@ G.npc = (Cls, preset, x, z, yaw = 0) => {
   const c = new Cls(preset);
   c.setPos(x, G.world.groundAt(x, z), z).face(yaw);
   G.world.add(c.root);
-  if (c.update && !c.pivot) G.idle(c);
-  else if (c.pivot) G.world.actors.push(c);
+  if (c.kind) G.world.actors.push(c);
+  else if (c.update) G.idle(c);
   return c;
 };
 G.flicker = (ch, to = 0, dur = 1.2) => guard(new Promise((res) => {

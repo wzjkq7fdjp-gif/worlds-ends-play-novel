@@ -34,8 +34,8 @@ To jump straight into a chapter, add a hash to the URL: `index.html#chapter-0` i
 To fill one in, open `js/memories.js`, paste her words into that memory's `text`, and the page opens in the game. It shows in the **Her Pages** menu on the title screen and in the scene where the memory appears.
 
 **Looks like a PS1 game:**
-- Rufki and Argjila are low-poly models textured from the front, profile and back views on their model sheets.
-- The Unmet, the Unsaid, the Keeper of Minutes, the Other Rufki, the children, the winter friend, the former best friend and the faceless dancer are sprites cut from the creature and cast boards.
+- Rufki and Argjila are sprites drawn in five directions, with front, side and back walk cycles and eight cutscene poses each. The other side is mirrored.
+- The Other Rufki, the Unmet, the Unsaid, the Keeper of Minutes, both children, the winter friend, the former best friend and the faceless dancer have their own turnarounds and animation frames.
 - Twelve painted locations are pre-rendered backgrounds, like the fixed-camera survival horror games of the era. Each has a camera solved from its vanishing point, so the 3D characters walk on the painted floor and pass behind foreground objects.
 - The streets and interiors that connect them are real-time 3D.
 - Rendering runs at 320×240 with vertex wobble, affine textures, 15-bit colour with dithering, fog and a CRT filter. Each effect can be switched off.
@@ -68,7 +68,7 @@ All the voices are in one file, `assets/vo/voices.mp3`, which streams in after b
 | Path | Contents |
 |---|---|
 | `js/backdrop.js` | Painted rooms: camera solve, floor polygons, occluders |
-| `js/actors.js` | Textured character rig, sprite actors, the Keeper |
+| `js/actors.js` | Sprite characters (direction, walk cycle, poses), the Keeper |
 | `js/chapters.js`, `js/chapters2.js` | The story |
 | `js/memories.js` | Argjila's pages |
 | `js/scenes.js` | Locations |

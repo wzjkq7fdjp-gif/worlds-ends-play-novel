@@ -265,7 +265,6 @@ export function buildHouseOut(W, G) {
     houses.push({ z, d });
     // kitchen window beside each door
     W.sign(-7.95, 2.0, z + 2.4, "", Math.PI / 2, { w: 1.4, h: 1.0, bg: i === 3 ? "#e8c890" : "#2a2a30", tw: 8, th: 8, size: 6, unlit: true });
-    W.tree(-4.4, z + 4, 0.8);
   }
   W.lamp(-4.4, 12, { side: -1 }); W.lamp(-4.4, 30, { side: -1 });
   G._houses = houses;

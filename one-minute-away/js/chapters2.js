@@ -592,7 +592,8 @@ export async function CH11(G) {
   G.music.play("dread", 2);
   G.audio.ambience({ wind: 0, drone: 0.45, note: 39, bright: 160, verb: 0.3 });
   const [fx, fz] = fl(W, 250, 290);
-  const her = new SpriteActor("friend", { sway: 0.01 }); her.setPos(fx, 0, fz).face(-Math.PI / 2); W.addActor(her);
+  const her = new SpriteActor("friend"); her.setPos(fx, 0, fz).face(-Math.PI / 2); W.addActor(her);
+  her.frameOverride = ["anim", 0];
   await G.fade(0, 1.2);
   await G.say([N("Two chairs face each other. Both have ARGJILA written on the tape across their backs."), N("The girl opposite is her former best friend. She copied nearly everything Argjila did.")]);
   const [cx, cz] = fl(W, 70, 290);
@@ -600,10 +601,12 @@ export async function CH11(G) {
   P.ch.pose("sit");
   await G.choose("", ["Roll up one sleeve"]);
   P.ch.pose("sleeve");
+  her.frameOverride = ["anim", 1];
   G.caption("She rolls up hers", 2.5);
   await G.wait(1);
   await G.choose("", ["Lower your arm"]);
   P.ch.pose("sit");
+  her.frameOverride = ["anim", 2];
   G.audio.sting(true);
   G.caption("She keeps hers raised. She's waiting for you to copy her.", 3.5);
   await G.wait(1.2);
@@ -615,6 +618,7 @@ export async function CH11(G) {
   await G.choose("", ["Match her pose"]);
   P.ch.pose("raised");
   G.audio.thud(); G.audio.noise(0.4, 300, 1, 0.2, "lowpass", 0.1);
+  her.frameOverride = ["anim", 3];
   G.caption("Both chairs scrape back to their starting marks", 3);
   await G.wait(1);
   await G.choose("", ["Hang up and walk out"]);
