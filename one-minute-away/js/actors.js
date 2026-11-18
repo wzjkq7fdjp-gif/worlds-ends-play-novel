@@ -126,17 +126,23 @@ export class Character {
     if (this.frameOverride) { const [g, i] = this.frameOverride; const L = F[g]; if (L) return this.setFrame(L[i % L.length], mirror); }
     if (this.poseName && F.pose && POSE[this.poseName] != null) return this.setFrame(F.pose[POSE[this.poseName]], mirror);
     if (this.anim && F[this.anim.group]) { const L = F[this.anim.group]; return this.setFrame(L[Math.floor(this.t * this.anim.fps) % L.length], this.anim.mirror ?? mirror); }
-    const step = Math.floor((this.phase + this.early) / (Math.PI / 2)) & 3;
     const moving = this.amp > 0.12;
     this._sway = 0;
     if (moving) {
-      // walking at an angle to the camera reads best as a side walk; only
-      // (nearly) straight toward / away uses the front / back cycle
-      const a = Math.abs(rel);
-      const grp = a < 0.5 ? "walkF" : a > Math.PI - 0.5 ? "walkB" : "walkS";
-      let L = F[grp];
-      if (!L && F.walkS && a > 0.3 && a < Math.PI - 0.3) L = F.walkS;
-      if (L) { this.pivot.position.y = 0; return this.setFrame(L[step], L === F.walkS ? mirror : false); }
+      // five walking directions: front, 3/4 front, side, 3/4 back, back (all drawn facing left,
+      // mirrored for the right); a sheet without one falls back to its neighbour
+      const a = Math.abs(rel), P8 = Math.PI / 8;
+      const dir = a < P8 * 1.5 ? 0 : a < P8 * 3.2 ? 1 : a < P8 * 4.8 ? 2 : a < P8 * 6.5 ? 3 : 4;
+      const order = [["walkF", "walkFQ", "walkS"], ["walkFQ", "walkS", "walkF"], ["walkS", "walkFQ", "walkBQ"], ["walkBQ", "walkS", "walkB"], ["walkB", "walkBQ", "walkS"]][dir];
+      let grp = order.find((g) => F[g]);
+      if (this.running && F.runS && dir >= 1 && dir <= 3) grp = "runS";
+      const L = grp && F[grp];
+      if (L) {
+        this.pivot.position.y = 0;
+        // one full cycle (two steps) per 2π of phase, whatever the frame count
+        const n = L.length, i = ((Math.floor(((this.phase + this.early) / (Math.PI * 2)) * n) % n) + n) % n;
+        return this.setFrame(L[i], grp === "walkF" || grp === "walkB" ? false : mirror);
+      }
       // no cycle drawn from this angle: step the turnaround with a bob and a weight shift
       this.pivot.position.y = Math.abs(Math.sin(this.phase)) * 0.04;
       this._sway = Math.sin(this.phase) * 0.035 * (this.height / 1.75);
@@ -151,8 +157,10 @@ export class Character {
     this.speed = speed;
     const target = Math.min(1, speed / 2.0) * (run ? 1 : 0.62);
     this.amp += (target - this.amp) * Math.min(1, dt * 10);
+    this.running = run && speed > 2.4;
     const before = Math.floor(this.phase / Math.PI);
-    if (speed > 0.05) this.phase += dt * speed * (run ? 2.6 : 3.3);
+    // cadence: about two steps a second walking (0.8 m stride), three running
+    if (speed > 0.05) this.phase += dt * speed * (run ? 2.5 : 3.9);
     else this.phase = Math.round(this.phase / Math.PI) * Math.PI;
     if (speed > 0.05 && Math.floor(this.phase / Math.PI) !== before) this.onStep?.(run);
   }
