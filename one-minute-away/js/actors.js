@@ -132,7 +132,15 @@ export class Character {
       // five walking directions: front, 3/4 front, side, 3/4 back, back (all drawn facing left,
       // mirrored for the right); a sheet without one falls back to its neighbour
       const a = Math.abs(rel), P8 = Math.PI / 8;
-      const dir = a < P8 * 1.5 ? 0 : a < P8 * 3.2 ? 1 : a < P8 * 4.8 ? 2 : a < P8 * 6.5 ? 3 : 4;
+      // pick a direction band, with some stickiness so a drifting camera doesn't flip cycles
+      const edges = [P8 * 1.5, P8 * 3.2, P8 * 4.8, P8 * 6.5];
+      let dir = edges.findIndex((e) => a < e); if (dir < 0) dir = 4;
+      const cur = this._dir;
+      if (cur != null && cur !== dir && Math.abs(dir - cur) === 1) {
+        const edge = edges[Math.min(dir, cur)];
+        if (Math.abs(a - edge) < 0.16) dir = cur;
+      }
+      this._dir = dir;
       const order = [["walkF", "walkFQ", "walkS"], ["walkFQ", "walkS", "walkF"], ["walkS", "walkFQ", "walkBQ"], ["walkBQ", "walkS", "walkB"], ["walkB", "walkBQ", "walkS"]][dir];
       let grp = order.find((g) => F[g]);
       if (this.running && F.runS && dir >= 1 && dir <= 3) grp = "runS";
@@ -140,7 +148,15 @@ export class Character {
       if (L) {
         this.pivot.position.y = 0;
         // one full cycle (two steps) per 2π of phase, whatever the frame count
-        const n = L.length, i = ((Math.floor(((this.phase + this.early) / (Math.PI * 2)) * n) % n) + n) % n;
+        const n = L.length;
+        let u = ((this.phase + this.early) / (Math.PI * 2)) % 1; if (u < 0) u += 1;
+        let i = Math.floor(u * n) % n;
+        // side-on, the passing frames (3 and 7) lift the knee: hold contact and weight frames longer
+        if (n === 8 && grp !== "walkF" && grp !== "walkB" && grp !== "runS") {
+          const W8 = [1.2, 1.15, 0.6, 1.05, 1.2, 1.15, 0.6, 1.05], tot = 8;
+          let acc = 0, t = u * tot; i = 7;
+          for (let k = 0; k < 8; k++) { acc += W8[k]; if (t < acc) { i = k; break; } }
+        }
         return this.setFrame(L[i], grp === "walkF" || grp === "walkB" ? false : mirror);
       }
       // no cycle drawn from this angle: step the turnaround with a bob and a weight shift
