@@ -25,8 +25,12 @@ export class Voice {
     this.cache = new Map();
     this.cur = null;
   }
+  // index.json: { key: [offset, length] } into one packed file of mp3 clips
   async init() {
-    try { this.have = new Set(await (await fetch("assets/vo/index.json")).json()); } catch { this.have = new Set(); }
+    try { this.index = await (await fetch("assets/vo/index.json")).json(); } catch { this.index = {}; }
+    this.have = new Set(Object.keys(this.index));
+    // the pack streams in the background; lines play once it has arrived
+    this.packP = this.have.size ? fetch("assets/vo/voices.pack").then((r) => r.arrayBuffer()).then((b) => (this.pack = b)).catch(() => null) : Promise.resolve(null);
   }
   has(who, text) { return !!this.have && this.have.has(voKey(who, text)); }
   load(who, text) {
@@ -34,7 +38,12 @@ export class Voice {
     if (!this.has(who, text)) return Promise.resolve(null);
     if (!this.cache.has(k)) {
       const ctx = this.G.audio.ctx;
-      const p = fetch(`assets/vo/${k}.mp3`).then((r) => r.arrayBuffer()).then((b) => new Promise((res) => ctx.decodeAudioData(b, res, () => res(null)))).catch(() => null);
+      const p = this.packP.then(() => {
+        if (!this.pack || !ctx) return null;
+        const [o, n] = this.index[k];
+        const clip = this.pack.slice(o, o + n);
+        return new Promise((res) => ctx.decodeAudioData(clip, res, () => res(null)));
+      }).catch(() => null);
       this.cache.set(k, p);
       if (this.cache.size > 80) this.cache.delete(this.cache.keys().next().value);
     }

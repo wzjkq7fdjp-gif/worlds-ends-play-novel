@@ -226,7 +226,7 @@ export class Character {
       case "hold": set(R.sh, -0.7, 0, 0.2); set(L.sh, -0.7, 0, -0.2); set(R.el, -1.2, 0, 0); set(L.el, -1.2, 0, 0); this.head.rotation.x = lerp(this.head.rotation.x, 0.35, k); break;
       case "embrace": set(R.sh, -1.15, 0, 0.75); set(L.sh, -1.15, 0, -0.75); set(R.el, -1.25, 0, 0); set(L.el, -1.25, 0, 0); set(this.torso, 0.1, 0, 0); break;
       case "cry": set(R.sh, -1.2, 0, 0.6); set(L.sh, -1.2, 0, -0.6); set(R.el, -1.6, 0, 0); set(L.el, -1.6, 0, 0); set(this.torso, 0.35, 0, 0); this.head.rotation.x = lerp(this.head.rotation.x, 0.45, k); break;
-      case "dance": set(R.sh, -1.2, 0, -0.9); set(L.sh, -0.6, 0, 0.5); set(R.el, -1.4, 0, 0); set(L.el, -0.9, 0, 0); break;
+      case "dance": set(R.sh, -0.95, 0, 0.35); set(R.el, -0.9, 0, 0); set(L.sh, -0.75, 0, -0.2); set(L.el, -1.25, 0, 0); set(this.torso, 0.04, Math.sin(t * 1.4) * 0.12, 0); break;
       case "sit": sit(); set(R.sh, -0.5, 0, -0.1); set(L.sh, -0.5, 0, 0.1); set(R.el, -0.6, 0, 0); set(L.el, -0.6, 0, 0); break;
       case "sitDrive": sit(0.42); set(R.sh, -1.1, 0, 0.15); set(L.sh, -1.1, 0, -0.15); set(R.el, -0.5, 0, 0); set(L.el, -0.5, 0, 0); break;
       case "sitMap": sit(0.42); set(R.sh, -0.9, 0, 0.3); set(L.sh, -0.9, 0, -0.3); set(R.el, -1.1, 0, 0); set(L.el, -1.1, 0, 0); this.head.rotation.x = lerp(this.head.rotation.x, 0.3, k); break;

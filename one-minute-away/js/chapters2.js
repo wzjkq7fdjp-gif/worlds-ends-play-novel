@@ -673,7 +673,7 @@ export async function CH12(G) {
   G.clock("4:04:01");
   G.music.play("dread", 1);
   G.audio.ambience({ wind: 0, drone: 0.55, note: 36, bright: 140, verb: 0.6 });
-  const un = new SpriteActor("unsaid", { emissive: 0.06, sway: 0.05 });
+  const un = new SpriteActor("unsaid", { emissive: 0.3, sway: 0.05 });
   const far = fl(W, 172, 182);
   un.setPos(far[0], 0, far[1]).face(Math.PI);
   W.addActor(un);
@@ -802,9 +802,9 @@ export async function CH14(G) {
     const W = G.world;
     G.pov("Rufki");
     G.state.place = "the Clock Tower";
-    const k = makeKeeper(2.2);
-    const [kx, kz] = fl(W, 320, 160);
-    k.root.position.set(kx + 6, -2, kz + 14);
+    const k = makeKeeper(5);
+    const [kx, kz] = fl(W, 252, 178);
+    k.root.position.set(kx, 0, kz);
     W.actors.push(k);
     W.add(k.root);
     G._keeper = k;

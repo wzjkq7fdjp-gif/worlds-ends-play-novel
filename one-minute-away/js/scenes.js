@@ -90,7 +90,7 @@ export const PAINTED = {
     lights: [[45, 205, 2.2, 0xffc890, 5]], surface: "tile",
   },
   tower: {
-    vp: [160, 120], h: 1.4, fov: 60, pan: "auto",
+    vp: [160, 120], h: 6.5, fov: 60, pan: "auto",
     walk: [[190, 228], [270, 218], [298, 238], [212, 250]],
     env: { fog: 0x3a3448, near: 8, far: 40, ambient: [0.5, 0.48, 0.56], dir: [0.12, 0.12, 0.14] },
     lights: [[240, 232, 2.2, 0xffd090, 5]], surface: "street",
