@@ -140,7 +140,7 @@ export class World {
       U.uPLPos.value[i].copy(L.pos);
       U.uPLCol.value[i].copy(L.color).multiplyScalar(k);
       U.uPLRange.value[i] = L.range;
-      if (L.glow) L.glow.visible = k > 0.5;
+      if (L.glow) { L.glow.userData.flick = true; L.glow.visible = k > 0.5 && !L.glow.userData.occl; }
     }
   }
 
@@ -220,6 +220,7 @@ export class World {
     }
     for (const a of this.actors) a.update(dt, cam);
     for (const u of this.updaters) u(dt, t);
+    this.updateEdgeFog();
   }
   // thin things between the camera and the player (lamp posts, tree trunks) drop out of view
   occlude(cam, focus) {
@@ -229,7 +230,26 @@ export class World {
       const px = ax + bx * t, pz = az + bz * t;
       const hide = t > -0.05 && t < 0.9 && Math.hypot(o.x - px, o.z - pz) < o.r + 0.3;
       for (const m of o.meshes) m.visible = !hide;
+      if (o.glows) for (const g of o.glows) { g.userData.occl = hide; if (!g.userData.flick && !g.userData.off) g.visible = !hide; }
     }
+  }
+  // the fog closes in as you near the end of an outdoor map
+  updateEdgeFog() {
+    const e = this.edgeFog, P = this.G.player;
+    if (!e || !P) return;
+    const p = P.pos;
+    let m = 1e9;
+    if (e.x0 != null) m = Math.min(m, p.x - e.x0);
+    if (e.x1 != null) m = Math.min(m, e.x1 - p.x);
+    if (e.z0 != null) m = Math.min(m, p.z - e.z0);
+    if (e.z1 != null) m = Math.min(m, e.z1 - p.z);
+    const k = Math.max(0, Math.min(1, 1 - m / (e.d || 9)));
+    // a script changed the fog itself: take that as the new base
+    if (this._fogSet && (U.uFogNear.value !== this._fogSet[0] || U.uFogFar.value !== this._fogSet[1])) this._fogBase = null;
+    if (!this._fogBase) this._fogBase = [U.uFogNear.value, U.uFogFar.value];
+    const n = this._fogBase[0] * (1 - 0.75 * k), f = Math.max(n + 2.5, this._fogBase[1] * (1 - 0.6 * k));
+    U.uFogNear.value = n; U.uFogFar.value = f;
+    this._fogSet = [n, f];
   }
   // register a sprite actor (needs the camera every frame)
   addActor(a) { this.actors.push(a); this.scene.add(a.root); return a; }
@@ -291,21 +311,21 @@ export class World {
     const pm = this.mesh(boxGeo(0.14, h, 0.14), pole, x, h / 2, z);
     const arm = o.side || 1;
     const am = this.mesh(boxGeo(0.9, 0.1, 0.1), pole, x + arm * 0.45, h - 0.05, z);
-    this.occluders.push({ meshes: [pm, am], x, z, r: 0.3 });
     const head = this.mesh(boxGeo(0.4, 0.14, 0.26), mat({ color: o.color ?? 0xffe0a0, unlit: true }), x + arm * 0.85, h - 0.12, z);
     this.colliderBox(x, z, 0.3, 0.3);
     const L = this.light(x + arm * 0.85, h - 0.6, z, o.color ?? 0xffcc88, o.range || 10, { flicker: o.flicker });
     L.glow = this.glow(x + arm * 0.85, h - 0.25, z, 1.4, o.color ?? 0xffcc88);
     L.head = head;
+    this.occluders.push({ meshes: [pm, am, head], glows: [L.glow], x, z, r: 0.3 });
     return L;
   }
   tree(x, z, s = 1, leaves) {
     const bark = mat({ map: TEX.bark() });
     const trunk = this.mesh(boxGeo(0.28 * s, 3.4 * s, 0.28 * s, 0.5, 1), bark, x, 1.7 * s, z);
-    this.occluders.push({ meshes: [trunk], x, z, r: 0.35 * s, low: true });
     const lm = mat({ map: leaves || TEX.leaves() });
     const c1 = this.mesh(new THREE.IcosahedronGeometry(1.5 * s, 0), lm, x, 4.4 * s, z, Math.random() * 3);
     const c2 = this.mesh(new THREE.IcosahedronGeometry(1.1 * s, 0), lm, x + 0.5 * s, 5.3 * s, z - 0.3 * s, Math.random() * 3);
+    this.occluders.push({ meshes: [trunk, c1, c2], x, z, r: 0.35 * s });
     this.colliderBox(x, z, 0.5, 0.5);
     return [c1, c2];
   }
@@ -465,6 +485,47 @@ export class World {
     this.mesh(new THREE.CylinderGeometry(0.3, 0.26, 0.9, 7), mat({ map: TEX.metal(), color: 0x4a5a4a }), x, 0.45, z);
     this.colliderBox(x, z, 0.6, 0.6);
   }
+  // see-through iron fence along a line (solid)
+  fence(x0, z0, x1, z1, o = {}) {
+    const h = o.h || 1.1, len = Math.hypot(x1 - x0, z1 - z0);
+    const t = TEX.bars();
+    const m = mat({ map: t, side: THREE.DoubleSide, color: o.color ?? 0xffffff });
+    const geo = new THREE.PlaneGeometry(len, h, Math.max(1, Math.round(len / 2)), 1);
+    const uv = geo.attributes.uv;
+    for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * len / 1.0, uv.getY(i));
+    const f = new THREE.Mesh(geo, m);
+    f.position.set((x0 + x1) / 2, h / 2, (z0 + z1) / 2);
+    f.rotation.y = Math.atan2(z1 - z0, x1 - x0) * -1;
+    this.scene.add(f);
+    if (o.solid !== false) this.collider(Math.min(x0, x1) - 0.08, Math.min(z0, z1) - 0.08, Math.max(x0, x1) + 0.08, Math.max(z0, z1) + 0.08);
+    return f;
+  }
+  // concrete jersey barriers with a striped sawhorse: the road is closed
+  roadBlock(x0, z, x1, o = {}) {
+    const cm = mat({ map: TEX.concrete([150, 148, 140], "jersey") });
+    for (let x = Math.min(x0, x1) + 1; x < Math.max(x0, x1); x += 2.05) {
+      this.mesh(boxGeo(2, 0.8, 0.5), cm, x, 0.4, z);
+      this.mesh(boxGeo(2, 0.08, 0.62), cm, x, 0.04, z);
+    }
+    const hz = mat({ map: TEX.hazard(), emissive: 0.15 });
+    for (const sx of o.horses || [(x0 + x1) / 2 - 2.5, (x0 + x1) / 2 + 2.5]) {
+      this.mesh(boxGeo(1.6, 0.22, 0.05), hz, sx, 1.05, z - 0.45);
+      for (const lx of [-0.65, 0.65]) this.mesh(boxGeo(0.06, 1.1, 0.06), mat({ color: 0x2a2a2a }), sx + lx, 0.55, z - 0.45);
+    }
+    if (o.sign !== false) this.sign((x0 + x1) / 2, 1.5, z - 0.5, o.sign || "ROAD CLOSED", o.ry ?? 0, { w: 1.6, h: 0.4, bg: "#e8e0c8", fg: "#901010", tw: 64, th: 16, size: 8 });
+    if (o.light !== false) { const L = this.light((x0 + x1) / 2, 1.6, z - 1, 0xff6a30, 5, { flicker: 0.25 }); L.glow = this.glow((x0 + x1) / 2 + 2.5, 1.25, z - 0.5, 0.4, 0xff6a30); }
+    this.collider(Math.min(x0, x1), z - 0.3, Math.max(x0, x1), z + 0.3);
+  }
+  // a row of buildings across the end of a street (their faces toward -face * z)
+  crossRow(z, x0, x1, face = 1, o = {}) {
+    const tints = [[96, 74, 62], [110, 92, 78], [80, 70, 66], [120, 84, 64]];
+    let i = 0;
+    for (let x = x0; x < x1; x += 8) {
+      const h = (o.minH || 9) + ((i * 7) % 4) * 3;
+      this.building(x + 4, z + face * 4, 7.8, 8, h, TEX.facade(tints[i % 4], o.lit ?? 0.25, 13 + i * 5));
+      i++;
+    }
+  }
   railing(x0, z, x1) {
     const m = mat({ map: TEX.metal(), color: 0x4a4e56 });
     const w = Math.abs(x1 - x0), cx = (x0 + x1) / 2;
@@ -524,7 +585,12 @@ export class World {
       for (let z = z0 + 8; z < z1 - 2; z += 16) if (o.benches !== false) this.bench(s * 7.4, z, s > 0 ? -Math.PI / 2 : Math.PI / 2);
       for (let z = z0 + 2 + (s > 0 ? 0 : 8); z < z1; z += 16) this.lamp(s * 12.2, z, { side: -s, flicker: o.flicker && Math.random() < 0.3 ? 0.3 : 0, color: o.lampColor });
     }
+    // the ends: the boulevard meets a cross street with buildings across it
+    const caps = o.caps ?? { start: true, end: true };
+    if (caps.start) { this.crossRow(z0 - 12, -24, 24, -1, { lit: o.lit }); this.ground(0, z0 - 6, 48, 12, TEX.asphalt(), { scale: 4 }); }
+    if (caps.end) { this.crossRow(z1 + 12, -24, 24, 1, { lit: o.lit }); this.ground(0, z1 + 6, 48, 12, TEX.asphalt(), { scale: 4 }); }
     this.bounds = this.bounds || { x0: -15, z0, x1: 15, z1 };
+    this.edgeFog = this.edgeFog || { z0, z1, d: 10 };
   }
 }
 

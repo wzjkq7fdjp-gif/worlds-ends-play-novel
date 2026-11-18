@@ -50,6 +50,7 @@ export function buildParkway(W, G, o = {}) {
 export function buildStreet(W, G) {
   env(W, { ...NIGHT, fog: 0x2a2632, near: 2, far: 26 });
   W.ground(0, 35, 8, 90, TEX.road(), { scale: 5 });
+  W.ground(0, 35, 60, 110, TEX.asphalt(), { scale: 4, y: -0.02 });
   for (const s of [-1, 1]) {
     W.ground(s * 5.5, 35, 3, 90, TEX.sidewalk(), { scale: 1.5 });
     W.mesh(boxGeo(0.2, 0.12, 90, 1), mat({ map: TEX.concrete() }), s * 4, 0.06, 35);
@@ -59,12 +60,20 @@ export function buildStreet(W, G) {
   for (let z = 4; z < 60; z += 12) { W.lamp(-6.4, z, { side: 1, flicker: z === 40 ? 0.45 : 0 }); W.lamp(6.4, z + 6, { side: -1 }); }
   W.car(-3, 16, Math.PI, [50, 52, 60]);
   W.car(3, 33, 0, [80, 70, 50]);
+  W.car(3, 6, 0, [60, 64, 70]); W.car(-3, 40, Math.PI, [70, 50, 46]); W.car(-3, 53, Math.PI, [44, 56, 50]);
+  // behind him: the block ends at a closed cross street and a row of buildings
+  W.crossRow(-9, -24, 24, -1, { lit: 0.2 });
+  W.roadBlock(-7, -4.6, 7, { sign: "ROAD CLOSED" });
   W.trash(-6.4, 22); W.hydrant(6.2, 12);
   W.streetSign(6.2, 26, "OCT 24 2025", "APR 4 2026");
   W.streetSign(-6.2, 46, "4:04 ST", "OCT 24 2026");
   G._numDoor = W.door(-6.98, 28, Math.PI / 2, { label: "APT 1" });
-  // the intersection at the end of the block
+  // the intersection at the end of the block: a T with buildings across it
   W.ground(0, 66, 30, 10, TEX.road(), { scale: 6 });
+  W.crossRow(72, -24, 24, 1, { lit: 0.3 });
+  W.building(-12, 61.6, 8, 7, 9, TEX.facade([96, 74, 62], 0.2, 71));
+  W.building(15, 65.6, 8, 14.8, 11, TEX.facade([110, 92, 78], 0.3, 73));
+  W.ground(9, 65.6, 4, 14.8, TEX.sidewalk(), { scale: 1.5, y: 0.01 });
   W.payphone(5.6, 60, -Math.PI / 2);
   G._payphone = [5.2, 60];
   // warm residential entrance (west) and the dark stairwell (east)
@@ -77,9 +86,13 @@ export function buildStreet(W, G) {
   const rail = mat({ map: TEX.metal(), color: 0x2e4a32 });
   W.mesh(boxGeo(0.08, 1.0, 3.2), rail, 7.9, 0.5, 68);
   W.mesh(boxGeo(0.08, 1.0, 3.2), rail, 10.1, 0.5, 68);
+  W.mesh(boxGeo(2.3, 1.0, 0.08), rail, 9, 0.5, 69.6);
+  // steps going down into the dark
+  for (let i = 0; i < 5; i++) W.mesh(boxGeo(2.1, 0.04, 0.5), mat({ map: TEX.concrete([70, 70, 74], "cellarstep") }), 9, -0.15 - i * 0.22, 66.8 + i * 0.5);
   W.sign(9, 1.35, 66.3, "DOWN", 0, { w: 0.9, h: 0.22, bg: "#1a3a1a", tw: 32, th: 8, size: 7 });
   W.light(9, 0.4, 68, 0x6080a0, 3.5);
-  W.bounds = { x0: -8, z0: -4, x1: 11, z1: 72 };
+  W.bounds = { x0: -8, z0: -4, x1: 11, z1: 71.5 };
+  W.edgeFog = { z0: -4, d: 8 };
   // a third door: the authentic one, half-hidden mid-block
   G._trueDoor = W.door(6.98, 50, -Math.PI / 2, { label: "APT 1", tint: "#3a2418" });
   passersby(W, G, [[5.8, 62, 6, 0.3], [-5.6, 10, 60, 0.6]]);
@@ -175,6 +188,20 @@ export function buildHouseOut(W, G) {
   }
   W.lamp(-4.4, 12, { side: -1 }); W.lamp(-4.4, 30, { side: -1 });
   G._houses = houses;
+  // across the street: the same houses, mirrored, and cars along both curbs
+  W.ground(5.5, 20, 3, 70, TEX.sidewalk(), { scale: 1.5 });
+  W.ground(0, 20, 80, 90, TEX.asphalt(), { scale: 4, y: -0.02 });
+  for (let i = -1; i < 7; i++) W.building(12, i * 8, 8, 7.6, 9, TEX.facade([128, 88, 70], 0.2, 50 + (i & 1)));
+  for (const [x, z, r] of [[-3.1, 3, Math.PI], [-3.1, 19, Math.PI], [-3.1, 35, Math.PI], [3.1, 10, 0], [3.1, 27, 0], [3.1, 41, 0]]) W.car(x, z, r, [[70, 66, 74], [90, 40, 36], [40, 60, 50]][Math.abs(z) % 3]);
+  // tree pits with low iron fences along the curb (why you can't step off it)
+  W.fence(-4.25, -6, -4.25, 46, { h: 0.55 });
+  for (let z = 4; z < 46; z += 9) W.tree(-4.7, z, 0.9);
+  // the ends of the block: a fence across the sidewalk and houses across the street
+  W.fence(-8, -6.2, -4.2, -6.2, { h: 1.2 });
+  W.fence(-8, 46.2, -4.2, 46.2, { h: 1.2 });
+  W.crossRow(-12, -24, 24, -1, { lit: 0.15 });
+  W.crossRow(52, -24, 24, 1, { lit: 0.15 });
+  W.edgeFog = { z0: -6, z1: 46, d: 8 };
   passersby(W, G, [[-4.7, 46, -4, 0.35]]);
   for (let i = 0; i < 6; i++) decal(W, ["missing", "posters", "noparking", "missing", "concert", "drain"][i], -7.97, i === 5 ? 0.3 : 1.5, i * 8 + 4.6, Math.PI / 2, i === 5 ? 0.6 : 0.8);
   return { start: [-5.5, -4, 0], cam: { yaw: -0.5, pitch: 0.3, dist: 5.5, height: 1.3 } };
@@ -288,9 +315,11 @@ export function buildBook(W, G) {
 }
 export function buildCrossing(W, G) {
   env(W, { fog: 0x8a8a90, near: 10, far: 55, ambient: [0.5, 0.5, 0.54], dir: [0.5, 0.48, 0.44], sat: 0.85 });
-  W.boulevard(-30, 35, { lit: 0.1 });
-  W.boulevard(45, 100, { lit: 0.1 });
+  W.boulevard(-30, 35, { lit: 0.1, caps: { start: true } });
+  W.boulevard(45, 100, { lit: 0.1, caps: { end: true } });
   W.ground(0, 40, 60, 10, TEX.road(), { scale: 6 });
+  // the cross street ends at buildings both ways
+  for (const s of [-1, 1]) for (const z of [36, 44]) W.building(s * 34, z, 8, 7.8, 10 + (z % 3) * 3, TEX.facade([96, 74, 62], 0.15, 90 + z));
   skyline(W, "storm", { r: 110, y: -4, h: 48, rep: 3, color: 0xc8c4d0 });
   streetDecals(W, 1, 15, [-28, 34]);
   streetDecals(W, -1, 15, [-28, 34], 5);
@@ -308,7 +337,7 @@ export function skyline(W, name, o = {}) {
   if (!t) return null;
   const r = o.r ?? 70, h = o.h ?? r * 0.42, y = o.y ?? -2;
   const t2 = t.clone(); t2.wrapS = THREE.RepeatWrapping; t2.needsUpdate = true; t2.userData = { uvk: [-(o.rep ?? 3), 1] };
-  const geo = new THREE.CylinderGeometry(r, r, h, 48, 1, true);
+  const geo = new THREE.CylinderGeometry(r, r, h, 48, 1, true, o.arc0 ?? 0, o.arc ?? Math.PI * 2);
   const m = new THREE.Mesh(geo, mat({ map: t2, unlit: true, noFog: true, side: THREE.BackSide, color: o.color ?? 0xffffff }));
   m.position.set(o.x ?? 0, y + h / 2, o.z ?? 0);
   m.rotation.y = o.rot ?? 0;
@@ -337,37 +366,57 @@ export function decal(W, name, x, y, z, ry, w = 1, h = w) {
   W.add(m);
   return m;
 }
-// faceless passers-by: they walk out of the fog along a line, stop and
-// turn to watch you when you come near, and are gone when you reach them
+// faceless passers-by: they walk out of the fog along a line, stop and turn
+// to watch you when you come near, and walk on once you leave them be. They
+// are solid (you bump into them) and only come and go far out in the fog.
 export function passersby(W, G, lines) {
   const KINDS = [["passerby", 1.05], ["passerbyW", 0.95], ["passerbyO", 0.65], ["passerbyK", 1.25]];
+  const FAR = 11; // spawn / despawn only this far from the player (inside the fog)
   for (const [n, [x, z0, z1, ph = 0, along = "z"]] of lines.entries()) {
     const [kind, speed] = KINDS[(n + Math.round(Math.abs(x * 7 + z0))) % KINDS.length];
     const a = new SpriteActor(kind, { color: 0xb8b4bc });
     const len = Math.abs(z1 - z0), dir = Math.sign(z1 - z0) || 1;
-    let u = len * ph, gone = 0;
-    const put = () => { const z = z0 + dir * u; along === "z" ? a.setPos(x, 0, z) : a.setPos(z, 0, x); a.last = null; };
-    put();
+    const at = (u) => (along === "z" ? [x, z0 + dir * u] : [z0 + dir * u, x]);
+    let u = len * ph, waiting = false, staring = false, started = false;
+    const col = { x0: 0, z0: 0, x1: 0, z1: 0, on: true, tag: "npc" };
+    const put = (jump = false) => { const [px, pz] = at(u); a.setPos(px, 0, pz); if (jump) a.last = null; col.x0 = px - 0.22; col.x1 = px + 0.22; col.z0 = pz - 0.22; col.z1 = pz + 0.22; };
+    put(true);
     W.addActor(a);
-    let first = true;
+    W.colliders.push(col);
+    const dist = (P, px, pz) => Math.hypot(P.pos.x - px, P.pos.z - pz);
     W.every((dt) => {
       const P = G.player;
       if (!P || !P.pos) return;
-      const p = a.root.position;
-      if (gone > 0) {
-        gone -= dt;
-        if (gone <= 0) { u = 0; put(); if (Math.hypot(P.pos.x - p.x, P.pos.z - p.z) < 9) gone = 2; else a.setVisible(true); }
+      // first frame: never start beside the player; slide to the far end of the line instead
+      if (!started) {
+        started = true;
+        if (dist(P, ...at(u)) < FAR) {
+          const s0 = dist(P, ...at(0)), s1 = dist(P, ...at(len));
+          u = s0 > s1 ? 0 : len * 0.98;
+          if (Math.max(s0, s1) < FAR) { waiting = true; a.setVisible(false); col.on = false; }
+          put(true);
+        }
+      }
+      // off stage, waiting for the start of the line to be deep in the fog
+      if (waiting) {
+        if (dist(P, ...at(0)) > FAR) { waiting = false; u = 0; put(true); a.setVisible(true); col.on = true; }
         return;
       }
-      const d = Math.hypot(P.pos.x - p.x, P.pos.z - p.z);
-      // never appear right beside you: they come out of the fog
-      if (first) { first = false; if (d < 9) { a.setVisible(false); gone = 3 + Math.random() * 3; return; } }
-      if (d < 1.4) { a.setVisible(false); gone = 7 + Math.random() * 5; G.audio?.noise?.(0.12, 2600, 1.5, 0.05); return; }
-      if (d < 3.4) { a.faceToward(P.pos.x, P.pos.z); a.last = null; return; }
+      const p = a.root.position;
+      const d = dist(P, p.x, p.z);
+      // close: stop, turn and watch; walk on once you've moved away
+      if (d < 3.2) staring = true;
+      else if (d > 4.6) staring = false;
+      if (staring) { a.faceToward(P.pos.x, P.pos.z); a.last = null; return; }
       u += speed * dt;
-      if (u > len) { a.setVisible(false); gone = 2 + Math.random() * 4; return; }
-      const z = z0 + dir * u;
-      along === "z" ? (p.z = z) : (p.x = z);
+      if (u >= len) {
+        // the end of the line: only leave if nobody is close enough to see it happen
+        u = len;
+        if (dist(P, p.x, p.z) > FAR) { waiting = true; a.setVisible(false); col.on = false; }
+        put();
+        return;
+      }
+      put();
     });
   }
 }
@@ -424,6 +473,15 @@ export function buildSidewalk(W, G, o = {}) {
   spot(W, "photo", 13.2, 14.2);
   spot(W, "exit", 13.5, 40);
   spot(W, "other", 13.5, 22, Math.PI);
+  // a low tree-pit fence along the curb; sidewalk sheds close both ends
+  W.fence(12.02, -6.3, 12.02, 66.3, { h: 0.55 });
+  for (const z of [-6.4, 66.4]) {
+    W.fence(12, z, 15, z, { h: 1.5 });
+    W.sign(13.5, 1.75, z + (z < 0 ? 0.05 : -0.05), "SIDEWALK CLOSED", z < 0 ? 0 : Math.PI, { w: 2.2, h: 0.4, bg: "#e8e0c8", fg: "#901010", tw: 96, th: 16, size: 8 });
+    W.mesh(boxGeo(3.2, 0.12, 2.4), M({ color: 0x2a3a2a }), 13.5, 3.1, z + (z < 0 ? -1.1 : 1.1));
+    for (const x of [12.1, 14.9]) W.mesh(boxGeo(0.1, 3.1, 0.1), M({ color: 0x2a3a2a }), x, 1.55, z);
+  }
+  W.edgeFog = { z0: -6, z1: 66, d: 9 };
   W.bounds = { x0: 12.1, z0: -6, x1: 14.9, z1: 66 };
   return { start: [13.4, -3, 0], cam: { yaw: 0.32, pitch: 0.28, dist: 6.4, height: 1.3 } };
 }
@@ -522,15 +580,18 @@ export function buildBedroom(W, G, o = {}) {
   W.frame(-2.6, 1.3, -0.9, Math.PI / 2, frameTex || canvasTex("tv"), 0.35, 0.28, { glow: 0.05 });
   W.frame(-2.6, 1.3, -0.1, Math.PI / 2, frameTex || canvasTex("tv"), 0.35, 0.28, { glow: 0.05 });
   // window with blinds, lamp
-  W.sign(2.97, 1.6, -0.6, "", -Math.PI / 2, { w: 1.6, h: 1.1, bg: tone === "dawn" ? "#e8a080" : tone === "warm" ? "#f0d0a0" : "#20283a", tw: 8, th: 8, unlit: true });
-  for (let i = 0; i < 6; i++) W.mesh(boxGeo(0.02, 0.05, 1.6), M({ color: 0x2a2420 }), 2.94, 1.15 + i * 0.18, -0.6);
-  W.light(2.4, 1.6, -0.6, tone === "dawn" ? 0xff9a80 : tone === "warm" ? 0xffd8a0 : 0x6070a0, 6);
+  // the window: on the far wall above her shelf, facing the corner camera
+  W.sign(0.2, 2.05, 3.97, "", Math.PI, { w: 1.6, h: 1.0, bg: tone === "dawn" ? "#e8a080" : tone === "warm" ? "#f0d0a0" : "#2a3450", tw: 8, th: 8, unlit: true });
+  W.mesh(boxGeo(1.76, 1.16, 0.06), M({ color: 0x3a2c22 }), 0.2, 2.05, 3.99);
+  for (let i = 0; i < 5; i++) W.mesh(boxGeo(1.6, 0.03, 0.02), M({ color: 0x2a2420 }), 0.2, 1.65 + i * 0.2, 3.94);
+  W.light(0.2, 2.0, 3.2, tone === "dawn" ? 0xff9a80 : tone === "warm" ? 0xffd8a0 : 0x6070a0, 6);
   W.box(2.6, 0, 3.4, 0.5, 0.6, 0.5, M({ map: TEX.wood([80, 56, 40], "night") }));
   W.glow(2.6, 0.95, 3.4, 0.6, 0xffc890);
   W.light(2.6, 1.1, 3.4, 0xffc890, 5);
   // a shelf for the things she kept
   W.box(0.2, 0, 3.75, 2.2, 1.2, 0.4, M({ map: TEX.wood([96, 70, 50], "shelf") }));
-  W.door(0, -2.95, 0, { tint: "#5a4a3a" });
+  // the door is on the side wall, out of the corner camera's face
+  W.door(-2.95, -2.1, Math.PI / 2, { tint: "#5a4a3a" });
   spot(W, "start", 0, -1.6, 0);
   spot(W, "phone", -1.8, 2.3, 0);
   spot(W, "dresser", -1.9, -0.5, -Math.PI / 2);
@@ -765,6 +826,18 @@ export function buildPark(W, G) {
   decal(W, "missing", -3.54, 1.15, 3.6, Math.PI / 2, 0.5);
   decal(W, "missing", -3.54, 1.15, 13.2, Math.PI / 2, 0.5);
   decal(W, "st404", 3.9, 2.6, -2.5, -Math.PI / 2, 0.8);
+  // parked cars and bollards along the curb; fences close both ends of the walk
+  for (const z of [-2.5, 6.5, 15.5]) W.car(5.4, z, 0, [[70, 66, 74], [44, 56, 50], [90, 40, 36]][Math.abs(Math.round(z)) % 3]);
+  for (let z = -4.5; z <= 21.5; z += 1.5) W.mesh(boxGeo(0.14, 0.7, 0.14), M({ color: 0x2a2a30 }), 4.35, 0.35, z);
+  W.collider(4.25, -6, 4.45, 23);
+  W.fence(-3.6, -5.3, 4.4, -5.3, { h: 1.3 });
+  W.fence(-3.6, 22.3, 4.4, 22.3, { h: 1.3 });
+  W.ground(0, 9, 60, 60, TEX.asphalt(), { scale: 4, y: -0.03 });
+  W.ground(-14, 9, 16, 40, TEX.grass(), { scale: 3, y: -0.01 });
+  for (let z = -10; z < 30; z += 7) W.tree(-11, z + 2, 1.2, TEX.leaves([40, 50, 36], "parkleaves"));
+  W.crossRow(-18, -20, 28, -1, { lit: 0.2 });
+  W.crossRow(30, -20, 28, 1, { lit: 0.2 });
+  W.edgeFog = { z0: -5, z1: 22, d: 8 };
   W.bounds = { x0: -3.4, z0: -5, x1: 4.2, z1: 22 };
   spot(W, "start", 2.5, -3.5, 0);
   spot(W, "her", -1.6, 6.4, Math.PI / 2);
@@ -783,12 +856,19 @@ export function buildWaterfront(W, G, o = {}) {
   if (sunset) { const sun = W.glow(0, 9, 85, 18, 0xffb070); sun.material.uniforms.uNoFog.value = 1; }
   W.surface = "wood";
   W.ground(0, 4, 50, 14, TEX.wood([90, 80, 74], "boards"), { scale: 1.2 });
-  W.ground(0, -8, 50, 10, TEX.road(), { scale: 6 });
-  W.ground(0, -15, 50, 4, TEX.sidewalk(), { scale: 1.5 });
+  W.ground(0, -8, 110, 10, TEX.road(), { scale: 6 });
+  W.ground(0, -15, 110, 4, TEX.sidewalk(), { scale: 1.5 });
+  W.ground(0, 4, 110, 14, TEX.wood([90, 80, 74], "boards"), { scale: 1.2, y: -0.01 });
+  // a low wall between the promenade and the road, gates at both ends
+  W.box(0, 0, -2.95, 52, 0.55, 0.35, M({ map: TEX.concrete([86, 80, 74], "parapet") }));
+  W.fence(-26, -2.95, 26, -2.95, { h: 1.0, solid: false });
+  for (const s of [-1, 1]) { W.fence(s * 24.3, -2.8, s * 24.3, 10.9, { h: 1.6 }); W.sign(s * 24.25, 1.9, 4, "PROMENADE CLOSED", s > 0 ? -Math.PI / 2 : Math.PI / 2, { w: 2.2, h: 0.36, bg: "#e8e0c8", fg: "#801010", tw: 96, th: 14, size: 8 }); }
+  W.edgeFog = { x0: -24, x1: 24, d: 8 };
   const water = W.ground(0, 50, 160, 80, TEX.water(sunset ? [60, 70, 100] : [20, 30, 60], "riverwater"), { y: -0.8, wave: 1, scroll: [0, 0.04] });
   water.material.uniforms.uEmissive.value = 0.15;
   W.railing(-25, 11, 25);
-  skyline(W, sunset ? "sunset" : "night", { r: 84, y: -1.2, h: 30, rep: 3 });
+  skyline(W, sunset ? "sunset" : "night", { r: 84, y: -1.2, h: 30, rep: 2, arc0: -Math.PI * 0.72, arc: Math.PI * 1.44 });
+  W.crossRow(-17.2, -48, 48, -1, { lit: 0.35 });
   W.bounds = { x0: -24, z0: -2.6, x1: 24, z1: 10.8 };
   // skyline + a bridge across the river
   for (let i = 0; i < 26; i++) {
@@ -889,6 +969,8 @@ export function buildTower(W, G) {
   for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) W.ground(-6 + i * 4 + 2, -6 + j * 4 + 2, 4, 4, tiles[(i + j * 2) % tiles.length], { scale: 1.5 });
   W.mesh(boxGeo(16.2, 3, 16.2), M({ map: TEX.brick([70, 56, 50], "towerbrick") }), 0, -1.52, 0);
   for (let x = -8; x <= 8; x += 0.6) for (const z of [-8, 8]) W.mesh(boxGeo(0.04, 1, 0.04), M({ color: 0x18161a }), x, 0.5, z);
+  for (const x of [-8, 8]) W.fence(x, -8, x, 8, { h: 1.0, solid: false });
+  for (const z of [-8, 8]) W.fence(-8, z, 8, z, { h: 1.0, solid: false });
   W.bounds = { x0: -7.6, z0: -7.6, x1: 7.6, z1: 7.6 };
   skyline(W, "storm", { r: 80, y: -26, h: 64, rep: 3 });
   // the great clock

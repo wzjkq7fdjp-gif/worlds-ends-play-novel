@@ -111,7 +111,8 @@ export class Character {
     this.uv.needsUpdate = true;
     const k = this.k, w = f.w * k, h = f.h * k, off = (f.w / 2 - f.ax) * k;
     this.mesh.scale.set(mirror ? -w : w, h, 1);
-    this.mesh.position.set(mirror ? -off : off, h / 2, 0);
+    this._bx = mirror ? -off : off;
+    this.mesh.position.set(this._bx + (this._sway || 0), h / 2, 0);
   }
 
   orient(cam) {
@@ -127,16 +128,22 @@ export class Character {
     if (this.anim && F[this.anim.group]) { const L = F[this.anim.group]; return this.setFrame(L[Math.floor(this.t * this.anim.fps) % L.length], this.anim.mirror ?? mirror); }
     const step = Math.floor((this.phase + this.early) / (Math.PI / 2)) & 3;
     const moving = this.amp > 0.12;
+    this._sway = 0;
     if (moving) {
-      const grp = sector <= 1 ? "walkF" : sector === 2 ? "walkS" : "walkB";
+      // walking at an angle to the camera reads best as a side walk; only
+      // (nearly) straight toward / away uses the front / back cycle
+      const a = Math.abs(rel);
+      const grp = a < 0.5 ? "walkF" : a > Math.PI - 0.5 ? "walkB" : "walkS";
       let L = F[grp];
-      if (!L && F.walkS && sector >= 1 && sector <= 3) L = F.walkS;
-      if (L) { this.pivot.position.y = 0; return this.setFrame(L[step], grp === "walkS" || L === F.walkS ? mirror : false); }
-      // no walk cycle from this angle: step the turnaround with a bob
-      this.pivot.position.y = Math.abs(Math.sin(this.phase)) * 0.035;
+      if (!L && F.walkS && a > 0.3 && a < Math.PI - 0.3) L = F.walkS;
+      if (L) { this.pivot.position.y = 0; return this.setFrame(L[step], L === F.walkS ? mirror : false); }
+      // no cycle drawn from this angle: step the turnaround with a bob and a weight shift
+      this.pivot.position.y = Math.abs(Math.sin(this.phase)) * 0.04;
+      this._sway = Math.sin(this.phase) * 0.035 * (this.height / 1.75);
     } else this.pivot.position.y = 0;
     const T = F.turn || F.anim || F.pose;
     this.setFrame(T[Math.min(sector, T.length - 1)], mirror);
+    this.mesh.position.x = (this._bx || 0) + this._sway;
   }
 
   update(dt, speed = 0, run = false) {

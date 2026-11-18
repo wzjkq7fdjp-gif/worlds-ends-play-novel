@@ -211,6 +211,19 @@ async function ch1(G) {
   W.interact({ pos: [-6.6, 1.6, 28], label: "APARTMENT DOOR", use: async () => { await G.say([N("The number on the door is not the number it was a second ago.")]); } });
   W.interact({ pos: [6.0, 1.8, 26], label: "STREET SIGN", verb: "READ", use: async () => { await G.say([N("The street signs show dates instead of names. OCT 24 2025. APR 4 2026.")]); } });
   G.objective("ANSWER THE PAYPHONE.");
+  // behind him, the streetlights go out one by one (the warm door light stays)
+  let darkCap = false;
+  W.every(() => {
+    if (!G.canMove()) return;
+    for (const L of W.lights) {
+      if (!L.head || !L.on || L.pos.z > P.pos.z - 9) continue;
+      L.on = false;
+      L.head.material.uniforms.uColor.value.setRGB(0.15, 0.14, 0.12);
+      if (L.glow) { L.glow.visible = false; L.glow.userData.off = true; }
+      G.audio.noise?.(0.05, 1800, 3, 0.04);
+      if (!darkCap) { darkCap = true; G.caption("Behind him, the streetlights go out one by one", 3.5); }
+    }
+  });
   await G.interactOnce({ pos: [G._payphone[0], 1.4, G._payphone[1]], label: "PAYPHONE", verb: "ANSWER", use: async () => {
     clearInterval(ring);
     P.ch.pose("phone");
@@ -224,7 +237,7 @@ async function ch1(G) {
   await G.cutscene(async () => {
     G.shot([2, 2.4, 60], [8.6, 0.4, 68], 48);
     G.audio.breath(0.04);
-    await G.say([N("The intersection divides. A warmly lit doorway on one side. On the other, a dark stairwell going down."), ["fakeA", "Rufki? I'm right here."], N("A woman's silhouette calls from below the stairs.")]);
+    await G.say([N("The intersection divides. A warmly lit doorway on one side. On the other, a dark stairwell going down."), N("Below the stairs, a woman's silhouette steps into the light. It calls up to him in her voice."), ["fakeA", "Rufki? I'm right here."]]);
     G.release();
   });
   G.objective("CHOOSE A WAY.");
@@ -343,7 +356,7 @@ async function ch2(G) {
       await G.wait(1.2);
       G.ui.peep(false);
       G.release();
-      await G.say([["visitor", "I know what you're afraid he'll say."], ["visitor", "I can tell him you changed your mind. Then you'd never have to find out."]]);
+      await G.say([["visitor", "You don't have to open it. I can answer for you."], ["visitor", "I'll tell him you changed your mind. Then nothing ever has to begin."]]);
       const c = await G.choose("The thing at the door is waiting.", ["Let it answer for you", "Step back from the door"]);
       P.ch.pose(null);
       if (c === 0) {
@@ -421,7 +434,7 @@ async function ch2(G) {
   G.music.play("dread", 2);
   G.audio.ambience({ wind: 0, drone: 0.5, note: 41, bright: 160, verb: 0.5 });
   await G.fade(0, 1);
-  await G.say([N("The memory plays correctly. In the background, a second Rufki stands very still. He follows him into a room full of photographs.")]);
+  await G.say([N("The memory plays correctly. In the background, a second Rufki stands very still."), N("When Rufki moves on into a room full of photographs, the second one follows.")]);
   G.objective("LOOK AT THE PHOTOGRAPHS.");
   const ph = [[1.6, 12, "pass", "THEY PASS WITHOUT SPEAKING"], [-1.6, 20, "never", "ARGJILA NEVER ARRIVES"], [1.6, 28, "alone", "RUFKI STANDS ALONE"]];
   ph.forEach(([x, z, k, t]) => W.interact({ pos: [x, 1.6, z], label: t, verb: "LOOK", r: 1.5, use: () => G.item({ title: "A DIFFERENT FIRST ENCOUNTER", img: itemURL(k === "pass" ? "pass" : k === "never" ? "never" : "alone"), text: t.charAt(0) + t.slice(1).toLowerCase() + "." }) }));

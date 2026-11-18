@@ -153,7 +153,23 @@ G.walkTo = (ch, x, z, speed = 1.4, o = {}) => guard(new Promise((res) => {
   };
   G.world.every(fn);
 }));
-G.idle = (ch) => G.world.every((dt) => { if (!ch._walking) ch.update(dt, 0); });
+// keep a character animated; anything that moves it (scripts, followers) makes it walk
+G.idle = (ch) => {
+  let last = null;
+  return G.world.every((dt) => {
+    if (ch._walking) { last = null; return; }
+    const p = ch.root.position;
+    let spd = 0;
+    if (last && dt > 0) {
+      const dx = p.x - last.x, dz = p.z - last.z;
+      spd = Math.hypot(dx, dz) / dt;
+      if (spd > 8) spd = 0; // a teleport, not a step
+      else if (spd > 0.25 && !ch.poseName) ch.face(ch.yaw + angDiff(ch.yaw, Math.atan2(dx, dz)) * Math.min(1, dt * 10));
+    }
+    last = { x: p.x, z: p.z };
+    ch.update(dt, spd > 0.25 ? Math.min(spd, 4) : 0, spd > 2.8);
+  });
+};
 G.tween = (dur, fn) => guard(new Promise((res) => {
   let t = 0;
   const u = (dt) => { t += dt; const k = Math.min(1, t / dur); fn(k); if (k >= 1) { G.world.updaters = G.world.updaters.filter((f) => f !== u); res(); } };

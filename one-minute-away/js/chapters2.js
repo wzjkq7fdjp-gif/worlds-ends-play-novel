@@ -289,7 +289,7 @@ export async function CH7(G) {
     G.pov("Argjila");
     P.ch.setVisible(false);
     G.shot([0.35, 1.2, -0.1], [1.0, 1.22, 0.45], 62);
-    await G.item({ title: "THE PAPER MAP", prop: "map", text: "A crease has swallowed the whole day back in the city. On the reverse, somebody has drawn a city block from the passenger window, side mirror in the corner." });
+    await G.item({ title: "THE PAPER MAP", prop: "map", text: "A crease has swallowed the whole day back in the city. On the reverse, somebody has drawn a side mirror, and a city block caught inside it." });
     let aligned = false;
     while (!aligned) aligned = await mapAlign(G);
     lightsOn(true);
@@ -327,7 +327,7 @@ export async function CH7(G) {
   G.audio.horn();
   G.caption("Somebody behind them leans on the horn", 3);
   await G.wait(0.8);
-  await G.say([N("For once in this game, the sound of an impatient New Yorker is a relief.")]);
+  await G.say([N("For once, the sound of an impatient New Yorker is a relief.")]);
   G.ui.clock("NEXT DAY");
   G.audio.tick(0.2);
   await G.say([N("The date on the dashboard finally turns over.")]);
@@ -609,7 +609,7 @@ export async function CH11(G) {
   const her = new SpriteActor("friend"); her.setPos(fx, 0, fz).face(-Math.PI / 2); W.addActor(her);
   her.frameOverride = ["anim", 0];
   await G.fade(0, 1.2);
-  await G.say([N("Two chairs face each other. Both have ARGJILA written on the tape across their backs."), N("The girl opposite is her former best friend. She copied nearly everything Argjila did.")]);
+  await G.say([N("Two chairs face each other. Both have ARGJILA written on the tape across their backs."), N("The girl opposite used to be her best friend. Whatever Argjila does, the girl does a moment later.")]);
   const [cx, cz] = at(W, "chairA");
   P.ghost = true;
   P.place(cx, cz, Math.PI / 2);
@@ -625,7 +625,7 @@ export async function CH11(G) {
   G.audio.sting(true);
   G.caption("She keeps hers raised. She's waiting for you to copy her.", 3.5);
   await G.wait(1.2);
-  await G.say([N("Her friend used to give her the silent treatment. When Argjila tried to talk things through, the conversation was shut down.")]);
+  await G.say([N("There was a time when Argjila tried to talk things through, and the line simply went quiet.")]);
   await G.choose("The rotary phone on the table.", ["Press redial"]);
   G.audio.dial();
   await G.wait(0.8);
@@ -949,7 +949,6 @@ export async function CH15(G) {
   G.audio.ambience({ wind: 0.5, drone: 0.4, note: 36, bright: 200, verb: 0.5 });
   // Argjila keeps up, a step behind
   const her = G.npc(Character, "argjila", 0.8, 2, 0);
-  her._walking = true;
   W.every((dt) => {
     const d = Math.hypot(P.pos.x - her.root.position.x, P.pos.z - her.root.position.z);
     if (d > 1.3) { const k = Math.min(1, dt * 2.6); her.root.position.x += (P.pos.x - her.root.position.x) * k * 0.7; her.root.position.z += (P.pos.z - 0.9 - her.root.position.z) * k * 0.7; her.faceToward(P.pos.x, P.pos.z); her.update(dt, 2.4); } else her.update(dt, 0);

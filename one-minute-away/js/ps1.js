@@ -352,6 +352,22 @@ export const TEX = {
       g.fillStyle = gr;
       g.fillRect(0, 0, w, h);
     }, key),
+  // see-through iron railings: bars and two rails on a transparent page
+  bars: (key = "bars") =>
+    canvasTex(32, 32, (g, w, h) => {
+      g.clearRect(0, 0, w, h);
+      g.fillStyle = "#1a1a1e";
+      for (let x = 1; x < w; x += 8) g.fillRect(x, 2, 2, h - 2);
+      g.fillRect(0, 2, w, 2);
+      g.fillRect(0, h - 6, w, 2);
+      g.fillStyle = "#3a3a40";
+      for (let x = 1; x < w; x += 8) g.fillRect(x, 0, 2, 2);
+    }, key),
+  // red and white hazard stripes
+  hazard: () =>
+    canvasTex(32, 8, (g, w, h) => {
+      for (let x = -8; x < w + 8; x += 8) { g.fillStyle = (x / 8) % 2 ? "#e8e4d8" : "#b02818"; g.beginPath(); g.moveTo(x, h); g.lineTo(x + 4, 0); g.lineTo(x + 8, 0); g.lineTo(x + 4, h); g.fill(); }
+    }, "hazard"),
   glow: () =>
     canvasTex(32, 32, (g, w, h) => {
       const gr = g.createRadialGradient(16, 16, 0, 16, 16, 16);

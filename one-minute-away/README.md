@@ -36,7 +36,7 @@ To fill one in, open `js/memories.js`, paste her words into that memory's `text`
 **Looks like a PS1 game:**
 - Rufki and Argjila are sprites drawn in five directions, with front, side and back walk cycles and eight cutscene poses each. The other side is mirrored.
 - The Other Rufki, the Unmet, the Unsaid, the Keeper of Minutes, both children, the winter friend, the former best friend and the faceless dancer have their own turnarounds and animation frames.
-- Every location is a modeled 3D map built from the location art and room blockouts: Ocean Parkway, the hallway of doors, the house, the House of Almost, her room, the rooftop Bathhouse pool at night, the dance studio, the car, the park, the waterfront, the Unread Room, the corridor of cords, the Clock Tower and the collapse. They use follow cameras and fixed corner cameras.
+- Every location is a modeled 3D map built from the location art and room blockouts: Ocean Parkway, the hallway of doors, the house, the House of Almost, her room, the rooftop Bathhouse pool at night, the dance studio, the car, the park, the waterfront, the Unread Room, the corridor of cords, the Clock Tower and the collapse. They use follow cameras and fixed corner cameras. Every outdoor map is closed by something you can see (road blocks, sidewalk sheds, fences, rows of buildings), and the fog thickens as you near the edge.
 - Walls, floors, streets, doors, trees, the pool, the cord wall and the tower clock use painted texture pages (`assets/tex`). Brick facades, damask wallpaper, mosaic hall tile, pool tile and the worn sidewalks all repeat like PS1 VRAM tiles.
 - Keepsakes and photographs you pick up are painted items: the scratched childhood photo, the rooftop Polaroid, the dinner, the ring beside the drawn house, the flowers, the promise ring, the 22-reasons deck, the tin of kisses and the "About You" card.
 - Dialogue portraits change expression (neutral, sad, scared, smiling) to match each line, for Rufki, Argjila, the Other Rufki, the Best Friend, the Keeper and the Unsaid.
@@ -56,7 +56,8 @@ All the voices are in one file, `assets/vo/voices.mp3`, which streams in after b
 
 **Horror:**
 - The Unmet moves only when you aren't looking at it, and its face fills the screen when it reaches you.
-- Faceless passers-by (a man in a coat, a woman with an umbrella, an old man, a child in a raincoat) walk out of the fog on the streets, the park and the waterfront. They stop and turn to watch you when you come near, and are gone when you reach them.
+- Faceless passers-by (a man in a coat, a woman with an umbrella, an old man, a child in a raincoat) walk out of the fog on the streets, the park and the waterfront. They stop and turn to watch you when you come near, and walk on once you leave them be.
+- On the street that remembers, the streetlights behind Rufki go out one by one.
 - Clocks run backward at every wrong turn.
 - A kitchen clock ticks only when she moves, and someone upstairs keeps walking when she stands still.
 - A knock arrives while both of his hands are in view.
