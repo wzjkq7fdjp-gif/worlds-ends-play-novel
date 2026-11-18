@@ -44,7 +44,7 @@ const G = {
   signals: {},
   state: null,
   meta: store.get(META_KEY, { unlocked: 0, endings: [], cleared: false }),
-  opts: { tank: false, crt: true, jitter: true, dither: true, volume: 8, music: 7, voice: false, voiceVol: 10, captions: true, autoText: false, ...store.get(OPT_KEY, {}), ...(store.get(OPT_KEY, {}).optv !== 2 ? { voice: false, optv: 2 } : {}) },
+  opts: { tank: false, crt: true, jitter: true, dither: true, bright: 6, volume: 8, music: 7, voice: false, voiceVol: 10, captions: true, autoText: false, ...store.get(OPT_KEY, {}), ...(store.get(OPT_KEY, {}).optv !== 2 ? { voice: false, optv: 2 } : {}) },
   memories: MEMORIES,
   CHAPTERS,
 };
@@ -83,6 +83,9 @@ function applyOpts() {
   U.uAffine.value = G.opts.jitter ? 0.22 : 0;
   U.uDither.value = G.opts.dither ? 1 : 0;
   document.body.classList.toggle("crt", G.opts.crt);
+  // brightness: 5 is the image as rendered; phones in a lit room usually want 6-7
+  const bk = 1 + ((G.opts.bright ?? 6) - 5) * 0.1;
+  document.getElementById("gl").style.filter = `brightness(${bk.toFixed(2)}) contrast(${(1 + ((G.opts.bright ?? 6) - 5) * 0.03).toFixed(2)})`;
   G.audio.setVolume(G.opts.volume / 10);
   G.music.setVolume((G.opts.music / 10) * 0.75);
   store.set(OPT_KEY, G.opts);
@@ -354,6 +357,7 @@ async function optionsMenu() {
       { label: "SOUND CAPTIONS", get: () => (o.captions ? "ON" : "OFF"), set: tog("captions"), hint: "Knocks, clicks and other audio cues are written on screen." },
       { label: "AUTO TEXT", get: () => (o.autoText ? "ON" : "OFF"), set: tog("autoText"), hint: "Dialogue moves on by itself when the voice finishes." },
       { label: "CONTROLS", get: () => (o.tank ? "TANK" : "MODERN"), set: tog("tank"), hint: o.tank ? "Tank: up walks forward, left/right turn." : "Modern: push the stick where you want to go." },
+      { label: "BRIGHTNESS", get: () => bar(o.bright ?? 6), set: lvl("bright"), hint: "Turn it up if the fog swallows everything on your screen." },
       { label: "VERTEX JITTER", get: () => (o.jitter ? "ON" : "OFF"), set: tog("jitter") },
       { label: "DITHERING", get: () => (o.dither ? "ON" : "OFF"), set: tog("dither") },
       { label: "CRT FILTER", get: () => (o.crt ? "ON" : "OFF"), set: tog("crt") },
