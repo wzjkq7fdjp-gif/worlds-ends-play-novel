@@ -576,7 +576,7 @@ export class Player {
     let sx = input.stick.x, sy = input.stick.y;
     const mag = Math.min(1, Math.hypot(sx, sy));
     const active = !this.frozen && G.canMove();
-    let run = active && (input.down("sq") || (input.lastDevice === "touch" && mag > 0.96)) && mag > 0.2;
+    let run = active && (input.down("sq") || (input.lastDevice === "touch" && mag > 0.85)) && mag > 0.2;
     if (this.noRun) run = false;
     const maxSpd = run ? this.runSpd : this.walk;
     let target = new THREE.Vector2();
