@@ -27,8 +27,11 @@ export class World {
     this.bounds = null;
     this.camZones = [];
     this.water = null; // {y, x0,z0,x1,z1}
+    this.actors = [];
+    this.backdrop = null;
   }
   dispose() {
+    if (this.backdrop) this.backdrop.dispose(this.G.camera);
     this.scene.traverse((o) => {
       if (o.geometry) o.geometry.dispose();
       const ms = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
@@ -109,6 +112,7 @@ export class World {
         }
       }
     }
+    if (this.backdrop) this.backdrop.constrain(pos, rad);
     if (this.bounds) {
       const B = this.bounds;
       pos.x = Math.max(B.x0 + rad, Math.min(B.x1 - rad, pos.x));
@@ -214,8 +218,11 @@ export class World {
       const k = 0.6 + Math.sin(t * 6 + s.position.z * 3) * 0.4;
       s.scale.setScalar(k);
     }
+    for (const a of this.actors) a.update(dt, cam);
     for (const u of this.updaters) u(dt, t);
   }
+  // register a sprite actor (needs the camera every frame)
+  addActor(a) { this.actors.push(a); this.scene.add(a.root); return a; }
 
   // ================================================================
   // Prop builders (all low-poly, all registered with physics)
@@ -513,7 +520,21 @@ export class Player {
       const w = G.world;
       if (!w) return;
       G.audio.step(w.surfaceAt(this.pos.x, this.pos.z), run);
+      w.onPlayerStep?.(run);
     };
+  }
+  // swap the controlled character (Rufki / Argjila / doubles)
+  setAvatar(preset) {
+    if (this.ch && this.ch.preset === preset) return this.ch;
+    const old = this.ch;
+    const ch = new Character(preset);
+    ch.onStep = old.onStep;
+    ch.root.position.copy(old.root.position);
+    ch.face(this.yaw);
+    if (old.root.parent) { old.root.parent.add(ch.root); old.root.parent.remove(old.root); }
+    this.ch = ch;
+    this.pos = ch.root.position;
+    return ch;
   }
   place(x, z, yaw = 0) {
     this.pos.set(x, this.G.world.groundAt(x, z), z);
@@ -572,12 +593,12 @@ export class Player {
     // integrate + collide
     const nx = this.pos.x + this.vel.x * dt, nz = this.pos.z + this.vel.y * dt;
     const p = { x: nx, z: nz };
-    W.resolve(p, this.radius);
+    if (!this.ghost) W.resolve(p, this.radius);
     const realVx = (p.x - this.pos.x) / Math.max(dt, 1e-4), realVz = (p.z - this.pos.z) / Math.max(dt, 1e-4);
     this.pos.x = p.x;
     this.pos.z = p.z;
     // ground follow (stairs, pool steps)
-    const gy = W.groundAt(this.pos.x, this.pos.z);
+    const gy = this.ghost ? this.pos.y : W.groundAt(this.pos.x, this.pos.z);
     this.pos.y += (gy - this.pos.y) * Math.min(1, dt * 14);
     this.ch.face(this.yaw);
     const spd = Math.hypot(realVx, realVz);

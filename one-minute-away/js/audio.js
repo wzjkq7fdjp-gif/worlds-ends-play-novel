@@ -195,7 +195,7 @@ export class Audio {
   move() { this.tone(660, 0.04, "square", 0.035); }
   confirm() { this.tone(988, 0.06, "square", 0.05); this.tone(1318, 0.09, "square", 0.04, 0.06); }
   cancel() { this.tone(440, 0.08, "square", 0.05); this.tone(330, 0.1, "square", 0.04, 0.07); }
-  type() { this.tone(1400 + Math.random() * 200, 0.015, "square", 0.012); }
+  type(who) { const f = { rufki: 1150, argjila: 1650, keeper: 520, unsaid: 900, other: 1080 }[who] || 1400; this.tone(f + Math.random() * 120, 0.015, "square", 0.011); }
   step(surface = "street", run = false) {
     const v = run ? 0.22 : 0.15;
     const map = { street: [900, 1.2], wood: [500, 2], tile: [2200, 3], water: [700, 0.6], carpet: [300, 0.8], metal: [1600, 4] };
@@ -246,6 +246,62 @@ export class Audio {
     this.noise(1.2, 2500, 0.5, 0.15, "highpass");
   }
   chime() { [523, 659, 784, 1046].forEach((f, i) => this.tone(f, 1.4, "sine", 0.05, i * 0.12)); }
+  // ---------------- One Minute Away cues ----------------
+  pan(p) {
+    if (!this.ctx || !this.ctx.createStereoPanner) return this.bus;
+    const s = this.ctx.createStereoPanner();
+    s.pan.value = p;
+    s.connect(this.bus);
+    return s;
+  }
+  chainClick(when = 0) {
+    this.noise(0.025, 4200, 8, 0.32, "bandpass", when);
+    this.tone(3100, 0.03, "square", 0.04, when);
+    this.noise(0.18, 2600, 4, 0.08, "bandpass", when + 0.02);
+  }
+  knock(when = 0, vol = 0.5) {
+    for (let i = 0; i < 3; i++) {
+      this.noise(0.07, 260, 1.4, vol, "lowpass", when + i * 0.21);
+      this.tone(92, 0.09, "sine", vol * 0.5, when + i * 0.21);
+    }
+  }
+  cartCrack(pan = 0.3) {
+    const d = this.pan(pan);
+    this.noise(0.05, 1800, 3, 0.35, "bandpass", 0, d);
+    this.noise(0.06, 900, 2, 0.3, "bandpass", 0.07, d);
+    this.noise(0.9, 700, 0.6, 0.05, "bandpass", 0.12, d);
+  }
+  drip(pan = 0) { const d = this.pan(pan); this.tone(1800 + Math.random() * 600, 0.06, "sine", 0.08, 0, d); this.tone(900, 0.1, "sine", 0.03, 0.03, d); }
+  slap() { this.noise(0.12, 700, 0.8, 0.35, "lowpass"); this.noise(0.3, 2400, 0.6, 0.08, "highpass", 0.05); }
+  flip() { this.noise(0.03, 3000, 2, 0.2, "bandpass"); this.tone(1600, 0.03, "square", 0.03, 0.04); }
+  textBeep() { this.tone(1320, 0.06, "square", 0.035); this.tone(1760, 0.08, "square", 0.03, 0.08); }
+  page() { this.noise(0.25, 3200, 0.7, 0.07, "highpass"); }
+  handoff() { this.tone(330, 0.5, "sine", 0.06); this.tone(495, 0.6, "sine", 0.05, 0.12); this.noise(0.4, 6000, 0.5, 0.03, "highpass"); }
+  dome() { this.tone(60, 0.04, "square", 0.05); this.noise(0.02, 5000, 3, 0.08, "bandpass"); }
+  carDoor(open = true) { this.noise(0.12, open ? 500 : 300, 1, 0.35, "lowpass"); this.tone(open ? 140 : 90, 0.12, "sine", 0.2); if (!open) this.thud(); }
+  creak(dur = 1.4) {
+    if (!this.ctx) return;
+    const c = this.ctx, t = c.currentTime, o = c.createOscillator(), g = c.createGain(), f = c.createBiquadFilter();
+    o.type = "sawtooth"; f.type = "bandpass"; f.frequency.value = 900; f.Q.value = 6;
+    o.frequency.setValueAtTime(70, t);
+    for (let i = 1; i < 10; i++) o.frequency.setValueAtTime(60 + Math.random() * 40, t + (i * dur) / 10);
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.09, t + 0.1); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(f).connect(g).connect(this.bus); o.start(t); o.stop(t + dur + 0.1);
+  }
+  horn(when = 0) { this.tone(392, 0.7, "sawtooth", 0.04, when); this.tone(466, 0.7, "sawtooth", 0.035, when); }
+  dial() { for (let i = 0; i < 6; i++) this.noise(0.015, 2000, 5, 0.12, "bandpass", i * 0.05); }
+  receiver(down = true) { this.noise(0.08, down ? 300 : 800, 1, 0.3, "lowpass"); this.tone(down ? 120 : 200, 0.06, "sine", 0.15); }
+  dialTone(dur = 1.2) { this.tone(350, dur, "sine", 0.03); this.tone(440, dur, "sine", 0.03); }
+  busy() { for (let i = 0; i < 3; i++) { this.tone(480, 0.25, "sine", 0.03, i * 0.5); this.tone(620, 0.25, "sine", 0.03, i * 0.5); } }
+  staticBurst(dur = 0.6, vol = 0.12) { this.noise(dur, 3000, 0.3, vol, "bandpass"); }
+  reverseTick() { this.noise(0.12, 2600, 5, 0.0001, "bandpass"); this.tone(1800, 0.12, "triangle", 0.04); this.tone(900, 0.2, "triangle", 0.03, 0.08); }
+  whoosh() { this.noise(0.8, 600, 0.4, 0.15, "lowpass"); }
+  rumble(dur = 2) { this.tone(32, dur, "sawtooth", 0.12); this.noise(dur, 90, 0.7, 0.25, "lowpass"); }
+  glass() { for (let i = 0; i < 6; i++) this.tone(2400 + Math.random() * 2000, 0.4, "sine", 0.03, i * 0.03); this.noise(0.4, 6000, 0.6, 0.12, "highpass"); }
+  upstairs(pan = 0, vol = 0.1) { const d = this.pan(pan); this.noise(0.09, 160, 1, vol, "lowpass", 0, d); this.tone(60, 0.08, "sine", vol * 0.6, 0, d); }
+  breath(vol = 0.05) { this.noise(1.1, 900, 0.5, vol, "bandpass"); }
+  clockStrike() { this.tone(196, 3, "sine", 0.1); this.tone(392, 2, "sine", 0.05); this.tone(587, 1.4, "sine", 0.03); }
+  repair() { [523, 659, 784, 1046, 1318].forEach((f, i) => this.tone(f, 1.6, "sine", 0.05, i * 0.1)); this.chainClick(0.7); }
   // tiny music-box melody for quiet moments / title
   musicBox(notes, tempo = 0.42, vol = 0.045) {
     if (!this.ctx) return 0;
