@@ -5,7 +5,7 @@ import { THREE, U, mat, TEX, boxGeo } from "./ps1.js";
 import { Character, SpriteActor, makeKeeper } from "./actors.js";
 import { isWatched } from "./world.js";
 import { pic } from "./art.js";
-import { propURL } from "./assets.js";
+import { propURL, itemURL, cgURL } from "./assets.js";
 import * as S from "./scenes.js";
 import { R, A, N, HER, at, pin, yawAt, herPage, grade, addTint, clockBack, reach, zone } from "./story.js";
 
@@ -461,21 +461,21 @@ export async function CH9(G) {
   await G.say([HER("You have shown me love in ways I can actually point to.")]);
   G.objective("THE THINGS YOU KEPT. ONE AT A TIME.");
   const keep = [
-    { key: "flowers", px: [20, 300], label: "FLOWERS", title: "FLOWERS", prop: null, kind: "ordinary", text: "You have brought me flowers again and again, sometimes only a few weeks apart." },
-    { key: "ring", px: [40, 262], label: "THE PROMISE RING", title: "A PROMISE RING", kind: "ring", text: "You gave me a promise ring." },
-    { key: "birthday", px: [80, 252], label: "DECORATIONS", title: "THE BIRTHDAY SURPRISE", kind: "couple", text: "You planned a birthday surprise with flowers and decorations." },
-    { key: "deck", px: [120, 246], label: "A DECK OF CARDS", title: "22 REASONS", kind: "message", text: "I made a “22 reasons why I love you” deck." },
-    { key: "tin", px: [105, 290], label: "A LITTLE TIN", title: "A TIN OF KISSES", kind: "iloveyou", text: "A little tin of kisses for when I was not around." },
-    { key: "card", px: [70, 312], label: "A SONG CARD", title: "“ABOUT YOU”", kind: "one", text: "An “About You” song card." },
-    { key: "letters", px: [140, 270], label: "LETTERS", title: "LETTERS AND PAGES", kind: "book", text: "I have made letters and small pages trying to capture what is hard for me to say all at once." },
+    { key: "flowers", at: "dresser", img: "flowers", label: "FLOWERS", title: "FLOWERS", prop: null, kind: "ordinary", text: "You have brought me flowers again and again, sometimes only a few weeks apart." },
+    { key: "ring", at: "nightstand", img: "promisering", label: "THE PROMISE RING", title: "A PROMISE RING", kind: "ring", text: "You gave me a promise ring." },
+    { key: "birthday", at: "window", label: "DECORATIONS", title: "THE BIRTHDAY SURPRISE", kind: "couple", text: "You planned a birthday surprise with flowers and decorations." },
+    { key: "deck", at: "desk", img: "deck", label: "A DECK OF CARDS", title: "22 REASONS", kind: "message", text: "I made a “22 reasons why I love you” deck." },
+    { key: "tin", at: [-0.5, 3.1], img: "tin", label: "A LITTLE TIN", title: "A TIN OF KISSES", kind: "iloveyou", text: "A little tin of kisses for when I was not around." },
+    { key: "card", at: [0.9, 3.1], img: "songcard", label: "A SONG CARD", title: "“ABOUT YOU”", kind: "one", text: "An “About You” song card." },
+    { key: "letters", at: "chair", label: "LETTERS", title: "LETTERS AND PAGES", kind: "book", text: "I have made letters and small pages trying to capture what is hard for me to say all at once." },
   ];
   const seen = new Set();
   while (seen.size < keep.length) {
     const left = keep.filter((k) => !seen.has(k.key));
-    const k = await G.interactAny(left.map((k) => ({ key: k.key, pos: [k.px[0], 0.8, k.px[1]], label: k.label, sparkle: true, r: 1.3 })));
+    const k = await G.interactAny(left.map((k) => ({ key: k.key, pos: typeof k.at === "string" ? pin(W, k.at, 0.8) : [k.at[0], 0.8, k.at[1]], label: k.label, sparkle: true, r: 1.1 })));
     const it = keep.find((x) => x.key === k);
     seen.add(k);
-    await G.item({ title: it.title, canvas: pic(it.kind), text: it.text });
+    await G.item({ title: it.title, ...(it.img ? { img: itemURL(it.img) } : { canvas: pic(it.kind) }), text: it.text });
     G.give({ name: it.title.charAt(0) + it.title.slice(1).toLowerCase(), text: it.text });
     G.us();
   }
@@ -829,7 +829,7 @@ export async function CH14(G) {
   G.audio.ambience({ wind: 0.6, drone: 0.4, note: 36, bright: 200, verb: 0.7 });
   const ticker = setInterval(() => G.mode === "play" && G.audio.tick(0.06), 1000);
   await G.fade(0, 1.5);
-  await G.say([N("Where Ocean Parkway should be, there is a tower made of impossible Brooklyn. Every clock shows 4:04.")]);
+  await G.still("tower", { hold: 7, text: "Where Ocean Parkway should be, there is a tower made of impossible Brooklyn. Every clock shows 4:04." });
   // the elevator returns you to unfinished memories
   const missing = ["dance", "return", "park"].filter((k) => !G.state.repaired[k]);
   if (missing.length) {
@@ -936,6 +936,7 @@ export async function CH15(G) {
   let W = G.world;
   G.pov("Rufki");
   G.state.place = "the collapse";
+  G.state.mood = "scared";
   G.clock("4:04:59");
   G.music.play("crossing", 1);
   G.audio.ambience({ wind: 0.5, drone: 0.4, note: 36, bright: 200, verb: 0.5 });

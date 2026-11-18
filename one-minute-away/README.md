@@ -37,6 +37,10 @@ To fill one in, open `js/memories.js`, paste her words into that memory's `text`
 - Rufki and Argjila are sprites drawn in five directions, with front, side and back walk cycles and eight cutscene poses each. The other side is mirrored.
 - The Other Rufki, the Unmet, the Unsaid, the Keeper of Minutes, both children, the winter friend, the former best friend and the faceless dancer have their own turnarounds and animation frames.
 - Every location is a modeled 3D map built from the location art and room blockouts: Ocean Parkway, the hallway of doors, the house, the House of Almost, her room, the rooftop Bathhouse pool at night, the dance studio, the car, the park, the waterfront, the Unread Room, the corridor of cords, the Clock Tower and the collapse. They use follow cameras and fixed corner cameras.
+- Walls, floors, streets, doors, trees, the pool, the cord wall and the tower clock use painted texture pages (`assets/tex`). Brick facades, damask wallpaper, mosaic hall tile, pool tile and the worn sidewalks all repeat like PS1 VRAM tiles.
+- Keepsakes and photographs you pick up are painted items: the scratched childhood photo, the rooftop Polaroid, the dinner, the ring beside the drawn house, the flowers, the promise ring, the 22-reasons deck, the tin of kisses and the "About You" card.
+- Rufki's and Argjila's dialogue portraits change expression (neutral, sad, scared, smiling) to match each line.
+- Three painted cutscene stills play full screen with a slow camera drift: the empty car with its door open, the rooftop pool at night, and the Keeper before the clock.
 - Rendering runs at 320×240 with vertex wobble, affine textures, 15-bit colour with dithering, fog and a CRT filter. Each effect can be switched off.
 
 **Voice acting.** Every character line is spoken; narration is read silently. The voices were synthesised offline with the Kokoro-82M neural TTS model and processed per speaker:
@@ -50,6 +54,7 @@ All the voices are in one file, `assets/vo/voices.mp3`, which streams in after b
 
 **Horror:**
 - The Unmet moves only when you aren't looking at it.
+- Faceless passers-by walk out of the fog on the streets, the park and the waterfront. They stop and turn to watch you when you come near, and are gone when you reach them.
 - Clocks run backward at every wrong turn.
 - A kitchen clock ticks only when she moves, and someone upstairs keeps walking when she stands still.
 - A knock arrives while both of his hands are in view.
@@ -73,6 +78,6 @@ All the voices are in one file, `assets/vo/voices.mp3`, which streams in after b
 | `js/ui.js` | Interface |
 | `js/voice.js` | Voice playback |
 | `js/music.js` | Soundtrack |
-| `assets/` | Character atlases, sprites, backgrounds, portraits, voices |
+| `assets/` | Character atlases, sprites, texture pages, items, cutscene stills, backgrounds, portraits, voices |
 
 The only dependency is three.js r160, which is included in `vendor/`.

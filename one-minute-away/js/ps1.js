@@ -48,6 +48,7 @@ uniform float uNoFog;
 uniform vec2 uScroll;
 uniform float uWave;
 uniform float uEmissive;
+uniform vec2 uUVk;
 varying vec3 vUvw;
 varying vec3 vLight;
 varying float vFog;
@@ -84,7 +85,7 @@ void main(){
     cp.xy = floor(cp.xy / cp.w * g + 0.5) / g * cp.w;
   }
   gl_Position = cp;
-  vec2 uvv = uv + uScroll * uTime;
+  vec2 uvv = uv * uUVk + uScroll * uTime;
   vUvw = vec3(uvv * cp.w, cp.w);
   float depth = -vp.z;
   vFog = uNoFog > 0.5 ? 0.0 : clamp((depth - uFogNear) / max(uFogFar - uFogNear, 0.001), 0.0, 1.0);
@@ -148,6 +149,7 @@ export function mat(o = {}) {
       uScroll: { value: new THREE.Vector2(...(o.scroll || [0, 0])) },
       uWave: { value: o.wave || 0 },
       uEmissive: { value: o.emissive || 0 },
+      uUVk: { value: new THREE.Vector2(...(o.map?.userData?.uvk || [1, 1])) },
     },
     side: o.side ?? THREE.FrontSide,
     transparent: !!(o.additive || (o.opacity != null && o.opacity < 1)),
@@ -165,7 +167,11 @@ function rng(seed) {
   let s = seed >>> 0 || 1;
   return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
 }
+// painted texture pages (assets/tex) replace procedural ones by key
+const OVR = new Map();
+export function overrideTex(key, t) { OVR.set(key, t); }
 export function canvasTex(w, h, draw, key) {
+  if (key && OVR.has(key)) return OVR.get(key);
   if (key && texCache.has(key)) return texCache.get(key);
   const c = document.createElement("canvas");
   c.width = w;
@@ -194,6 +200,8 @@ function noise(g, w, h, base, amt, seed = 1, size = 1) {
 const clamp255 = (v) => Math.max(0, Math.min(255, v | 0));
 
 export const TEX = {
+  // a painted page by name, or a procedural stand-in
+  page: (key, fb = TEX.metal) => OVR.get(key) || fb(),
   asphalt: () =>
     canvasTex(64, 64, (g, w, h) => {
       noise(g, w, h, [70, 70, 74], 30, 3);
@@ -225,7 +233,7 @@ export const TEX = {
       }
     }, key),
   facade: (tint = [92, 80, 72], lit = 0.25, seed = 11, key) =>
-    canvasTex(64, 64, (g, w, h) => {
+    OVR.get(lit >= 0.5 ? "@windows" : seed % 3 ? "@facade" : "@facadeB") || canvasTex(64, 64, (g, w, h) => {
       noise(g, w, h, tint, 22, seed);
       const r = rng(seed * 3);
       for (let wx = 0; wx < 2; wx++) {
@@ -403,7 +411,7 @@ export const TEX = {
     }, o.key || `text:${str}:${w}x${h}:${o.bg}:${o.fg}`);
   },
   clockFace: (label = "4:04") =>
-    canvasTex(64, 64, (g) => {
+    (label === "4:04" && OVR.get("@clockface")) || canvasTex(64, 64, (g) => {
       g.fillStyle = "#0b0b0d";
       g.fillRect(0, 0, 64, 64);
       g.fillStyle = "#d8d0b8";

@@ -10,7 +10,7 @@ import { Voice } from "./voice.js";
 import { Input } from "./input.js";
 import { UI } from "./ui.js";
 import { World, Player, CameraRig, angDiff } from "./world.js";
-import { loadAssets, bgURL } from "./assets.js";
+import { loadAssets, bgURL, cgURL } from "./assets.js";
 import { CHAPTERS, ENDINGS, buildTitle, decideEnding } from "./chapters.js";
 import { MEMORIES } from "./memories.js";
 
@@ -108,6 +108,8 @@ G.fade = (to, dur, color) => guard(G.ui.fade(to, dur, color));
 G.card = (o) => guard(G.ui.titleCard(o));
 G.lines = (l, o) => guard(G.ui.lines(l, o));
 G.item = (o) => guard(G.ui.item(o));
+// a painted cutscene still (assets/cg) with a slow drift
+G.still = (name, o = {}) => guard(G.ui.still({ src: cgURL(name), ...o }));
 G.phone = (o) => guard(G.ui.phone(o));
 G.page = (o) => guard(G.ui.page(o));
 G.handoff = (n, s) => guard(G.ui.handoff(n, s));
@@ -201,6 +203,7 @@ G.load = async (builder, o = {}) => {
   if (G.world) G.world.dispose();
   G.timers = G.timers.filter((t) => t.keep);
   G.signals = {};
+  if (G.state) G.state.mood = null;
   const W = new World(G);
   G.world = W;
   if (!G.player) G.player = new Player(G);

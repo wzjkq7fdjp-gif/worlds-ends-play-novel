@@ -8,6 +8,7 @@ import { THREE, U, mat, TEX, boxGeo } from "./ps1.js";
 import { Character, SpriteActor } from "./actors.js";
 import { isWatched } from "./world.js";
 import { pic } from "./art.js";
+import { itemURL } from "./assets.js";
 import * as S from "./scenes.js";
 import { R, A, N, HER, at, pin, yawAt, peepCanvas, herPage, relabel, grade, addTint, clockBack, minuteMap, stalker, reach } from "./story.js";
 import { CH6, CH7, CH8, CH9, CH10, CH11, CH12, CH13, CH14, CH15, ENDINGS, buildTitle, decideEnding } from "./chapters2.js";
@@ -58,7 +59,8 @@ async function prologue(G) {
     await G.tween(0.9, (k) => (hinge.rotation.y = k * 1.05));
     G.shot([10.5, 1.45, 0.9], [9.5, 0.7, -0.3], 52);
     G.audio.sting(true);
-    await G.say([N("Halfway through her question, the passenger door swings open from the inside."), N("The seat is empty.")]);
+    await G.say([N("Halfway through her question, the passenger door swings open from the inside.")]);
+    await G.still("car", { hold: 5, text: "The seat is empty.", rev: true });
     G.shot([12.2, 1.55, 3.6], [10.3, 1.0, -0.2], 44);
     await G.say([A("Before we met... how close were we?"), R("One minute.")]);
     // the window across the street brightens each time she breathes
@@ -182,7 +184,7 @@ async function ch1(G) {
   await G.interactOnce({ pos: pin(W, "photo", 0.2), label: "SOMETHING UNDER THE LAMP", verb: "PICK UP", sparkle: true, use: async () => {
     P.ch.pose("crouch");
     await G.wait(0.5);
-    await G.item({ title: "A CHILDHOOD PHOTOGRAPH", canvas: pic("childhood"), text: "Him, small, beside a girl whose face has been scratched out. On the back: You passed each other more times than you know." });
+    await G.item({ title: "A CHILDHOOD PHOTOGRAPH", img: itemURL("childhood"), text: "Him, small, beside a girl whose face has been scratched out. On the back: You passed each other more times than you know." });
     G.give({ name: "Childhood photograph", prop: "photo", text: "You passed each other more times than you know." });
     P.ch.pose(null);
   } });
@@ -526,7 +528,7 @@ async function ch3(G) {
   W.interact({ pos: [0, 1.6, 44.6], label: "THE NOTE", verb: "READ", use: () => G.say([N("DO NOT MAKE THEM MEET.")]) });
   if (G.state.flags.ngplus) {
     // New Game+: the photograph can be examined from both sides
-    W.interact({ pos: [-1.5, 1.2, 40], label: "THE PHOTOGRAPH (FRONT)", use: async () => { await G.item({ title: "THE PHOTOGRAPH", canvas: pic("childhood"), text: "Two children at a crossing. Neither has seen the other yet." }); G.flag("photoFront"); } });
+    W.interact({ pos: [-1.5, 1.2, 40], label: "THE PHOTOGRAPH (FRONT)", use: async () => { await G.item({ title: "THE PHOTOGRAPH", img: itemURL("childhood"), text: "Two children at a crossing. Neither has seen the other yet." }); G.flag("photoFront"); } });
     W.interact({ pos: [-1.5, 1.2, 42], label: "THE PHOTOGRAPH (BACK)", use: async () => { await G.say([N("On the back, in pencil: 4:05.")]); G.flag("photoBack"); } });
   }
   await reach(G, 0, 43.5, 1.6);
@@ -677,7 +679,8 @@ async function ch5(G) {
   G.idle(refl);
   G.steam(3);
   await G.fade(0, 1.6);
-  await G.say([N("April 4, 2026. Up on the roof, steam rises off the water into the cold."), N("Argjila is sitting beside the pool, on the night they become official."), N("In the reflection, she is already getting up to leave.")]);
+  await G.still("roof", { hold: 6, text: "April 4, 2026. Up on the roof, steam rises off the water into the cold." });
+  await G.say([N("Argjila is sitting beside the pool, on the night they become official."), N("In the reflection, she is already getting up to leave.")]);
   await G.tween(2.5, (k) => G.steam(3 * (1 - k)));
   G.steam(0);
   const [re, rze] = at(W, "reflectionEnd");
@@ -762,19 +765,19 @@ async function ch5(G) {
   // the photographs under the water
   G.objective("LIFT THE PHOTOGRAPHS FROM THE POOL. ONE AT A TIME.");
   const photos = [
-    ["couple", "APRIL 4, 2026", "Official."],
+    ["couple", "APRIL 4, 2026", "Official.", "rooftop"],
     ["iloveyou", "“I LOVE YOU”", "Said out loud."],
-    ["families", "APRIL 15, 2026", "Dinner with his parents. It went well."],
+    ["families", "APRIL 15, 2026", "Dinner with his parents. It went well.", "dinner"],
     ["ordinary", "THE ORDINARY DAYS", "All the days in between."],
   ];
   let dark = 1;
-  for (const [i, [kind, title, text]] of photos.entries()) {
+  for (const [i, [kind, title, text, img]] of photos.entries()) {
     const [px, pz] = at(W, "photo" + i);
     await G.interactOnce({ pos: [px, 0.2, pz], label: "SOMETHING UNDER THE WATER", verb: "LIFT", r: 1.5, sparkle: true, use: async () => {
       P.ch.pose("crouch");
       G.audio.splash();
       await G.wait(0.4);
-      await G.item({ title, canvas: pic(kind), text });
+      await G.item({ title, ...(img ? { img: itemURL(img) } : { canvas: pic(kind) }), text });
       dark -= 0.12;
       G.U.uTint.value.setRGB(dark, dark, dark * 1.05);
       P.ch.pose(null);
@@ -782,7 +785,7 @@ async function ch5(G) {
   }
   await G.interactOnce({ pos: pin(W, "bottom", 0.2), label: "THE BOTTOM OF THE POOL", verb: "REACH", r: 1.8, sparkle: true, use: async () => {
     P.ch.pose("crouch");
-    await G.item({ title: "AT THE BOTTOM", canvas: pic("ring"), text: "A ring, beside a picture of a house that doesn't exist yet. Two small figures stand next to the couple. Their faces are blurred." });
+    await G.item({ title: "AT THE BOTTOM", img: itemURL("ringhouse"), text: "A ring, beside a picture of a house that doesn't exist yet. Two small figures stand next to the couple. Their faces are blurred." });
     P.ch.pose(null);
   } });
   await G.cutscene(async () => {

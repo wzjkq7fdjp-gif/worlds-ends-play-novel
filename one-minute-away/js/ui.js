@@ -40,6 +40,17 @@ export const CAST = {
   child: { name: "CHILD", por: "kid_rufki" },
 };
 
+// which face Rufki / Argjila wear for a line: neutral, sad, scared or smile
+const SCARED = /\b(run|stop|help|behind you|what is that|who's there|don't look|get away|it's here|can't breathe|wake up)\b/i;
+const SAD = /\b(sorry|miss(ed)? you|alone|cry|crying|tears|lost|hurts?|gone|goodbye|too late|i was wrong|empty)\b/i;
+const SMILE = /\b(love you|i love|laugh|happy|thank you|beautiful|cute|haha|official|surprise|we did it|perfect)\b/i;
+export function moodOf(text = "", base) {
+  if (SCARED.test(text)) return "scared";
+  if (SAD.test(text)) return "sad";
+  if (SMILE.test(text)) return "smile";
+  return base || "neutral";
+}
+
 export class UI {
   constructor(G) {
     this.G = G;
@@ -154,6 +165,7 @@ export class UI {
   peep(on) { document.getElementById("peep").classList.toggle("on", !!on); }
 
   // ---------- dialogue ----------
+  // expression for the two leads: a line's own { e } tag, else read from the words
   // lines: "narration" | [who, text] | { who, text, slow, onShow, fx }
   say(lines, o = {}) {
     if (!Array.isArray(lines) || typeof lines[0] === "string" && lines.length === 2 && CAST[lines[0]] !== undefined && !Array.isArray(lines[1])) lines = [lines];
@@ -180,7 +192,7 @@ export class UI {
         tAcc = 0;
         autoT = 0;
         box.className = "dlg " + (C.cls || "") + (C.por ? "" : " nopor") + (o.top ? " top" : "");
-        const url = C.por && portraitURL(C.por);
+        const url = C.por && portraitURL(C.por, cur.e || moodOf(cur.text, G.state?.mood));
         if (url) { por.src = url; por.style.display = ""; } else por.style.display = "none";
         who.textContent = C.name || "";
         txt.textContent = "";
@@ -358,6 +370,29 @@ export class UI {
       const close = () => { G.audio.blip(); G.ui.pop(m); res(); };
       c.addEventListener("click", (e) => { e.stopPropagation(); if (t > 0.4) close(); });
       const m = { el: c, update(dt, input) { t += dt; if (t > 0.4 && (input.pressed("x") || input.pressed("o"))) close(); } };
+      this.push(m);
+    });
+  }
+
+  // ---------- cutscene still: a painted frame with a slow camera drift ----------
+  still({ src, text, hold = 7, rev = false }) {
+    return new Promise((res) => {
+      const c = el("div", "cg" + (rev ? " r" : ""));
+      c.style.setProperty("--kb", hold + 3 + "s");
+      const im = el("img");
+      im.src = src;
+      c.append(im);
+      if (text) c.append(el("div", "cgtxt", esc(text)));
+      let t = 0, done = false;
+      const G = this.G;
+      const close = () => {
+        if (done) return;
+        done = true;
+        c.classList.add("out");
+        setTimeout(() => { G.ui.pop(m); res(); }, 850);
+      };
+      c.addEventListener("click", (e) => { e.stopPropagation(); if (t > 0.8) close(); });
+      const m = { el: c, update(dt, input) { t += dt; if (t > hold) close(); else if (t > 0.8 && (input.pressed("x") || input.pressed("o"))) close(); } };
       this.push(m);
     });
   }

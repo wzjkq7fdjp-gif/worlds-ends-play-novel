@@ -5,6 +5,7 @@
 // ============================================================
 import { THREE, U, mat, TEX, boxGeo, planeGeo } from "./ps1.js";
 import { pic, tvScreen } from "./art.js";
+import { SpriteActor } from "./actors.js";
 
 export const C = (r, g, b) => new THREE.Color(r, g, b);
 export const env = (W, o) => W.env({ ...o, ambient: o.ambient && C(...o.ambient), dir: o.dir && C(...o.dir) });
@@ -80,6 +81,7 @@ export function buildStreet(W, G) {
   W.bounds = { x0: -8, z0: -4, x1: 11, z1: 72 };
   // a third door: the authentic one, half-hidden mid-block
   G._trueDoor = W.door(6.98, 50, -Math.PI / 2, { label: "APT 1", tint: "#3a2418" });
+  passersby(W, G, [[5.8, 62, 6, 0.3], [-5.6, 10, 60, 0.6]]);
   W.light(6.2, 2.5, 50, 0xffcf90, 4);
   return { start: [0, 2, 0], cam: { yaw: 0, pitch: 0.36, dist: 6, height: 1.3 } };
 }
@@ -147,6 +149,7 @@ export function buildHouseOut(W, G) {
   W.surface = "street";
   W.ground(0, 20, 8, 70, TEX.road(), { scale: 5 });
   W.ground(-5.5, 20, 3, 70, TEX.sidewalk(), { scale: 1.5 });
+  W.ground(-7.5, 20, 1.1, 70, TEX.concrete([110, 104, 96], "stoop"), { scale: 1.5 });
   W.bounds = { x0: -7, z0: -6, x1: -4.2, z1: 46 };
   // a row of identical brownstones with the same number
   const houses = [];
@@ -161,6 +164,7 @@ export function buildHouseOut(W, G) {
   }
   W.lamp(-4.4, 12, { side: -1 }); W.lamp(-4.4, 30, { side: -1 });
   G._houses = houses;
+  passersby(W, G, [[-4.7, 46, -4, 0.35]]);
   return { start: [-5.5, -4, 0], cam: { yaw: -0.5, pitch: 0.3, dist: 5.5, height: 1.3 } };
 }
 
@@ -283,6 +287,38 @@ export function buildCrossing(W, G) {
 // Each builder registers named spots: W.spots[name] = [x, z, yaw]
 // ============================================================
 export const spot = (W, name, x, z, yaw = 0) => ((W.spots ||= {})[name] = [x, z, yaw]);
+// faceless passers-by: they walk out of the fog along a line, stop and
+// turn to watch you when you come near, and are gone when you reach them
+export function passersby(W, G, lines) {
+  for (const [x, z0, z1, ph = 0, along = "z"] of lines) {
+    const a = new SpriteActor("passerby", { color: 0xb8b4bc });
+    const len = Math.abs(z1 - z0), dir = Math.sign(z1 - z0) || 1;
+    let u = len * ph, gone = 0;
+    const put = () => { const z = z0 + dir * u; along === "z" ? a.setPos(x, 0, z) : a.setPos(z, 0, x); a.last = null; };
+    put();
+    W.addActor(a);
+    let first = true;
+    W.every((dt) => {
+      const P = G.player;
+      if (!P || !P.pos) return;
+      const p = a.root.position;
+      if (gone > 0) {
+        gone -= dt;
+        if (gone <= 0) { u = 0; put(); if (Math.hypot(P.pos.x - p.x, P.pos.z - p.z) < 9) gone = 2; else a.setVisible(true); }
+        return;
+      }
+      const d = Math.hypot(P.pos.x - p.x, P.pos.z - p.z);
+      // never appear right beside you: they come out of the fog
+      if (first) { first = false; if (d < 9) { a.setVisible(false); gone = 3 + Math.random() * 3; return; } }
+      if (d < 1.4) { a.setVisible(false); gone = 7 + Math.random() * 5; G.audio?.noise?.(0.12, 2600, 1.5, 0.05); return; }
+      if (d < 3.4) { a.faceToward(P.pos.x, P.pos.z); a.last = null; return; }
+      u += 1.05 * dt;
+      if (u > len) { a.setVisible(false); gone = 2 + Math.random() * 4; return; }
+      const z = z0 + dir * u;
+      along === "z" ? (p.z = z) : (p.x = z);
+    });
+  }
+}
 const M = (o) => mat(o);
 function lampPost(W, x, z, o = {}) { return W.lamp(x, z, { side: o.side ?? 1, color: o.color ?? 0xffc890, range: o.range ?? 9, flicker: o.flicker || 0, h: o.h }); }
 function pendant(W, x, y, z, color = 0xffd8a0, range = 7, flicker = 0) {
@@ -329,6 +365,7 @@ export function buildSidewalk(W, G, o = {}) {
   W.light(15.2, 5.6, 8, 0xffb060, 8);
   // the streetlamp with the photograph under it
   lampPost(W, 12.4, 14, { side: 1, range: 10 });
+  passersby(W, G, [[14.4, 64, 4, 0.55], [12.7, 66, 8, 0.15]]);
   spot(W, "car", 10.4, -0.15, 0);
   spot(W, "start", 13.4, -3, 0);
   spot(W, "photo", 13.2, 14.2);
@@ -657,7 +694,7 @@ export function buildPark(W, G) {
   lampPost(W, -3.1, 16, { side: 1, range: 9 });
   // across the street: a storefront with red glass (fictional lettering)
   W.building(15, 10, 6, 14, 8, TEX.facade([110, 80, 70], 0.3, 21));
-  W.mesh(new THREE.PlaneGeometry(10, 2.6), M({ color: 0xc02818, opacity: 0.55, emissive: 0.3 }), 11.95, 1.5, 10, -Math.PI / 2);
+  W.mesh(new THREE.PlaneGeometry(10, 2.6), M({ map: TEX.page("redglass"), color: 0xffffff, opacity: 0.85, emissive: 0.35 }), 11.95, 1.5, 10, -Math.PI / 2);
   W.sign(11.94, 3.3, 10, "MARKET", -Math.PI / 2, { w: 3.4, h: 0.7, bg: "#b01810", fg: "#fff0e0", tw: 64, th: 14, size: 10, unlit: true });
   W.light(11, 1.6, 10, 0xff3020, 9);
   // the cart and the crack it keeps rolling over
@@ -669,6 +706,8 @@ export function buildPark(W, G) {
   W.add(cart);
   G._cart = cart;
   W.mesh(boxGeo(1.6, 0.012, 0.05), M({ color: 0x0a0a0a }), 2.8, 0.006, 6);
+  W.ground(12.6, 9, 1.4, 32, TEX.sidewalk(), { scale: 1.5 });
+  passersby(W, G, [[12.4, -6, 24, 0.4]]);
   W.bounds = { x0: -3.4, z0: -5, x1: 4.2, z1: 22 };
   spot(W, "start", 2.5, -3.5, 0);
   spot(W, "her", -1.6, 6.4, Math.PI / 2);
@@ -709,7 +748,7 @@ export function buildWaterfront(W, G, o = {}) {
   W.light(4.6, 2.2, 8.2, 0xffc050, 6);
   W.glow(4.6, 2.0, 8.4, 1.2, 0xffc050);
   W.box(7.4, 0, 8.2, 3, 2.8, 2.4, M({ map: TEX.metal(), color: 0x8a8070 }));
-  W.mesh(new THREE.PlaneGeometry(2.6, 2.2), M({ map: TEX.metal(), color: 0x6a6460 }), 7.4, 1.2, 6.98, Math.PI);
+  W.mesh(new THREE.PlaneGeometry(2.6, 2.2), M({ map: TEX.page("shutter", TEX.metal), color: 0xb0aaa0 }), 7.4, 1.2, 6.98, Math.PI);
   W.mesh(boxGeo(3.4, 0.2, 2.8), M({ map: TEX.cloth([170, 60, 50], "awning") }), 7.4, 2.9, 7.9);
   // places from ordinary days across the road
   W.car(-14, -8, Math.PI / 2, [70, 66, 74]);
@@ -717,6 +756,7 @@ export function buildWaterfront(W, G, o = {}) {
   W.sign(16, 3.6, -16.9, "DELI · GROCERY", 0, { w: 4, h: 0.6, bg: "#1a4a2a", fg: "#f0f0d0", tw: 96, th: 14, size: 9, unlit: true });
   W.building(-4, -19, 10, 4, 5, TEX.facade([120, 80, 70], 0.7, 5));
   W.building(-22, -19, 10, 4, 7, TEX.facade([100, 90, 80], 0.3, 6));
+  passersby(W, G, [[-14.6, 24, -24, 0.2, "x"], [-15.4, -24, 24, 0.7, "x"]]);
   spot(W, "start", -16, 6, Math.PI / 2);
   spot(W, "him", -15.2, 7.2, Math.PI / 2);
   spot(W, "far", 16, 9, Math.PI / 2);
