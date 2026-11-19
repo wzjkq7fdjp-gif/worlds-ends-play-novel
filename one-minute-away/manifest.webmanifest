@@ -1,0 +1,15 @@
+{
+  "name": "One Minute Away — The Road Between Us",
+  "short_name": "One Minute Away",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "description": "A PS1-style psychological horror love story set on Ocean Parkway, Brooklyn.",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

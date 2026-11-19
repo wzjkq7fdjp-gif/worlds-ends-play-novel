@@ -1,5 +1,5 @@
 // Simple offline cache for GitHub Pages + iOS Safari
-const CACHE_NAME = "worlds-ends-cache-v3";
+const CACHE_NAME = "worlds-ends-cache-v4";
 const CORE = [
   "./",
   "./index.html",
@@ -29,6 +29,8 @@ self.addEventListener("fetch", (event) => {
 
   // Only handle same-origin requests (your GitHub Pages domain)
   if (url.origin !== self.location.origin) return;
+  // One Minute Away is its own app: always fetch it fresh from the network
+  if (url.pathname.includes("/one-minute-away/")) return;
 
   // HTML (navigation): network first, fallback to cache
   if (req.mode === "navigate" || (req.headers.get("accept") || "").includes("text/html")) {

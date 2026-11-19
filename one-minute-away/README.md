@@ -1,0 +1,88 @@
+# One Minute Away: The Road Between Us
+
+A PS1-style psychological horror love story told from two points of view: Rufki and Argjila, at 4:04 in the morning on Ocean Parkway, Brooklyn. It runs in any browser, with no install and no build step.
+
+## Play
+
+Open `one-minute-away/index.html` from any static host, such as GitHub Pages. To run it locally:
+
+```bash
+python3 -m http.server   # from the repo root, then open http://localhost:8000/one-minute-away/
+```
+
+To jump straight into a chapter, add a hash to the URL: `index.html#chapter-0` is the prologue and `#chapter-15` is the last crossing.
+
+| Action | Gamepad | Keyboard | Touch |
+|---|---|---|---|
+| Walk | Left stick | WASD / arrows | Drag on the left half |
+| Run | □ | Shift | □ |
+| Confirm / examine | ✕ | Space / E / Enter | ✕ |
+| Back | ○ | Q / Backspace | ○ |
+| Memory route (map) | △ | Tab | △ |
+| Pause | Start | Esc | START |
+
+## What's in it
+
+**Two points of view, one save.** Control passes between Rufki and Argjila at marked handoffs. What one of them does changes the other's room. For example, she slides a chain and he hears two clicks in the car speaker.
+
+**The story:**
+- Sixteen chapters: from 4:04 on Ocean Parkway, through the house on October 24, 2025, the House of Almost, the winter he was away, the Bathhouse, the May dance, the drive back, the park near Target, *Room to Be Me*, the quiet days, the optional Unread Room, the Unsaid, the world without her and the Clock Tower, to the last crossing.
+- Five endings: *Always*, *The One Who Waited*, *4:04 Forever*, *The Other Me*, and *Before We Knew* (New Game+), plus a post-credits scene.
+
+**Her side, in her words.** Argjila's chapters are built from the details she shared, and her own sentences are read in her voice. Five of her pages are open: the May 9 kitchen, the slow dance, the drive back from upstate, the park, and why "About You" matters. They hold what she told Rufki, marked *"Told by Argjila · written down by Rufki"*, and she can replace them with her own sentences. The moments she hasn't shared yet are not invented: the minute before, what she noticed first, when she knew she liked him, when he came back, and Pennsylvania. They appear in the game as sealed pages that say *"This memory is Argjila's to write."*
+
+To fill one in, open `js/memories.js`, paste her words into that memory's `text`, and the page opens in the game. It shows in the **Her Pages** menu on the title screen and in the scene where the memory appears.
+
+**Looks like a PS1 game:**
+- Rufki and Argjila are sprites drawn in five directions, with front, side and back walk cycles and eight cutscene poses each. The other side is mirrored.
+- The Other Rufki, the Unmet, the Unsaid, the Keeper of Minutes, both children, the winter friend, the former best friend and the faceless dancer have their own turnarounds and animation frames.
+- Every location is a modeled 3D map built from the location art and room blockouts: Ocean Parkway, the hallway of doors, the house, the House of Almost, her room, the rooftop Bathhouse pool at night, the dance studio, the car, the park, the waterfront, the Unread Room, the corridor of cords, the Clock Tower and the collapse. They use follow cameras and fixed corner cameras. Every outdoor map is closed by something you can see (road blocks, sidewalk sheds, fences, rows of buildings), and the fog thickens as you near the edge.
+- Walls, floors, streets, doors, trees, the pool, the cord wall and the tower clock use painted texture pages (`assets/tex`). Brick facades, damask wallpaper, mosaic hall tile, pool tile and the worn sidewalks all repeat like PS1 VRAM tiles.
+- Keepsakes and photographs you pick up are painted items: the scratched childhood photo, the rooftop Polaroid, the dinner, the ring beside the drawn house, the flowers, the promise ring, the 22-reasons deck, the tin of kisses and the "About You" card.
+- Dialogue portraits change expression (neutral, sad, scared, smiling) to match each line, for Rufki, Argjila, the Other Rufki, the Best Friend, the Keeper and the Unsaid.
+- Parked cars are painted 90s sedans, and the streets carry flyers, shop signs, graffiti and a 4:04 ST sign. The rooftop, the waterfront, the tower and the crossing have painted skylines (night, sunset, storm).
+- Memory items in the inventory have their own icons. The title screen and every chapter's loading screen are painted.
+- Painted cutscene stills play full screen with a slow camera drift at the big moments: the empty car with its door open, the peephole, the rooftop pool, the dancers in the mirrors, the rear-view mirror, the red glass, the payphone, the two chairs, the Unsaid in the cords, the Keeper before the clock and the last crossing. Every ending has its own still.
+- Rendering runs at 320×240 with a light vertex wobble, a touch of affine texture warp (walls are subdivided so they don't bend), 15-bit colour with dithering, fog and a CRT filter. Each effect can be switched off.
+
+**Voice acting (optional).** By default all dialogue is read in text boxes, like the original PS1 games. Synthesised character voices can be switched on in Options; narration is always read silently. The voices were made offline with the Kokoro-82M neural TTS model and processed per speaker:
+- the radio is band-limited
+- the Keeper is slowed into a giant
+- the Unsaid speaks in three borrowed voices at once
+- the thing at the door sounds almost like Rufki
+- the copy of Argjila is just slightly too perfect
+
+All the voices are in one file, `assets/vo/voices.mp3`, which streams in after boot.
+
+**Horror:**
+- The Unmet moves only when you aren't looking at it, and its face fills the screen when it reaches you.
+- Faceless passers-by (a man in a coat, a woman with an umbrella, an old man, a child in a raincoat) walk out of the fog on the streets, the park and the waterfront. They stop and turn to watch you when you come near, and walk on once you leave them be.
+- On the street that remembers, the streetlights behind Rufki go out one by one.
+- Clocks run backward at every wrong turn.
+- A kitchen clock ticks only when she moves, and someone upstairs keeps walking when she stands still.
+- A knock arrives while both of his hands are in view.
+- Her reflection gets up early, and dance doubles move ahead of the beat.
+- Someone in the empty back seat hums one beat ahead of the radio.
+- A corridor of telephone cords has to be traced by ear while the Unsaid closes in.
+- The Keeper makes its offers, and in the end the tower comes apart.
+
+**Accessibility.** Every audio-driven cue has a caption, such as *[Chain clicks twice]*, and captions can be turned on or off. Optional auto-advancing text and separate volume controls for voice, music and everything else are in the options.
+
+**Music.** The soundtrack is composed for a WebAudio sequencer, with no music files. "About You" by The 1975 is named in the story. The cue that plays in the game is an original placeholder until a licensed recording is supplied.
+
+## Files
+
+| Path | Contents |
+|---|---|
+| `js/actors.js` | Sprite characters (direction, walk cycle, poses), the Keeper |
+| `js/chapters.js`, `js/chapters2.js` | The story |
+| `js/memories.js` | Argjila's pages |
+| `js/scenes.js` | The 3D maps and their named spots |
+| `js/ui.js` | Interface |
+| `js/voice.js` | Voice playback |
+| `js/music.js` | Soundtrack |
+| `assets/` | Character atlases, sprites, texture pages, the painted car, street decals, skylines, items, icons, cutscene stills, loading screens, portraits, voices |
+
+The only dependency is three.js r160, which is included in `vendor/`.
+
+Some surface textures (road asphalt, painted metal, carpet, ceilings, tiles, wood, leather, linen) are CC0 photo textures from [Poly Haven](https://polyhaven.com), cut down to 128 px and 15-bit colour (`assets/tex/ph_*.png`).
